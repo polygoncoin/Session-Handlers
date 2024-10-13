@@ -1,12 +1,3 @@
-# SessionHandler
-Collection of Mostly used Session Handlers
-
-- Supports File / MySql / Redis / Memcached based Session Handlers
-- Supports Readonly mode as well for all the above mentioned Session Handlers
-
-## Example
-
-```PHP
 <?php
 include __DIR__ . '/SessionHandlers/Session.php';
 
@@ -27,5 +18,3 @@ if (isset($_SESSION)) {
 // Use once client is authorised and want to make changes in $_SESSION
 Session::start_rw_mode();
 $_SESSION['id'] = 1;
-
-```

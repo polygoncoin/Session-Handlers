@@ -1,0 +1,348 @@
+<?php
+/**
+ * CREATE TABLE IF NOT EXISTS `sessions` (
+ *     `sessionId` CHAR(32) NOT NULL,
+ *     `lastAccessed` INT UNSIGNED NOT NULL,
+ *     `sessionData` TEXT,
+ *     PRIMARY KEY (`sessionID`)
+ * ) ENGINE=InnoDB;
+ */
+/**
+ * Class for using MySql based Session Handlers.
+ * 
+ * @category   Session
+ * @package    MySql based Session Handler
+ * @author     Ramesh Narayan Jangid
+ * @copyright  Ramesh Narayan Jangid
+ * @version    Release: @1.0.0@
+ * @since      Class available since Release 1.0.0
+ */
+class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
+{
+    /** DB credentials */
+    public $DB_HOSTNAME = null;
+    public $DB_PORT = null;
+    public $DB_USERNAME = null;
+    public $DB_PASSWORD = null;
+    public $DB_DATABASE = null;
+
+    /** Session max lifetime */
+    public $sessionMaxlifetime = null;
+
+    /** DB PDO object */
+    private $pdo = null;
+
+    /** Current timestamp */
+    private $currentTimestamp = null;
+
+    /** Session data found */
+    private $dataFound = false;
+    
+    /** Session Path */
+    private $sessionSavePath = null;
+
+    /** Session Name */
+    private $sessionName = null;
+
+    /** Session Id */
+    private $sessionId = null;
+
+    /** Session Data */
+    private $sessionData = null;
+
+    /** Spam flag */
+    private $isSpam = false;
+
+    /**
+     * A callable with the following signature
+     *
+     * @param string $savePath
+     * @param string $sessionName
+     * @return boolean true for success or false for failure
+     */
+    public function open($sessionSavePath, $sessionName): bool
+    {echo __FUNCTION__ . PHP_EOL;
+        $this->sessionSavePath = $sessionSavePath;
+        $this->sessionName = $sessionName;
+
+        $this->connect();
+        $this->currentTimestamp = time();
+        return true;
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param string $sessionId
+     * @return string true if the session id is valid otherwise false
+     */
+    #[\ReturnTypeWillChange]
+    public function validateId($sessionId)
+    {echo __FUNCTION__ . PHP_EOL;
+        $this->sessionId = $sessionId;
+
+        $sql = 'SELECT `sessionData` FROM `sessions` WHERE `sessionId` = :sessionId';
+        $params = [
+            ':sessionId' => $sessionId
+        ];
+        $row = $this->get($sql, $params);
+
+        if (isset($row['sessionData'])) {
+            $this->sessionData = $row['sessionData'];
+            $this->dataFound = true;
+        }
+
+        /** marking spam request */
+        $this->isSpam = !$this->dataFound;
+        if ($this->isSpam) {
+            setcookie($this->sessionName,'',1);
+        }
+
+        return true;
+    }
+
+    /**
+     * A callable with the following signature
+     * Invoked internally when a new session id is needed
+     *
+     * @return string should be new session id
+     */
+    public function create_sid(): string
+    {echo __FUNCTION__ . PHP_EOL;
+        if ($this->isSpam) {
+            return '';
+        }
+        return uniqid('', true);
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param string $sessionId
+     * @return string the session data or an empty string
+     */
+    #[\ReturnTypeWillChange]
+    public function read($sessionId): string
+    {echo __FUNCTION__ . PHP_EOL;
+        if ($this->isSpam) {
+            return '';
+        }
+        if (!is_null($this->sessionData)) {
+            return $this->sessionData;
+        }
+        return '';
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param string $sessionId
+     * @param string $sessionData
+     * @return boolean true for success or false for failure
+     */
+    public function write($sessionId, $sessionData): bool
+    {echo __FUNCTION__ . PHP_EOL;
+        if ($this->isSpam) {
+            return true;
+        }
+        if ($this->sessionData === $sessionData || $sessionData === '') {
+            return true;
+        }
+        $this->sessionData = $sessionData;
+
+        if ($this->dataFound) {
+            $sql = 'UPDATE `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
+        } else {
+            $sql = 'INSERT INTO `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed, `sessionId` = :sessionId';
+        }
+        $params = [
+            ':sessionId' => $sessionId,
+            ':sessionData' => $sessionData,
+            ':lastAccessed' => $this->currentTimestamp
+        ];
+
+        $return = false;
+        if ($this->set($sql, $params)) {
+            $return = true;
+        }
+        return $return;
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param string $sessionId
+     * @return boolean true for success or false for failure
+     */
+    public function destroy($sessionId): bool
+    {echo __FUNCTION__ . PHP_EOL;
+        if ($this->isSpam) {
+            return true;
+        }
+        $sql = 'DELETE FROM `sessions` WHERE `sessionId` = :sessionId';
+        $params = [
+            ':sessionId' => $sessionId
+        ];
+
+        $return = false;
+        if ($this->set($sql, $params)) {
+            $return = true;
+        }
+        return $return;
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param integer $sessionMaxlifetime
+     * @return boolean true for success or false for failure
+     */
+    #[\ReturnTypeWillChange]
+    public function gc($sessionMaxlifetime): bool
+    {echo __FUNCTION__ . PHP_EOL;
+        if ($this->isSpam) {
+            return true;
+        }
+        $lastAccessed = $this->currentTimestamp - $sessionMaxlifetime;
+        $sql = 'DELETE FROM `sessions` WHERE `lastAccessed` < :lastAccessed';
+        $params = [
+            ':lastAccessed' => $lastAccessed
+        ];
+
+        $return = false;
+        if ($this->set($sql, $params)) {
+            $return = true;
+        }
+        return $return;
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param string $sessionId
+     * @param string $sessionData
+     * @return boolean true for success or false for failure
+     */
+    #[\ReturnTypeWillChange]
+    public function updateTimestamp($sessionId, $sessionData)
+    {echo __FUNCTION__ . PHP_EOL;
+        if ($this->isSpam) {
+            return true;
+        }
+        $sql = 'UPDATE `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
+        $params = [
+            ':sessionId' => $sessionId,
+            ':sessionData' => $sessionData,
+            ':lastAccessed' => $this->currentTimestamp
+        ];
+        $return = false;
+        if ($this->set($sql, $params)) {
+            $return = true;
+        }
+        return $return;
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @return boolean true for success or false for failure
+     */
+    public function close(): bool
+    {echo __FUNCTION__ . PHP_EOL;
+        if ($this->isSpam) {
+            return true;
+        }
+        $this->pdo = null;
+        $this->currentTimestamp = null;
+        $this->dataFound = false;
+    
+        $this->sessionId = null;
+        $this->sessionData = null;
+
+        return true;
+    }
+
+    /**
+     * Set PDO connection
+     *
+     * @return void
+     */
+    private function connect()
+    {echo __FUNCTION__ . PHP_EOL;
+        try {
+            $this->pdo = new \PDO(
+                "mysql:host={$this->DB_HOSTNAME};dbname={$this->DB_DATABASE}",
+                $this->DB_USERNAME,
+                $this->DB_PASSWORD,
+                [
+                    \PDO::ATTR_EMULATE_PREPARES => false,
+                ]
+            );    
+        } catch (\Exception $e) {
+            $this->manageException($e);
+        }
+    }
+
+    /**
+     * Get SQL data.
+     *
+     * @param string $sql
+     * @param string $params
+     * @return array
+     */
+    private function get($sql, $params = [])
+    {echo __FUNCTION__ . PHP_EOL;
+        $row = [];
+        try {
+            $stmt = $this->pdo->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
+            $stmt->execute($params);
+            switch($stmt->rowCount()) {
+                case 0:
+                    $row = [];
+                    break;
+                case 1:
+                    $row = $stmt->fetch();
+                    break;
+                default:
+                    // $this->destroy($params['sessionId']);
+                    $row = false;
+                    break;
+            }
+            $stmt->closeCursor();
+        } catch (\Exception $e) {
+            $this->manageException($e);
+        }
+        return $row;
+    }
+
+    /**
+     * Set SQL data.
+     *
+     * @param string $sql
+     * @param string $params
+     * @return integer Affected rows
+     */
+    private function set($sql, $params = [])
+    {echo __FUNCTION__ . PHP_EOL;
+        try {
+            $stmt = $this->pdo->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
+            $stmt->execute($params);
+            $affectedRows = $stmt->rowCount();
+            $stmt->closeCursor();
+        } catch (\Exception $e) {
+            $this->manageException($e);
+        }
+        return $affectedRows;
+    }
+
+    /**
+     * Handle Exception
+     *
+     * @param object $e
+     * @return void
+     */
+    private function manageException(\Exception $e)
+    {echo __FUNCTION__ . PHP_EOL;
+        die($e->getMessage());
+    }
+}
