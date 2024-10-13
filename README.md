@@ -1,4 +1,4 @@
-# SessionHandler
+# Session Handlers
 Collection of Mostly used Session Handlers
 
 - Supports File / MySql / Redis / Memcached based Session Handlers
@@ -37,6 +37,6 @@ CREATE TABLE IF NOT EXISTS `sessions` (
     `sessionId` CHAR(32) NOT NULL,
     `lastAccessed` INT UNSIGNED NOT NULL,
     `sessionData` TEXT,
-    PRIMARY KEY (`sessionID`)
+    PRIMARY KEY (`sessionId`)
 ) ENGINE=InnoDB;
 ```
