@@ -50,7 +50,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return boolean true for success or false for failure
      */
     public function open($sessionSavePath, $sessionName): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionSavePath = $sessionSavePath;
         $this->sessionName = $sessionName;
 
@@ -67,7 +67,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      */
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionId = $sessionId;
 
         if ($data = $this->get($sessionId)) {
@@ -91,7 +91,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return string should be new session id
      */
     public function create_sid(): string
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -106,7 +106,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      */
     #[\ReturnTypeWillChange]
     public function read($sessionId): string
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -124,7 +124,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return boolean true for success or false for failure
      */
     public function write($sessionId, $sessionData): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -147,7 +147,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return boolean true for success or false for failure
      */
     public function destroy($sessionId): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -167,7 +167,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      */
     #[\ReturnTypeWillChange]
     public function gc($sessionMaxlifetime): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -184,7 +184,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      */
     #[\ReturnTypeWillChange]
     public function updateTimestamp($sessionId, $sessionData)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -201,7 +201,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return boolean true for success or false for failure
      */
     public function close(): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -221,7 +221,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return void
      */
     private function connect()
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             $this->memcacheD = new \Memcached();
             $this->memcacheD->addServer($this->MEMCACHED_HOSTNAME, $this->MEMCACHED_PORT);
@@ -237,7 +237,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return string
      */
     private function get($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $row = [];
         try {
             return $this->memcacheD->get($sessionId);
@@ -255,7 +255,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return bool
      */
     private function set($sessionId, $sessionData)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             return $this->memcacheD->set($sessionId, $sessionData, $this->sessionMaxlifetime);
         } catch (\Exception $e) {
@@ -270,7 +270,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return bool
      */
     private function delete($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             return $this->memcacheD->delete($sessionId);
         } catch (\Exception $e) {
@@ -286,7 +286,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
      * @return void
      */
     private function manageException(\Exception $e)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         die($e->getMessage());
     }
 }

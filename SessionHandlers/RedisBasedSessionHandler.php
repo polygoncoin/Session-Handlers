@@ -53,7 +53,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function open($sessionSavePath, $sessionName): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionSavePath = $sessionSavePath;
         $this->sessionName = $sessionName;
 
@@ -70,7 +70,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionId = $sessionId;
 
         if ($this->redis->exists($sessionId)) {
@@ -94,7 +94,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return string should be new session id
      */
     public function create_sid(): string
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -109,7 +109,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function read($sessionId): string
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -127,7 +127,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function write($sessionId, $sessionData): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -150,7 +150,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function destroy($sessionId): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -170,7 +170,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function gc($sessionMaxlifetime): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -187,7 +187,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function updateTimestamp($sessionId, $sessionData)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -204,7 +204,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function close(): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -224,7 +224,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return void
      */
     private function connect()
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             $this->redis = new \Redis(
                 [
@@ -247,7 +247,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return string
      */
     private function get($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $row = [];
         try {
             $return = false;
@@ -268,7 +268,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return bool
      */
     private function set($sessionId, $sessionData)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             return $this->redis->set($sessionId, $sessionData, $this->sessionMaxlifetime);
         } catch (\Exception $e) {
@@ -283,7 +283,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return bool
      */
     private function delete($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             $return = false;
             if ($this->redis->exists($sessionId)) {
@@ -302,7 +302,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return void
      */
     private function manageException(\Exception $e)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         die($e->getMessage());
     }
 }

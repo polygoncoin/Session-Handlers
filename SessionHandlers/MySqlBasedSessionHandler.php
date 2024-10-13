@@ -1,13 +1,5 @@
 <?php
 /**
- * CREATE TABLE IF NOT EXISTS `sessions` (
- *     `sessionId` CHAR(32) NOT NULL,
- *     `lastAccessed` INT UNSIGNED NOT NULL,
- *     `sessionData` TEXT,
- *     PRIMARY KEY (`sessionID`)
- * ) ENGINE=InnoDB;
- */
-/**
  * Class for using MySql based Session Handlers.
  * 
  * @category   Session
@@ -61,7 +53,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function open($sessionSavePath, $sessionName): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionSavePath = $sessionSavePath;
         $this->sessionName = $sessionName;
 
@@ -78,7 +70,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionId = $sessionId;
 
         $sql = 'SELECT `sessionData` FROM `sessions` WHERE `sessionId` = :sessionId';
@@ -108,7 +100,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return string should be new session id
      */
     public function create_sid(): string
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -123,7 +115,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function read($sessionId): string
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -141,7 +133,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function write($sessionId, $sessionData): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -175,7 +167,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function destroy($sessionId): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -199,7 +191,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function gc($sessionMaxlifetime): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -225,7 +217,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      */
     #[\ReturnTypeWillChange]
     public function updateTimestamp($sessionId, $sessionData)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -248,7 +240,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return boolean true for success or false for failure
      */
     public function close(): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -268,7 +260,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return void
      */
     private function connect()
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             $this->pdo = new \PDO(
                 "mysql:host={$this->DB_HOSTNAME};dbname={$this->DB_DATABASE}",
@@ -291,7 +283,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return array
      */
     private function get($sql, $params = [])
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $row = [];
         try {
             $stmt = $this->pdo->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
@@ -323,7 +315,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return integer Affected rows
      */
     private function set($sql, $params = [])
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         try {
             $stmt = $this->pdo->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
             $stmt->execute($params);
@@ -342,7 +334,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
      * @return void
      */
     private function manageException(\Exception $e)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         die($e->getMessage());
     }
 }

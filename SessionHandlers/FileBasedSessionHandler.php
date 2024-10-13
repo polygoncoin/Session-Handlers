@@ -46,7 +46,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      * @return boolean true for success or false for failure
      */
     function open($sessionSavePath, $sessionName): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionSavePath = $sessionSavePath;
         $this->sessionName = $sessionName;
 
@@ -61,7 +61,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      */
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         $this->sessionId = $sessionId;
 
         // only for mode files the entry of file is created
@@ -90,7 +90,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      * @return string should be new session id
      */
     public function create_sid(): string
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -105,7 +105,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      */
     #[\ReturnTypeWillChange]
     function read($sessionId)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return '';
         }
@@ -123,7 +123,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      * @return boolean true for success or false for failure
      */
     function write($sessionId, $sessionData): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -146,7 +146,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      * @return boolean true for success or false for failure
      */
     function destroy($sessionId): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -166,7 +166,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      */
     #[\ReturnTypeWillChange]
     function gc($sessionMaxlifetime)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -184,7 +184,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      */
     #[\ReturnTypeWillChange]
     public function updateTimestamp($sessionId, $sessionData)
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }
@@ -197,7 +197,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
      * @return boolean true for success or false for failure
      */
     function close(): bool
-    {echo __FUNCTION__ . PHP_EOL;
+    {
         if ($this->isSpam) {
             return true;
         }

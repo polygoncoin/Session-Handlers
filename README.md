@@ -29,3 +29,14 @@ Session::start_rw_mode();
 $_SESSION['id'] = 1;
 
 ```
+
+## Database Table for MySql
+
+```SQL
+CREATE TABLE IF NOT EXISTS `sessions` (
+    `sessionId` CHAR(32) NOT NULL,
+    `lastAccessed` INT UNSIGNED NOT NULL,
+    `sessionData` TEXT,
+    PRIMARY KEY (`sessionID`)
+) ENGINE=InnoDB;
+```
