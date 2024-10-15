@@ -119,7 +119,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
         if ($this->isSpam) {
             return '';
         }
-        if (!is_null($this->sessionData)) {
+        if (!empty($this->sessionData)) {
             return $this->sessionData;
         }
         return '';
