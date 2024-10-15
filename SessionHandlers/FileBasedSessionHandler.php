@@ -33,7 +33,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
     private $sessionId = null;
 
     /** Session Data */
-    private $sessionData = null;
+    private $sessionData = '';
 
     /** Spam flag */
     private $isSpam = false;
@@ -130,7 +130,6 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
         if ($this->sessionData === $sessionData || $sessionData === '') {
             return true;
         }
-        $this->sessionData = $sessionData;
 
         if (!$this->handle) {
             $this->handle = fopen($this->sessionSavePath . '/' . $sessionId, 'w+b');

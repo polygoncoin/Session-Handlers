@@ -40,7 +40,7 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
     private $sessionId = null;
 
     /** Session Data */
-    private $sessionData = null;
+    private $sessionData = '';
 
     /** Spam flag */
     private $isSpam = false;
@@ -140,7 +140,6 @@ class MySqlBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
         if ($this->sessionData === $sessionData || $sessionData === '') {
             return true;
         }
-        $this->sessionData = $sessionData;
 
         if ($this->dataFound) {
             $sql = 'UPDATE `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';

@@ -40,7 +40,7 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
     private $sessionId = null;
 
     /** Session Data */
-    private $sessionData = null;
+    private $sessionData = '';
 
     /** Spam flag */
     private $isSpam = false;
@@ -134,7 +134,6 @@ class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdate
         if ($this->sessionData === $sessionData || $sessionData === '') {
             return true;
         }
-        $this->sessionData = $sessionData;
 
         $return = false;
         if ($this->set($sessionId, $sessionData)) {

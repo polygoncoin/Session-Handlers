@@ -37,7 +37,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
     private $sessionId = null;
 
     /** Session Data */
-    private $sessionData = null;
+    private $sessionData = '';
 
     /** Spam flag */
     private $isSpam = false;
@@ -131,7 +131,6 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
         if ($this->sessionData === $sessionData || $sessionData === '') {
             return true;
         }
-        $this->sessionData = $sessionData;
 
         $return = false;
         if ($this->set($sessionId, $sessionData)) {
