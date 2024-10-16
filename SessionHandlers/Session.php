@@ -88,6 +88,7 @@ class Session
         self::$options = [ // always required.
             'use_strict_mode' => true,
             'name' => self::$sessionName,
+            'serialize_handler' => 'php_serialize',
             'gc_maxlifetime' => self::$sessionMaxlifetime
         ];
 
