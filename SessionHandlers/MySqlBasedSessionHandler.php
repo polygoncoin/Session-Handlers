@@ -141,6 +141,8 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
             return true;
         }
 
+        // $sessionData can be applied unserialize() function to manipulate data.
+
         if ($this->dataFound) {
             $sql = 'UPDATE `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
         } else {
