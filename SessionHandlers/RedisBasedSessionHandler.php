@@ -9,7 +9,7 @@
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class RedisBasedSessionHandler implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
+class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $REDIS_HOSTNAME = null;

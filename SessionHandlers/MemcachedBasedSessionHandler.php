@@ -9,7 +9,7 @@
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
+class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $MEMCACHED_HOSTNAME = null;
