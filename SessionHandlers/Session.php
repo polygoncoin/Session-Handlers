@@ -129,6 +129,7 @@ class Session
         $options = self::$options;
         $options['read_and_close'] = true;
 
+        // Change $_COOKIE to $_REQUEST for non-cookie based session
         if (isset($_COOKIE[self::$sessionName])) {
             return session_start($options);
         }
