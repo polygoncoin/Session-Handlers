@@ -128,7 +128,7 @@ class MemcachedBasedSessionHandler implements SessionHandlerInterface, SessionUp
         if ($this->isSpam) {
             return true;
         }
-        if ($this->sessionData === $sessionData || $sessionData === '') {
+        if ($this->sessionData === $sessionData || empty($sessionData)) {
             return true;
         }
 

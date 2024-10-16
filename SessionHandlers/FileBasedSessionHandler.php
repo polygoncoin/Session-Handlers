@@ -127,7 +127,7 @@ class FileBasedSessionHandler implements SessionHandlerInterface, SessionUpdateT
         if ($this->isSpam) {
             return true;
         }
-        if ($this->sessionData === $sessionData || $sessionData === '') {
+        if ($this->sessionData === $sessionData || empty($sessionData)) {
             return true;
         }
 
