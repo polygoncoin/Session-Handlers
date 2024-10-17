@@ -14,9 +14,6 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
     /** Session max lifetime */
     public $sessionMaxlifetime = null;
 
-    /** File handle */
-    private $handle = null;
-
     /** Current timestamp */
     private $currentTimestamp = null;
 
@@ -38,6 +35,8 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
     /** Spam flag */
     private $isSpam = false;
 
+    /** Spam flag */
+    private $filepath = null;
     /**
      * A callable with the following signature
      *
@@ -68,10 +67,8 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         // for other modes (DB's) only connection is established
         $filepath = $this->sessionSavePath . '/' . $this->sessionId;
         if (file_exists($filepath)) {
-            $this->handle = fopen($filepath, 'w+');
-            $this->sessionData = fread($this->handle, 4096);
+            $this->filepath = $filepath;
             $this->dataFound = true;
-            // flock($this->handle, LOCK_EX); // locks file handle
         }
 
         /** marking spam request */
@@ -109,8 +106,8 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         if ($this->isSpam) {
             return '';
         }
-        if ($this->handle) {
-            return fread($this->handle, 4096);
+        if (!is_null($this->filepath)) {
+            return file_get_contents($this->filepath);
         }
         return '';
     }
@@ -131,11 +128,12 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
             return true;
         }
 
-        if (!$this->handle) {
-            $this->handle = fopen($this->sessionSavePath . '/' . $sessionId, 'w+');
+        if (is_null($this->filepath)) {
+            $this->filepath = $this->sessionSavePath . '/' . $this->sessionId;
+            touch($this->filepath);
         }
-        fwrite($this->handle, $sessionData);
-        return true;
+
+        return file_put_contents($this->filepath, $sessionData);
     }
 
     /**
@@ -148,9 +146,6 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
     {
         if ($this->isSpam) {
             return true;
-        }
-        if ($this->handle) {
-            fclose($this->handle);
         }
         unlink($this->sessionSavePath . '/' . $sessionId);
 
@@ -199,9 +194,6 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
     {
         if ($this->isSpam) {
             return true;
-        }
-        if ($this->handle) {
-            return fclose($this->handle);
         }
         return true;
     }
