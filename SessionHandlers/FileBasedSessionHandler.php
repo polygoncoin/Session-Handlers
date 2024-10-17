@@ -26,9 +26,6 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
     /** Session Name */
     private $sessionName = null;
 
-    /** Session Id */
-    private $sessionId = null;
-
     /** Session Data */
     private $sessionData = '';
 
@@ -61,13 +58,12 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
     {
-        $this->sessionId = $sessionId;
-
         // only for mode files the entry of file is created
         // for other modes (DB's) only connection is established
-        $filepath = $this->sessionSavePath . '/' . $this->sessionId;
+        $filepath = $this->sessionSavePath . '/' . $sessionId;
         if (file_exists($filepath)) {
             $this->filepath = $filepath;
+            $this->sessionData = file_get_contents($this->filepath);
             $this->dataFound = true;
         }
 
@@ -91,6 +87,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         if ($this->isSpam) {
             return '';
         }
+
         return uniqid('', true);
     }
 
@@ -109,6 +106,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         if (!is_null($this->filepath)) {
             return file_get_contents($this->filepath);
         }
+
         return '';
     }
 
@@ -127,9 +125,8 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         if ($this->sessionData === $sessionData || empty($sessionData)) {
             return true;
         }
-
         if (is_null($this->filepath)) {
-            $this->filepath = $this->sessionSavePath . '/' . $this->sessionId;
+            $this->filepath = $this->sessionSavePath . '/' . $sessionId;
             touch($this->filepath);
         }
 
@@ -147,7 +144,9 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         if ($this->isSpam) {
             return true;
         }
-        unlink($this->sessionSavePath . '/' . $sessionId);
+        if (!is_null($this->filepath) && file_exists($this->filepath)) {
+            return unlink($this->filepath);
+        }
 
         return true;
     }
@@ -166,6 +165,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         }
         $datetime = date('Y-m-d H:i', ($this->currentTimestamp - $sessionMaxlifetime));
         shell_exec("find {$this->sessionSavePath} -type f -not -newermt '{$datetime}' -delete");
+
         return true;
     }
 
@@ -182,7 +182,11 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         if ($this->isSpam) {
             return true;
         }
-        return touch($this->sessionSavePath . '/' . $sessionId);
+        if (!is_null($this->filepath) && file_exists($this->filepath)) {
+            return touch($this->filepath);
+        }
+
+        return true;
     }
 
     /**
