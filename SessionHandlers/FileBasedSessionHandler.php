@@ -68,7 +68,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         // for other modes (DB's) only connection is established
         $filepath = $this->sessionSavePath . '/' . $this->sessionId;
         if (file_exists($filepath)) {
-            $this->handle = fopen($filepath, 'rw+b');
+            $this->handle = fopen($filepath, 'w+');
             $this->sessionData = fread($this->handle, 4096);
             $this->dataFound = true;
             // flock($this->handle, LOCK_EX); // locks file handle
@@ -132,7 +132,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         }
 
         if (!$this->handle) {
-            $this->handle = fopen($this->sessionSavePath . '/' . $sessionId, 'w+b');
+            $this->handle = fopen($this->sessionSavePath . '/' . $sessionId, 'w+');
         }
         fwrite($this->handle, $sessionData);
         return true;
