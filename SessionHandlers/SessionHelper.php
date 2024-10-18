@@ -12,16 +12,16 @@
 class SessionHelper
 {
     /** The cipher method */
-    static private $cipher_algo = 'AES-256-CBC';
+    private $cipher_algo = 'AES-256-CBC';
 
     /** Usually 256-bit passphrase */
-    static public $passphrase = null;
+    public $passphrase = null;
 
     /** Bitwise disjunction of the flags OPENSSL_RAW_DATA, and OPENSSL_ZERO_PADDING or OPENSSL_DONT_ZERO_PAD_KEY */
-    static private $options = OPENSSL_RAW_DATA;
+    private $options = OPENSSL_RAW_DATA;
 
     /** Usually 128-bit iv */
-    static public $iv = null;
+    public $iv = null;
 
     /**
      * Encryption
@@ -29,15 +29,15 @@ class SessionHelper
      * @param string $plaintext
      * @return string ciphertext
      */
-    static function encryptData($plaintext)
+    function encryptData($plaintext)
     {
-        if (!empty(self::$passphrase)) {
+        if (!empty($this->passphrase)) {
             return openssl_encrypt(
                 $plaintext,
-                self::$cipher_algo,
-                self::$passphrase,
-                self::$options,
-                self::$iv
+                $this->cipher_algo,
+                $this->passphrase,
+                $this->options,
+                $this->iv
             );
         }
         return $plaintext;
@@ -49,15 +49,15 @@ class SessionHelper
      * @param string $ciphertext
      * @return string plaintext
      */
-    static function decryptData($ciphertext)
+    function decryptData($ciphertext)
     {
-        if (!empty(self::$passphrase)) {
+        if (!empty($this->passphrase)) {
             return openssl_decrypt(
                 $ciphertext,
-                self::$cipher_algo,
-                self::$passphrase,
-                self::$options,
-                self::$iv
+                $this->cipher_algo,
+                $this->passphrase,
+                $this->options,
+                $this->iv
             );
         }
         return $ciphertext;
@@ -68,7 +68,7 @@ class SessionHelper
      *
      * @return string
      */
-    static function getRandomString()
+    function getRandomString()
     {
         return bin2hex(random_bytes(32));
     }

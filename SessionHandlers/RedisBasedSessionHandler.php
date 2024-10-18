@@ -1,4 +1,6 @@
 <?php
+include __DIR__ . '/SessionHelper.php';
+
 /**
  * Class for using Redis based Session Handlers.
  * 
@@ -9,7 +11,7 @@
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $REDIS_HOSTNAME = null;
@@ -74,7 +76,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         $this->sessionId = $sessionId;
 
         if ($this->redis->exists($sessionId)) {
-            $this->sessionData = SessionHelper::decryptData($this->get($sessionId));
+            $this->sessionData = $this->decryptData($this->get($sessionId));
             $this->dataFound = true;
         }
 
@@ -98,7 +100,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         if ($this->isSpam) {
             return '';
         }
-        return SessionHelper::getRandomString();
+        return $this->getRandomString();
     }
 
     /**
@@ -136,7 +138,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         }
 
         $return = false;
-        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
+        if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
         return $return;
@@ -191,7 +193,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
             return true;
         }
         $return = false;
-        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
+        if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
         return $return;

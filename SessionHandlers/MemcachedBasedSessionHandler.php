@@ -1,4 +1,6 @@
 <?php
+include __DIR__ . '/SessionHelper.php';
+
 /**
  * Class for using Memcached based Session Handlers.
  * 
@@ -9,7 +11,7 @@
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $MEMCACHED_HOSTNAME = null;
@@ -71,7 +73,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
         $this->sessionId = $sessionId;
 
         if ($data = $this->get($sessionId)) {
-            $this->sessionData = SessionHelper::decryptData($data);
+            $this->sessionData = $this->decryptData($data);
             $this->dataFound = true;
         }
 
@@ -95,7 +97,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
         if ($this->isSpam) {
             return '';
         }
-        return SessionHelper::getRandomString();
+        return $this->getRandomString();
     }
 
     /**
@@ -133,7 +135,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
         }
 
         $return = false;
-        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
+        if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
         return $return;
@@ -188,7 +190,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
             return true;
         }
         $return = false;
-        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
+        if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
         return $return;

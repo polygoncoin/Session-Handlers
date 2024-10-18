@@ -1,4 +1,6 @@
 <?php
+include __DIR__ . '/SessionHelper.php';
+
 /**
  * Class for using File based Session Handlers.
  * 
@@ -9,7 +11,7 @@
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** Session max lifetime */
     public $sessionMaxlifetime = null;
@@ -63,7 +65,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         $filepath = $this->sessionSavePath . '/' . $sessionId;
         if (file_exists($filepath)) {
             $this->filepath = $filepath;
-            $this->sessionData = SessionHelper::decryptData(file_get_contents($this->filepath));
+            $this->sessionData = $this->decryptData(file_get_contents($this->filepath));
             $this->dataFound = true;
         }
 
@@ -88,7 +90,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
             return '';
         }
 
-        return SessionHelper::getRandomString();
+        return $this->getRandomString();
     }
 
     /**
@@ -130,7 +132,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
             touch($this->filepath);
         }
 
-        return file_put_contents($this->filepath, SessionHelper::encryptData($sessionData));
+        return file_put_contents($this->filepath, $this->encryptData($sessionData));
     }
 
     /**

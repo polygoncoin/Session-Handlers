@@ -1,4 +1,6 @@
 <?php
+include __DIR__ . '/SessionHelper.php';
+
 /**
  * Class for using MySql based Session Handlers.
  * 
@@ -9,7 +11,7 @@
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $DB_HOSTNAME = null;
@@ -80,7 +82,7 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         $row = $this->get($sql, $params);
 
         if (isset($row['sessionData'])) {
-            $this->sessionData = SessionHelper::decryptData($row['sessionData']);
+            $this->sessionData = $this->decryptData($row['sessionData']);
             $this->dataFound = true;
         }
 
@@ -104,7 +106,7 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         if ($this->isSpam) {
             return '';
         }
-        return SessionHelper::getRandomString();
+        return $this->getRandomString();
     }
 
     /**
@@ -152,7 +154,7 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         }
         $params = [
             ':sessionId' => $sessionId,
-            ':sessionData' => SessionHelper::encryptData($sessionData),
+            ':sessionData' => $this->encryptData($sessionData),
             ':lastAccessed' => $this->currentTimestamp
         ];
 
