@@ -14,11 +14,10 @@ class Session
     /** SET THESE TO ENABLE ENCRYPTION */
     /** base64_encode(openssl_random_pseudo_bytes(32)) */
     // Example: static private $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
-    static private $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
-    // static private $ENCRYPTION_PASS_PHRASE = null;
+    static private $ENCRYPTION_PASS_PHRASE = null;
     /** base64_encode(openssl_random_pseudo_bytes(16)) */
-    static private $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
-    // static private $ENCRYPTION_IV = null;
+    // Example: static private $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
+    static private $ENCRYPTION_IV = null;
     
     /** MySql Session config */
     static private $DB_HOSTNAME = 'localhost';
