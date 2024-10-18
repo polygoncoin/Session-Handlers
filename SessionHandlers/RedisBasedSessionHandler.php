@@ -3,7 +3,7 @@
  * Class for using Redis based Session Handlers.
  * 
  * @category   Session
- * @package    Redis based Session Handler
+ * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
  * @copyright  Ramesh Narayan Jangid
  * @version    Release: @1.0.0@
@@ -74,7 +74,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         $this->sessionId = $sessionId;
 
         if ($this->redis->exists($sessionId)) {
-            $this->sessionData = $this->get($sessionId);
+            $this->sessionData = SessionHelper::decryptData($this->get($sessionId));
             $this->dataFound = true;
         }
 
@@ -98,7 +98,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         if ($this->isSpam) {
             return '';
         }
-        return uniqid('', true);
+        return SessionHelper::getRandomString();
     }
 
     /**
@@ -136,7 +136,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         }
 
         $return = false;
-        if ($this->set($sessionId, $sessionData)) {
+        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
             $return = true;
         }
         return $return;
@@ -191,7 +191,7 @@ class RedisBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
             return true;
         }
         $return = false;
-        if ($this->set($sessionId, $sessionData)) {
+        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
             $return = true;
         }
         return $return;

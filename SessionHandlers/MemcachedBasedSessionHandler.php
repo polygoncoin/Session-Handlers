@@ -3,7 +3,7 @@
  * Class for using Memcached based Session Handlers.
  * 
  * @category   Session
- * @package    Memcached based Session Handler
+ * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
  * @copyright  Ramesh Narayan Jangid
  * @version    Release: @1.0.0@
@@ -71,7 +71,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
         $this->sessionId = $sessionId;
 
         if ($data = $this->get($sessionId)) {
-            $this->sessionData = $data;
+            $this->sessionData = SessionHelper::decryptData($data);
             $this->dataFound = true;
         }
 
@@ -95,7 +95,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
         if ($this->isSpam) {
             return '';
         }
-        return uniqid('', true);
+        return SessionHelper::getRandomString();
     }
 
     /**
@@ -133,7 +133,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
         }
 
         $return = false;
-        if ($this->set($sessionId, $sessionData)) {
+        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
             $return = true;
         }
         return $return;
@@ -188,7 +188,7 @@ class MemcachedBasedSessionHandler implements \SessionHandlerInterface, \Session
             return true;
         }
         $return = false;
-        if ($this->set($sessionId, $sessionData)) {
+        if ($this->set($sessionId, SessionHelper::encryptData($sessionData))) {
             $return = true;
         }
         return $return;

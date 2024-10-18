@@ -3,7 +3,7 @@
  * Class for using MySql based Session Handlers.
  * 
  * @category   Session
- * @package    MySql based Session Handler
+ * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
  * @copyright  Ramesh Narayan Jangid
  * @version    Release: @1.0.0@
@@ -80,7 +80,7 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         $row = $this->get($sql, $params);
 
         if (isset($row['sessionData'])) {
-            $this->sessionData = $row['sessionData'];
+            $this->sessionData = SessionHelper::decryptData($row['sessionData']);
             $this->dataFound = true;
         }
 
@@ -104,7 +104,7 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         if ($this->isSpam) {
             return '';
         }
-        return uniqid('', true);
+        return SessionHelper::getRandomString();
     }
 
     /**
@@ -152,7 +152,7 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         }
         $params = [
             ':sessionId' => $sessionId,
-            ':sessionData' => $sessionData,
+            ':sessionData' => SessionHelper::encryptData($sessionData),
             ':lastAccessed' => $this->currentTimestamp
         ];
 
@@ -224,10 +224,9 @@ class MySqlBasedSessionHandler implements \SessionHandlerInterface, \SessionUpda
         if ($this->isSpam) {
             return true;
         }
-        $sql = 'UPDATE `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
+        $sql = 'UPDATE `sessions` SET `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
         $params = [
             ':sessionId' => $sessionId,
-            ':sessionData' => $sessionData,
             ':lastAccessed' => $this->currentTimestamp
         ];
         $return = false;

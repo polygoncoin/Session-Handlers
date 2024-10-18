@@ -36,9 +36,9 @@ $_SESSION['id'] = 1;
 
 ```SQL
 CREATE TABLE IF NOT EXISTS `sessions` (
-    `sessionId` CHAR(32) NOT NULL,
+    `sessionId` CHAR(64) NOT NULL,
     `lastAccessed` INT UNSIGNED NOT NULL,
-    `sessionData` TEXT,
+    `sessionData` MEDIUMBLOB,
     PRIMARY KEY (`sessionId`)
 ) ENGINE=InnoDB;
 ```

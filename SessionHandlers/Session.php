@@ -1,4 +1,6 @@
 <?php
+include __DIR__ . '/SessionHelper.php';
+
 /**
  * Class for using Session Handlers.
  * 
@@ -11,6 +13,14 @@
  */
 class Session
 {
+    /** SET THESE TO ENABLE ENCRYPTION */
+    /** base64_encode(openssl_random_pseudo_bytes(32)) */
+    // Example: static private $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
+    static private $ENCRYPTION_PASS_PHRASE = null;
+    /** base64_encode(openssl_random_pseudo_bytes(16)) */
+    // Example: static private $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
+    static private $ENCRYPTION_IV = null;
+    
     /** MySql Session config */
     static private $DB_HOSTNAME = 'localhost';
     static private $DB_PORT = 3306;
@@ -112,11 +122,18 @@ class Session
         self::$sessionMode = $sessionMode;
         $sessionModeFileLocation = __DIR__ . '/'.self::$sessionMode.'BasedSessionHandler.php';
         include $sessionModeFileLocation;
-        self::setOptions();
         $handlerClassName = self::$sessionMode.'BasedSessionHandler';
         self::$sessionHandler = new $handlerClassName();
         self::setConfig();
         session_set_save_handler(self::$sessionHandler, true);
+        self::setOptions();
+        if (
+            !empty(self::$ENCRYPTION_PASS_PHRASE) &&
+            !empty(self::$ENCRYPTION_IV)
+        ) {
+            SessionHelper::$passphrase = base64_decode(self::$ENCRYPTION_PASS_PHRASE);
+            SessionHelper::$iv = base64_decode(self::$ENCRYPTION_IV);    
+        }
     }
 
     /**

@@ -3,7 +3,7 @@
  * Class for using File based Session Handlers.
  * 
  * @category   Session
- * @package    File based Session Handler
+ * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
  * @copyright  Ramesh Narayan Jangid
  * @version    Release: @1.0.0@
@@ -63,7 +63,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         $filepath = $this->sessionSavePath . '/' . $sessionId;
         if (file_exists($filepath)) {
             $this->filepath = $filepath;
-            $this->sessionData = file_get_contents($this->filepath);
+            $this->sessionData = SessionHelper::decryptData(file_get_contents($this->filepath));
             $this->dataFound = true;
         }
 
@@ -88,7 +88,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
             return '';
         }
 
-        return uniqid('', true);
+        return SessionHelper::getRandomString();
     }
 
     /**
@@ -103,8 +103,8 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
         if ($this->isSpam) {
             return '';
         }
-        if (!is_null($this->filepath)) {
-            return file_get_contents($this->filepath);
+        if (!empty($this->sessionData)) {
+            return $this->sessionData;
         }
 
         return '';
@@ -130,7 +130,7 @@ class FileBasedSessionHandler implements \SessionHandlerInterface, \SessionUpdat
             touch($this->filepath);
         }
 
-        return file_put_contents($this->filepath, $sessionData);
+        return file_put_contents($this->filepath, SessionHelper::encryptData($sessionData));
     }
 
     /**
