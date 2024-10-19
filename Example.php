@@ -6,7 +6,6 @@ Session::initSessionHandler('File');
 // Session::initSessionHandler('MySql');
 // Session::initSessionHandler('Redis');
 // Session::initSessionHandler('Memcached');
-// Session::initSessionHandler('Cookie');
 
 // Start session in readonly mode
 // Use when user is already logged in and we need to authorise the client cookie.

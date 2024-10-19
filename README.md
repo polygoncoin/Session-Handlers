@@ -1,7 +1,7 @@
 # Session Handlers
 Collection of Mostly used Session Handlers
 
-- Supports File / MySql / Redis / Memcached / Cookie based Session Handlers
+- Supports File / MySql / Redis / Memcached based Session Handlers
 - Supports Readonly mode as well for all the above mentioned Session Handlers
 
 ## Example
