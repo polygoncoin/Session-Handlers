@@ -207,10 +207,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      */
     function close(): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
+        $this->filepath = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
         $this->sessionData = null;

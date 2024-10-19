@@ -235,10 +235,6 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      */
     public function close(): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         $this->pdo = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;

@@ -192,10 +192,6 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
      */
     public function close(): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         $this->memcacheD = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;

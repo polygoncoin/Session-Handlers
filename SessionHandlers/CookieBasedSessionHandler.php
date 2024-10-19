@@ -248,6 +248,10 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      */
     public function close(): bool
     {
+        $this->currentTimestamp = null;
+        $this->dataFound = false;
+        $this->sessionData = null;
+
         return true;
     }
 

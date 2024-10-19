@@ -197,10 +197,6 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      */
     public function close(): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         $this->redis = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
