@@ -11,7 +11,7 @@ include __DIR__ . '/SessionHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class CookieBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class CookieBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** Session max lifetime */
     public $sessionMaxlifetime = null;
@@ -141,7 +141,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             return true;
         }
 
-        if ($this->sessionData === $sessionData || empty($sessionData)) {
+        if (empty($sessionData)) {
             return true;
         }
         
@@ -204,6 +204,8 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
 
     /**
      * A callable with the following signature
+     * When session.lazy_write is enabled, and session data is unchanged
+     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
      * @param string $sessionId
      * @param string $sessionData
@@ -212,7 +214,31 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
     #[\ReturnTypeWillChange]
     public function updateTimestamp($sessionId, $sessionData)
     {
-        return true;
+        if ($this->isSpam) {
+            return true;
+        }
+
+        $sessionDataArr = unserialize($sessionData);
+        $sessionDataArr['_TS_'] = $this->currentTimestamp;
+        $sessionData = serialize($sessionDataArr);
+
+        $cookieData = $this->encryptData($sessionData);
+        if (strlen($cookieData) > 4096) {
+            ob_end_clean();
+            die('Session data length exceeds max 4 kilobytes (KB) supported per Cookie');
+        }
+
+        $return = setcookie(
+            $name = $this->sessionDataName,
+            $value = $cookieData,
+            $expires = 0,
+            $path = '/',
+            $domain = '',
+            $secure = false,
+            $httponly = true
+        );
+
+        return $return;
     }
 
     /**

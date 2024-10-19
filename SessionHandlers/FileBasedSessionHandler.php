@@ -11,7 +11,7 @@ include __DIR__ . '/SessionHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** Session max lifetime */
     public $sessionMaxlifetime = null;
@@ -128,7 +128,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
             return true;
         }
 
-        if ($this->sessionData === $sessionData || empty($sessionData)) {
+        if (empty($sessionData)) {
             return true;
         }
         if (is_null($this->filepath)) {
@@ -179,6 +179,8 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
 
     /**
      * A callable with the following signature
+     * When session.lazy_write is enabled, and session data is unchanged
+     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
      * @param string $sessionId
      * @param string $sessionData
@@ -208,6 +210,10 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
         if ($this->isSpam) {
             return true;
         }
+
+        $this->currentTimestamp = null;
+        $this->dataFound = false;
+        $this->sessionData = null;
 
         return true;
     }

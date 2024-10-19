@@ -104,6 +104,7 @@ class Session
             'use_strict_mode' => true,
             'name' => self::$sessionName,
             'serialize_handler' => 'php_serialize',
+            'lazy_write' => true,
             'gc_maxlifetime' => self::$sessionMaxlifetime
         ];
 

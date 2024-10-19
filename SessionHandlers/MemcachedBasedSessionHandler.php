@@ -11,7 +11,7 @@ include __DIR__ . '/SessionHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $MEMCACHED_HOSTNAME = null;
@@ -128,16 +128,11 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->isSpam) {
             return true;
         }
-        if ($this->sessionData === $sessionData || empty($sessionData)) {
+        if (empty($sessionData)) {
             return true;
         }
 
-        $return = false;
-        if ($this->set($sessionId, $this->encryptData($sessionData))) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->set($sessionId, $this->encryptData($sessionData));
     }
 
     /**
@@ -152,12 +147,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
             return true;
         }
 
-        $return = false;
-        if ($this->delete($sessionId)) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->delete($sessionId);
     }
 
     /**
@@ -178,6 +168,8 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
 
     /**
      * A callable with the following signature
+     * When session.lazy_write is enabled, and session data is unchanged
+     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
      * @param string $sessionId
      * @param string $sessionData
@@ -190,12 +182,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
             return true;
         }
 
-        $return = false;
-        if ($this->set($sessionId, $this->encryptData($sessionData))) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->set($sessionId, $this->encryptData($sessionData));
     }
 
     /**
@@ -212,7 +199,6 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         $this->memcacheD = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
-    
         $this->sessionData = null;
 
         return true;

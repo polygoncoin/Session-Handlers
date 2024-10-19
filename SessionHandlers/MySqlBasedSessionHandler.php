@@ -11,7 +11,7 @@ include __DIR__ . '/SessionHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $DB_HOSTNAME = null;
@@ -118,6 +118,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return '';
         }
+
         if (!empty($this->sessionData)) {
             return $this->sessionData;
         }
@@ -137,7 +138,8 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
-        if ($this->sessionData === $sessionData || empty($sessionData)) {
+
+        if (empty($sessionData)) {
             return true;
         }
 
@@ -156,12 +158,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             ':lastAccessed' => $this->currentTimestamp
         ];
 
-        $return = false;
-        if ($this->set($sql, $params)) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->set($sql, $params);
     }
 
     /**
@@ -175,17 +172,13 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
+
         $sql = 'DELETE FROM `sessions` WHERE `sessionId` = :sessionId';
         $params = [
             ':sessionId' => $sessionId
         ];
 
-        $return = false;
-        if ($this->set($sql, $params)) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->set($sql, $params);
     }
 
     /**
@@ -200,22 +193,20 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
+
         $lastAccessed = $this->currentTimestamp - $sessionMaxlifetime;
         $sql = 'DELETE FROM `sessions` WHERE `lastAccessed` < :lastAccessed';
         $params = [
             ':lastAccessed' => $lastAccessed
         ];
 
-        $return = false;
-        if ($this->set($sql, $params)) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->set($sql, $params);
     }
 
     /**
      * A callable with the following signature
+     * When session.lazy_write is enabled, and session data is unchanged
+     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
      * @param string $sessionId
      * @param string $sessionData
@@ -227,17 +218,14 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
+
         $sql = 'UPDATE `sessions` SET `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
         $params = [
             ':sessionId' => $sessionId,
             ':lastAccessed' => $this->currentTimestamp
         ];
-        $return = false;
-        if ($this->set($sql, $params)) {
-            $return = true;
-        }
 
-        return $return;
+        return $this->set($sql, $params);
     }
 
     /**
@@ -250,10 +238,10 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
+
         $this->pdo = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
-    
         $this->sessionData = null;
 
         return true;

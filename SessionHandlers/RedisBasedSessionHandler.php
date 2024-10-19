@@ -11,7 +11,7 @@ include __DIR__ . '/SessionHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** DB credentials */
     public $REDIS_HOSTNAME = null;
@@ -133,16 +133,11 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             return true;
         }
 
-        if ($this->sessionData === $sessionData || empty($sessionData)) {
+        if (empty($sessionData)) {
             return true;
         }
 
-        $return = false;
-        if ($this->set($sessionId, $this->encryptData($sessionData))) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->set($sessionId, $this->encryptData($sessionData));
     }
 
     /**
@@ -157,12 +152,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             return true;
         }
 
-        $return = false;
-        if ($this->delete($sessionId)) {
-            $return = true;
-        }
-    
-        return $return;
+        return $this->delete($sessionId);
     }
 
     /**
@@ -183,6 +173,8 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
 
     /**
      * A callable with the following signature
+     * When session.lazy_write is enabled, and session data is unchanged
+     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
      * @param string $sessionId
      * @param string $sessionData
@@ -195,12 +187,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             return true;
         }
 
-        $return = false;
-        if ($this->set($sessionId, $this->encryptData($sessionData))) {
-            $return = true;
-        }
-
-        return $return;
+        return $this->set($sessionId, $this->encryptData($sessionData));
     }
 
     /**
