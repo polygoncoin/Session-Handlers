@@ -38,9 +38,6 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     /** Session Name */
     private $sessionName = null;
 
-    /** Session Id */
-    private $sessionId = null;
-
     /** Session Data */
     private $sessionData = '';
 
@@ -61,6 +58,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
 
         $this->connect();
         $this->currentTimestamp = time();
+
         return true;
     }
 
@@ -73,8 +71,6 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
     {
-        $this->sessionId = $sessionId;
-
         $sql = 'SELECT `sessionData` FROM `sessions` WHERE `sessionId` = :sessionId';
         $params = [
             ':sessionId' => $sessionId
@@ -106,6 +102,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return '';
         }
+
         return $this->getRandomString();
     }
 
@@ -124,6 +121,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if (!empty($this->sessionData)) {
             return $this->sessionData;
         }
+
         return '';
     }
 
@@ -162,6 +160,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->set($sql, $params)) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -185,6 +184,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->set($sql, $params)) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -210,6 +210,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->set($sql, $params)) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -235,6 +236,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->set($sql, $params)) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -252,7 +254,6 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         $this->currentTimestamp = null;
         $this->dataFound = false;
     
-        $this->sessionId = null;
         $this->sessionData = null;
 
         return true;

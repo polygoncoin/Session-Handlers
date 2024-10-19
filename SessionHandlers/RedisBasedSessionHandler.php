@@ -38,9 +38,6 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     /** Session Name */
     private $sessionName = null;
 
-    /** Session Id */
-    private $sessionId = null;
-
     /** Session Data */
     private $sessionData = '';
 
@@ -61,6 +58,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
 
         $this->connect();
         $this->currentTimestamp = time();
+
         return true;
     }
 
@@ -73,8 +71,6 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
     {
-        $this->sessionId = $sessionId;
-
         if ($this->redis->exists($sessionId)) {
             $this->sessionData = $this->decryptData($this->get($sessionId));
             $this->dataFound = true;
@@ -100,6 +96,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return '';
         }
+
         return $this->getRandomString();
     }
 
@@ -115,9 +112,11 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return '';
         }
+
         if (!empty($this->sessionData)) {
             return $this->sessionData;
         }
+
         return '';
     }
 
@@ -133,6 +132,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
+
         if ($this->sessionData === $sessionData || empty($sessionData)) {
             return true;
         }
@@ -141,6 +141,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -160,6 +161,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->delete($sessionId)) {
             $return = true;
         }
+    
         return $return;
     }
 
@@ -192,10 +194,12 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
+
         $return = false;
         if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -209,11 +213,10 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         if ($this->isSpam) {
             return true;
         }
+
         $this->redis = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
-    
-        $this->sessionId = null;
         $this->sessionData = null;
 
         return true;

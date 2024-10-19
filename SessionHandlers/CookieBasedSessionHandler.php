@@ -2,7 +2,7 @@
 include __DIR__ . '/SessionHelper.php';
 
 /**
- * Class for using File based Session Handlers.
+ * Class for using Cookie based Session Handlers.
  * 
  * @category   Session
  * @package    Session Handlers
@@ -11,7 +11,7 @@ include __DIR__ . '/SessionHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class CookieBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** Session max lifetime */
     public $sessionMaxlifetime = null;
@@ -34,8 +34,8 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
     /** Spam flag */
     private $isSpam = false;
 
-    /** Spam flag */
-    private $filepath = null;
+    /** Session data cookie name */
+    private $sessionDataName = 'PHPSESSDATA';
 
     /**
      * A callable with the following signature
@@ -46,6 +46,12 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      */
     function open($sessionSavePath, $sessionName): bool
     {
+        if (empty($this->passphrase) || empty($this->iv)) {
+            die ('Please set encryption details');
+        }
+
+        ob_start(); // Turn on output buffering
+
         $this->sessionSavePath = $sessionSavePath;
         $this->sessionName = $sessionName;
 
@@ -61,19 +67,22 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
     {
-        // only for mode files the entry of file is created
-        // for other modes (DB's) only connection is established
-        $filepath = $this->sessionSavePath . '/' . $sessionId;
-        if (file_exists($filepath)) {
-            $this->filepath = $filepath;
-            $this->sessionData = $this->decryptData(file_get_contents($this->filepath));
-            $this->dataFound = true;
+        if (isset($_COOKIE[$this->sessionDataName]) && !empty($_COOKIE[$this->sessionDataName])) {
+            $sessionData = $this->decryptData($_COOKIE[$this->sessionDataName]);
+            $sessionDataArr = unserialize($sessionData);
+            if (
+                isset($sessionDataArr['__TIMESTAMP__']) &&
+                ($sessionDataArr['__TIMESTAMP__'] + $sessionMaxlifetime) > $this->currentTimestamp
+            ) {
+                $this->sessionData = $sessionData;
+                $this->dataFound = true;
+            }
         }
 
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
         if ($this->isSpam) {
-            setcookie($this->sessionName,'',1);
+            setcookie($this->sessionDataName,'',1);
         }
 
         return true;
@@ -85,7 +94,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      *
      * @return string should be new session id
      */
-    public function create_sid(): string
+    public function create_sid()
     {
         if ($this->isSpam) {
             return '';
@@ -101,7 +110,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @return string the session data or an empty string
      */
     #[\ReturnTypeWillChange]
-    function read($sessionId)
+    public function read($sessionId)
     {
         if ($this->isSpam) {
             return '';
@@ -121,7 +130,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    function write($sessionId, $sessionData): bool
+    public function write($sessionId, $sessionData): bool
     {
         if ($this->isSpam) {
             return true;
@@ -130,12 +139,23 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
         if ($this->sessionData === $sessionData || empty($sessionData)) {
             return true;
         }
-        if (is_null($this->filepath)) {
-            $this->filepath = $this->sessionSavePath . '/' . $sessionId;
-            touch($this->filepath);
-        }
+        
+        $sessionDataArr = unserialize($sessionData);
+        $sessionDataArr['__TIMESTAMP__'] = $this->currentTimestamp;
+        $sessionData = serialize($sessionDataArr);
 
-        return file_put_contents($this->filepath, $this->encryptData($sessionData));
+        $return = setcookie(
+            $name = $this->sessionDataName,
+            $value = $this->encryptData($sessionData),
+            $expires = 0,
+            $path = '/',
+            $domain = '',
+            $secure = false,
+            $httponly = true
+        );
+        ob_end_flush(); //Flush (send) the output buffer and turn off output buffering
+
+        return $return;
     }
 
     /**
@@ -144,15 +164,14 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionId
      * @return boolean true for success or false for failure
      */
-    function destroy($sessionId): bool
+    public function destroy($sessionId): bool
     {
         if ($this->isSpam) {
             return true;
         }
 
-        if (!is_null($this->filepath) && file_exists($this->filepath)) {
-            return unlink($this->filepath);
-        }
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionDataName, '', 1);
 
         return true;
     }
@@ -164,14 +183,11 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @return boolean true for success or false for failure
      */
     #[\ReturnTypeWillChange]
-    function gc($sessionMaxlifetime)
+    public function gc($sessionMaxlifetime): bool
     {
         if ($this->isSpam) {
             return true;
         }
-
-        $datetime = date('Y-m-d H:i', ($this->currentTimestamp - $sessionMaxlifetime));
-        shell_exec("find {$this->sessionSavePath} -type f -not -newermt '{$datetime}' -delete");
 
         return true;
     }
@@ -186,14 +202,6 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
     #[\ReturnTypeWillChange]
     public function updateTimestamp($sessionId, $sessionData)
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
-        if (!is_null($this->filepath) && file_exists($this->filepath)) {
-            return touch($this->filepath);
-        }
-
         return true;
     }
 
@@ -202,12 +210,8 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      *
      * @return boolean true for success or false for failure
      */
-    function close(): bool
+    public function close(): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         return true;
     }
 }

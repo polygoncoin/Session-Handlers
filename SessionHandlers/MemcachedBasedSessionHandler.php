@@ -35,9 +35,6 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
     /** Session Name */
     private $sessionName = null;
 
-    /** Session Id */
-    private $sessionId = null;
-
     /** Session Data */
     private $sessionData = '';
 
@@ -58,6 +55,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
 
         $this->connect();
         $this->currentTimestamp = time();
+
         return true;
     }
 
@@ -70,8 +68,6 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
     #[\ReturnTypeWillChange]
     public function validateId($sessionId)
     {
-        $this->sessionId = $sessionId;
-
         if ($data = $this->get($sessionId)) {
             $this->sessionData = $this->decryptData($data);
             $this->dataFound = true;
@@ -97,6 +93,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->isSpam) {
             return '';
         }
+
         return $this->getRandomString();
     }
 
@@ -115,6 +112,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if (!empty($this->sessionData)) {
             return $this->sessionData;
         }
+
         return '';
     }
 
@@ -138,6 +136,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -157,6 +156,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->delete($sessionId)) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -189,10 +189,12 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->isSpam) {
             return true;
         }
+
         $return = false;
         if ($this->set($sessionId, $this->encryptData($sessionData))) {
             $return = true;
         }
+
         return $return;
     }
 
@@ -206,11 +208,11 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->isSpam) {
             return true;
         }
+
         $this->memcacheD = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
     
-        $this->sessionId = null;
         $this->sessionData = null;
 
         return true;
