@@ -238,13 +238,13 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         $row = [];
         try {
             $return = false;
-            if ($this->redis->exists($sessionId)) {
-                $return = $this->redis->get($sessionId);
+            if ($data = $this->redis->get($sessionId)) {
+                $return = &$data;
             }
+            return $return;
         } catch (\Exception $e) {
             $this->manageException($e);
         }
-        return $return;
     }
 
     /**
@@ -257,7 +257,11 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     private function set($sessionId, $sessionData)
     {
         try {
-            return $this->redis->set($sessionId, $sessionData, $this->sessionMaxlifetime);
+            $return = false;
+            if ($this->redis->set($sessionId, $sessionData, $this->sessionMaxlifetime)) {
+                $return = true;
+            }
+            return $return;
         } catch (\Exception $e) {
             $this->manageException($e);
         }
@@ -273,13 +277,13 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     {
         try {
             $return = false;
-            if ($this->redis->exists($sessionId)) {
-                $return = $this->redis->del($sessionId);
+            if ($this->redis->del($sessionId)) {
+                $return = true;
             }
+            return $return;
         } catch (\Exception $e) {
             $this->manageException($e);
         }
-        return $return;
     }
 
     /**

@@ -155,7 +155,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             die('Session data length exceeds max 4 kilobytes (KB) supported per Cookie');
         }
 
-        $return = setcookie(
+        return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,
             $expires = 0,
@@ -164,8 +164,6 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             $secure = false,
             $httponly = true
         );
-
-        return $return;
     }
 
     /**
@@ -228,7 +226,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             die('Session data length exceeds max 4 kilobytes (KB) supported per Cookie');
         }
 
-        $return = setcookie(
+        return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,
             $expires = 0,
@@ -237,8 +235,6 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             $secure = false,
             $httponly = true
         );
-
-        return $return;
     }
 
     /**

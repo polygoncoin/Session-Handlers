@@ -223,13 +223,15 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
      */
     private function get($sessionId)
     {
-        $row = [];
         try {
-            return $this->memcacheD->get($sessionId);
+            $return = false;
+            if ($data = $this->memcacheD->get($sessionId)) {
+                $return = &$data;
+            }
+            return $return;
         } catch (\Exception $e) {
             $this->manageException($e);
         }
-        return $return;
     }
 
     /**
@@ -242,7 +244,11 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
     private function set($sessionId, $sessionData)
     {
         try {
-            return $this->memcacheD->set($sessionId, $sessionData, $this->sessionMaxlifetime);
+            $return = false;
+            if ($this->memcacheD->set($sessionId, $sessionData, $this->sessionMaxlifetime)) {
+                $return = true;
+            }
+            return $return;
         } catch (\Exception $e) {
             $this->manageException($e);
         }
@@ -257,11 +263,14 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
     private function delete($sessionId)
     {
         try {
-            return $this->memcacheD->delete($sessionId);
+            $return = false;
+            if ($this->memcacheD->delete($sessionId)) {
+                $return = true;
+            }
+            return $return;
         } catch (\Exception $e) {
             $this->manageException($e);
         }
-        return $return;
     }
 
     /**
