@@ -141,7 +141,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             return true;
         }
 
-        if (empty($sessionData)) {
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
         
@@ -213,6 +213,10 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
     public function updateTimestamp($sessionId, $sessionData)
     {
         if ($this->isSpam) {
+            return true;
+        }
+
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
 

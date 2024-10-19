@@ -139,7 +139,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             return true;
         }
 
-        if (empty($sessionData)) {
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
 
@@ -216,6 +216,10 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     public function updateTimestamp($sessionId, $sessionData)
     {
         if ($this->isSpam) {
+            return true;
+        }
+
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
 

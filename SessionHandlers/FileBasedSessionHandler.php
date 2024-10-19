@@ -128,7 +128,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
             return true;
         }
 
-        if (empty($sessionData)) {
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
         if (is_null($this->filepath)) {
@@ -190,6 +190,10 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
     public function updateTimestamp($sessionId, $sessionData)
     {
         if ($this->isSpam) {
+            return true;
+        }
+
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
 

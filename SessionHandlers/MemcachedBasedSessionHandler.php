@@ -128,7 +128,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->isSpam) {
             return true;
         }
-        if (empty($sessionData)) {
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
 
@@ -179,6 +179,10 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
     public function updateTimestamp($sessionId, $sessionData)
     {
         if ($this->isSpam) {
+            return true;
+        }
+
+        if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
 
