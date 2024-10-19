@@ -47,7 +47,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
     function open($sessionSavePath, $sessionName): bool
     {
         if (empty($this->passphrase) || empty($this->iv)) {
-            die ('Please set encryption details');
+            die ('Please set encryption details in Session.php');
         }
 
         ob_start(); // Turn on output buffering

@@ -32,13 +32,13 @@ class SessionHelper
     function encryptData($plaintext)
     {
         if (!empty($this->passphrase)) {
-            return openssl_encrypt(
+            return base64_encode(openssl_encrypt(
                 $plaintext,
                 $this->cipher_algo,
                 $this->passphrase,
                 $this->options,
                 $this->iv
-            );
+            ));
         }
         return $plaintext;
     }
@@ -53,7 +53,7 @@ class SessionHelper
     {
         if (!empty($this->passphrase)) {
             return openssl_decrypt(
-                $ciphertext,
+                base64_decode($ciphertext),
                 $this->cipher_algo,
                 $this->passphrase,
                 $this->options,
