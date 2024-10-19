@@ -36,6 +36,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
 
     /** Spam flag */
     private $filepath = null;
+
     /**
      * A callable with the following signature
      *
