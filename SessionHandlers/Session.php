@@ -39,7 +39,7 @@ class Session
 
     /** Session options */
     static private $sessionName = 'PHPSESSID';
-    static private $sessionMaxlifetime = 30 * 60; //30 mins.
+    static private $sessionMaxlifetime = 30 * 60; // 30 mins.
 
     /** File Session options */
     // static private $sessionPath = '/tmp';
