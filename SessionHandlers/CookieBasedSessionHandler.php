@@ -229,7 +229,9 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
         }
 
         setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionDataName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
+        setcookie($this->sessionDataName,'',1);
+        setcookie($this->sessionDataName,'',1, '/');
 
         return true;
     }

@@ -223,6 +223,9 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             return true;
         }
 
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
+
         $sql = 'DELETE FROM `sessions` WHERE `sessionId` = :sessionId';
         $params = [
             ':sessionId' => $sessionId

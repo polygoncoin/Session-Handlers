@@ -190,6 +190,9 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             return true;
         }
 
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
+
         return $this->delete($sessionId);
     }
 

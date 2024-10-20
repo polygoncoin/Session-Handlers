@@ -201,6 +201,9 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
             return unlink($this->filepath);
         }
 
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
+
         return true;
     }
 
