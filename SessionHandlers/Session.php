@@ -39,7 +39,7 @@ class Session
 
     /** Session options */
     static private $sessionName = 'PHPSESSID';
-    static private $sessionDataName = 'PHPSESSDATA';
+    static private $sessionDataName = 'PHPSESSDATA'; // For cookie mode
     static private $sessionMaxlifetime = 30 * 60; // 30 mins.
 
     /** File Session options */
@@ -63,12 +63,20 @@ class Session
     static private function setConfig()
     {
         switch(self::$sessionMode) {
+            case 'Cookie':
+                self::$sessionHandler->sessionName = self::$sessionName;
+                self::$sessionHandler->sessionDataName = self::$sessionDataName;
+                break;
+            case 'File':
+                self::$sessionHandler->sessionName = self::$sessionName;
+                break;
             case 'MySql':
                 self::$sessionHandler->DB_HOSTNAME = self::$DB_HOSTNAME;
                 self::$sessionHandler->DB_PORT = self::$DB_PORT;
                 self::$sessionHandler->DB_USERNAME = self::$DB_USERNAME;
                 self::$sessionHandler->DB_PASSWORD = self::$DB_PASSWORD;
                 self::$sessionHandler->DB_DATABASE = self::$DB_DATABASE;
+                self::$sessionHandler->sessionName = self::$sessionName;
                 break;
             case 'Redis':
                 self::$sessionHandler->REDIS_HOSTNAME = self::$REDIS_HOSTNAME;
@@ -76,16 +84,16 @@ class Session
                 self::$sessionHandler->REDIS_USERNAME = self::$REDIS_USERNAME;
                 self::$sessionHandler->REDIS_PASSWORD = self::$REDIS_PASSWORD;
                 self::$sessionHandler->REDIS_DATABASE = self::$REDIS_DATABASE;
+                self::$sessionHandler->sessionName = self::$sessionName;
                 break;
             case 'Memcached':
                 self::$sessionHandler->MEMCACHED_HOSTNAME = self::$MEMCACHED_HOSTNAME;
                 self::$sessionHandler->MEMCACHED_PORT = self::$MEMCACHED_PORT;
+                self::$sessionHandler->sessionName = self::$sessionName;
                 break;
             default:
                 break;
         }
-        self::$sessionHandler->sessionName = self::$sessionName;
-        self::$sessionHandler->sessionDataName = self::$sessionDataName;
         self::$sessionHandler->sessionMaxlifetime = self::$sessionMaxlifetime;
         if (
             !empty(self::$ENCRYPTION_PASS_PHRASE) &&
