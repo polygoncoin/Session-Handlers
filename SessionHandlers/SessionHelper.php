@@ -108,7 +108,7 @@ class SessionHelper
             setcookie($this->sessionName, '', 1);
             setcookie($this->sessionName, '', 1, '/');    
         }
-        if (!empty($this->sessionDataName)) {
+        if (!empty($this->sessionDataName) || isset($_COOKIE[$this->sessionDataName])) {
             setcookie($this->sessionDataName,'',1);
             setcookie($this->sessionDataName,'',1, '/');
         }
