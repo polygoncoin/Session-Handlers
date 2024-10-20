@@ -20,4 +20,4 @@ if (!isset($_SESSION) || !isset($_SESSION['id'])) {
 // Start session in normal (read/write) mode.
 // Use once client is authorised and want to make changes in $_SESSION
 Session::start_rw_mode();
-$_SESSION['id'] = 1;
+$_SESSION['id'] = rand();
