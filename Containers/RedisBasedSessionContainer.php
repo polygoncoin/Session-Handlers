@@ -1,4 +1,5 @@
 <?php
+include __DIR__ . '/SessionContainerInterface.php';
 include __DIR__ . '/SessionContainerHelper.php';
 
 /**
@@ -11,7 +12,7 @@ include __DIR__ . '/SessionContainerHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class RedisBasedSessionContainer extends SessionContainerHelper
+class RedisBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
 {
     public $REDIS_HOSTNAME = null;
     public $REDIS_PORT = null;

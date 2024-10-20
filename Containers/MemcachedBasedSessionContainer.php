@@ -1,4 +1,5 @@
 <?php
+include __DIR__ . '/SessionContainerInterface.php';
 include __DIR__ . '/SessionContainerHelper.php';
 
 /**
@@ -11,7 +12,7 @@ include __DIR__ . '/SessionContainerHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MemcachedBasedSessionContainer extends SessionContainerHelper
+class MemcachedBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
 {
     public $MEMCACHED_HOSTNAME = null;
     public $MEMCACHED_PORT = null;

@@ -1,4 +1,5 @@
 <?php
+include __DIR__ . '/SessionContainerInterface.php';
 include __DIR__ . '/SessionContainerHelper.php';
 
 /**
@@ -11,7 +12,7 @@ include __DIR__ . '/SessionContainerHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class FileBasedSessionContainer extends SessionContainerHelper
+class FileBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
 {
     public $sessionSavePath = null;
 
@@ -37,7 +38,6 @@ class FileBasedSessionContainer extends SessionContainerHelper
             touch($filepath);
         }
         return file_put_contents($filepath, $this->encryptData($sessionData));
-
     }
 
     public function touch($sessionId, $sessionData)

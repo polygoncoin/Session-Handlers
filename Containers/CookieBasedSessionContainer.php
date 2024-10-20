@@ -1,4 +1,5 @@
 <?php
+include __DIR__ . '/SessionContainerInterface.php';
 include __DIR__ . '/SessionContainerHelper.php';
 
 /**
@@ -11,7 +12,7 @@ include __DIR__ . '/SessionContainerHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class CookieBasedSessionContainer extends SessionContainerHelper
+class CookieBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
 {
     public function init($sessionSavePath, $sessionName)
     {
@@ -88,12 +89,6 @@ class CookieBasedSessionContainer extends SessionContainerHelper
         return true;
     }
 
-    /**
-     * A callable with the following signature
-     *
-     * @param string $sessionId
-     * @return boolean true for success or false for failure
-     */
     public function delete($sessionId): bool
     {
         return true;

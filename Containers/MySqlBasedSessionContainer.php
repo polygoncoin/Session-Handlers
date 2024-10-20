@@ -1,4 +1,5 @@
 <?php
+include __DIR__ . '/SessionContainerInterface.php';
 include __DIR__ . '/SessionContainerHelper.php';
 
 /**
@@ -11,7 +12,7 @@ include __DIR__ . '/SessionContainerHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MySqlBasedSessionContainer extends SessionContainerHelper
+class MySqlBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
 {
     public $DB_HOSTNAME = null;
     public $DB_PORT = null;
@@ -118,7 +119,6 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
                     $row = $stmt->fetch();
                     break;
                 default:
-                    // $this->destroy($params['sessionId']);
                     $row = false;
                     break;
             }
