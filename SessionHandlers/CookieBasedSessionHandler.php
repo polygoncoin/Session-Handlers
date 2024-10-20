@@ -50,7 +50,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      * @param string $sessionName
      * @return boolean true for success or false for failure
      */
-    function open($sessionSavePath, $sessionName): bool
+    public function open($sessionSavePath, $sessionName): bool
     {
         if (empty($this->passphrase) || empty($this->iv)) {
             die ('Please set encryption details in Session.php');
@@ -69,8 +69,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      * @param string $sessionId
      * @return string true if the session id is valid otherwise false
      */
-    #[\ReturnTypeWillChange]
-    public function validateId($sessionId)
+    public function validateId($sessionId): bool
     {
         if (isset($_COOKIE[$this->sessionDataName]) && !empty($_COOKIE[$this->sessionDataName])) {
             $sessionData = $this->decryptData($_COOKIE[$this->sessionDataName]);
@@ -86,9 +85,6 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
 
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
-        if ($this->isSpam) {
-            setcookie($this->sessionDataName,'',1);
-        }
 
         return true;
     }
@@ -99,7 +95,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      *
      * @return string should be new session id
      */
-    public function create_sid()
+    public function create_sid(): string
     {
         if ($this->isSpam) {
             return '';
@@ -114,8 +110,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      * @param string $sessionId
      * @return string the session data or an empty string
      */
-    #[\ReturnTypeWillChange]
-    public function read($sessionId)
+    public function read($sessionId): string|false
     {
         if ($this->isSpam) {
             return '';
@@ -190,8 +185,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      * @param integer $sessionMaxlifetime
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    public function gc($sessionMaxlifetime): bool
+    public function gc($sessionMaxlifetime): int|false
     {
         if ($this->isSpam) {
             return true;
@@ -209,8 +203,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    public function updateTimestamp($sessionId, $sessionData)
+    public function updateTimestamp($sessionId, $sessionData): bool
     {
         if ($this->isSpam) {
             return true;
@@ -248,6 +241,11 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
      */
     public function close(): bool
     {
+        if ($this->isSpam) {
+            setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionDataName,'',1);
+        }
+
         $this->currentTimestamp = null;
         $this->dataFound = false;
         $this->sessionData = null;

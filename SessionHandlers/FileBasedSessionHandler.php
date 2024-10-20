@@ -37,6 +37,12 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
     /** Spam flag */
     private $filepath = null;
 
+    /** Constructor */
+    public function __construct()
+    {
+        ob_start(); // Turn on output buffering
+    }
+
     /**
      * A callable with the following signature
      *
@@ -44,7 +50,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionName
      * @return boolean true for success or false for failure
      */
-    function open($sessionSavePath, $sessionName): bool
+    public function open($sessionSavePath, $sessionName): bool
     {
         $this->sessionSavePath = $sessionSavePath;
         $this->sessionName = $sessionName;
@@ -59,8 +65,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionId
      * @return string true if the session id is valid otherwise false
      */
-    #[\ReturnTypeWillChange]
-    public function validateId($sessionId)
+    public function validateId($sessionId): bool
     {
         // only for mode files the entry of file is created
         // for other modes (DB's) only connection is established
@@ -73,9 +78,6 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
 
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
-        if ($this->isSpam) {
-            setcookie($this->sessionName,'',1);
-        }
 
         return true;
     }
@@ -101,8 +103,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionId
      * @return string the session data or an empty string
      */
-    #[\ReturnTypeWillChange]
-    function read($sessionId)
+    public function read($sessionId): string|false
     {
         if ($this->isSpam) {
             return '';
@@ -122,7 +123,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    function write($sessionId, $sessionData): bool
+    public function write($sessionId, $sessionData): bool
     {
         if ($this->isSpam) {
             return true;
@@ -146,7 +147,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionId
      * @return boolean true for success or false for failure
      */
-    function destroy($sessionId): bool
+    public function destroy($sessionId): bool
     {
         if ($this->isSpam) {
             return true;
@@ -165,8 +166,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param integer $sessionMaxlifetime
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    function gc($sessionMaxlifetime)
+    public function gc($sessionMaxlifetime): int|false
     {
         if ($this->isSpam) {
             return true;
@@ -187,8 +187,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    public function updateTimestamp($sessionId, $sessionData)
+    public function updateTimestamp($sessionId, $sessionData): bool
     {
         if ($this->isSpam) {
             return true;
@@ -210,13 +209,23 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
      *
      * @return boolean true for success or false for failure
      */
-    function close(): bool
+    public function close(): bool
     {
+        if ($this->isSpam) {
+            setcookie($this->sessionName, '', 1);
+        }
+
         $this->filepath = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
         $this->sessionData = null;
 
         return true;
+    }
+
+    /** Destructor */
+    public function __destruct()
+    {
+        ob_end_flush(); //Flush (send) the output buffer and turn off output buffering
     }
 }

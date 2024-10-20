@@ -44,6 +44,12 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     /** Spam flag */
     private $isSpam = false;
 
+    /** Constructor */
+    public function __construct()
+    {
+        ob_start(); // Turn on output buffering
+    }
+
     /**
      * A callable with the following signature
      *
@@ -68,8 +74,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param string $sessionId
      * @return string true if the session id is valid otherwise false
      */
-    #[\ReturnTypeWillChange]
-    public function validateId($sessionId)
+    public function validateId($sessionId): bool
     {
         if ($this->redis->exists($sessionId)) {
             $this->sessionData = $this->decryptData($this->get($sessionId));
@@ -79,7 +84,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
         if ($this->isSpam) {
-            setcookie($this->sessionName,'',1);
+            setcookie($this->sessionName, '', 1);
         }
 
         return true;
@@ -106,8 +111,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param string $sessionId
      * @return string the session data or an empty string
      */
-    #[\ReturnTypeWillChange]
-    public function read($sessionId): string
+    public function read($sessionId): string|false
     {
         if ($this->isSpam) {
             return '';
@@ -161,8 +165,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param integer $sessionMaxlifetime
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    public function gc($sessionMaxlifetime): bool
+    public function gc($sessionMaxlifetime): int|false
     {
         if ($this->isSpam) {
             return true;
@@ -180,8 +183,7 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    public function updateTimestamp($sessionId, $sessionData)
+    public function updateTimestamp($sessionId, $sessionData): bool
     {
         if ($this->isSpam) {
             return true;
@@ -299,5 +301,11 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     private function manageException(\Exception $e)
     {
         die($e->getMessage());
+    }
+
+    /** Destructor */
+    public function __destruct()
+    {
+        ob_end_flush(); //Flush (send) the output buffer and turn off output buffering
     }
 }

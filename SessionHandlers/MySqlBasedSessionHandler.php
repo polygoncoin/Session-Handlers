@@ -44,6 +44,12 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     /** Spam flag */
     private $isSpam = false;
 
+    /** Constructor */
+    public function __construct()
+    {
+        ob_start(); // Turn on output buffering
+    }
+
     /**
      * A callable with the following signature
      *
@@ -68,8 +74,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param string $sessionId
      * @return string true if the session id is valid otherwise false
      */
-    #[\ReturnTypeWillChange]
-    public function validateId($sessionId)
+    public function validateId($sessionId): bool
     {
         $sql = 'SELECT `sessionData` FROM `sessions` WHERE `sessionId` = :sessionId';
         $params = [
@@ -84,9 +89,6 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
 
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
-        if ($this->isSpam) {
-            setcookie($this->sessionName,'',1);
-        }
 
         return true;
     }
@@ -112,8 +114,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param string $sessionId
      * @return string the session data or an empty string
      */
-    #[\ReturnTypeWillChange]
-    public function read($sessionId): string
+    public function read($sessionId): string|false
     {
         if ($this->isSpam) {
             return '';
@@ -187,8 +188,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param integer $sessionMaxlifetime
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    public function gc($sessionMaxlifetime): bool
+    public function gc($sessionMaxlifetime): int|false
     {
         if ($this->isSpam) {
             return true;
@@ -212,8 +212,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    #[\ReturnTypeWillChange]
-    public function updateTimestamp($sessionId, $sessionData)
+    public function updateTimestamp($sessionId, $sessionData): bool
     {
         if ($this->isSpam) {
             return true;
@@ -239,6 +238,10 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      */
     public function close(): bool
     {
+        if ($this->isSpam) {
+            setcookie($this->sessionName, '', 1);
+        }
+
         $this->pdo = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;
@@ -312,12 +315,11 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
         try {
             $stmt = $this->pdo->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
             $stmt->execute($params);
-            $affectedRows = $stmt->rowCount();
             $stmt->closeCursor();
         } catch (\Exception $e) {
             $this->manageException($e);
         }
-        return $affectedRows;
+        return true;
     }
 
     /**
@@ -329,5 +331,11 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     private function manageException(\Exception $e)
     {
         die($e->getMessage());
+    }
+
+    /** Destructor */
+    public function __destruct()
+    {
+        ob_end_flush(); //Flush (send) the output buffer and turn off output buffering
     }
 }
