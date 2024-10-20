@@ -72,12 +72,12 @@ class RedisBasedSessionContainer extends SessionContainerHelper
         }
     }
 
-    private function getKey($sessionId)
+    private function getKey($key)
     {
         $row = [];
         try {
             $return = false;
-            if ($data = $this->redis->get($sessionId)) {
+            if ($data = $this->redis->get($key)) {
                 $return = &$data;
             }
             return $return;
@@ -86,11 +86,11 @@ class RedisBasedSessionContainer extends SessionContainerHelper
         }
     }
 
-    private function setKey($sessionId, $sessionData)
+    private function setKey($key, $value)
     {
         try {
             $return = false;
-            if ($this->redis->set($sessionId, $sessionData, $this->sessionMaxlifetime)) {
+            if ($this->redis->set($key, $value, $this->sessionMaxlifetime)) {
                 $return = true;
             }
             return $return;
@@ -99,11 +99,11 @@ class RedisBasedSessionContainer extends SessionContainerHelper
         }
     }
 
-    private function deleteKey($sessionId)
+    private function deleteKey($key)
     {
         try {
             $return = false;
-            if ($this->redis->del($sessionId)) {
+            if ($this->redis->del($key)) {
                 $return = true;
             }
             return $return;

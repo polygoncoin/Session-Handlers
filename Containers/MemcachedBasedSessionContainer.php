@@ -62,11 +62,11 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
         }
     }
 
-    private function getKey($sessionId)
+    private function getKey($key)
     {
         try {
             $return = false;
-            if ($data = $this->memcacheD->get($sessionId)) {
+            if ($data = $this->memcacheD->get($key)) {
                 $return = &$data;
             }
             return $return;
@@ -75,11 +75,11 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
         }
     }
 
-    private function setKey($sessionId, $sessionData)
+    private function setKey($key, $value)
     {
         try {
             $return = false;
-            if ($this->memcacheD->set($sessionId, $sessionData, $this->sessionMaxlifetime)) {
+            if ($this->memcacheD->set($key, $value, $this->sessionMaxlifetime)) {
                 $return = true;
             }
             return $return;
@@ -88,11 +88,11 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
         }
     }
 
-    private function deleteKey($sessionId)
+    private function deleteKey($key)
     {
         try {
             $return = false;
-            if ($this->memcacheD->delete($sessionId)) {
+            if ($this->memcacheD->delete($key)) {
                 $return = true;
             }
             return $return;
