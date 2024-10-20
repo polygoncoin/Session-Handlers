@@ -12,10 +12,14 @@ Session::initSessionHandler('File');
 // Use when user is already logged in and we need to authorise the client cookie.
 Session::start_readonly();
 
-// Auth Check
-if (!isset($_SESSION) || !isset($_SESSION['id'])) {
-    die('Unauthorised');
+if (isset($_SESSION)) {
+    print_r($_SESSION);
 }
+
+// Auth Check
+// if (!isset($_SESSION) || !isset($_SESSION['id'])) {
+//     die('Unauthorised');
+// }
 
 // Start session in normal (read/write) mode.
 // Use once client is authorised and want to make changes in $_SESSION
