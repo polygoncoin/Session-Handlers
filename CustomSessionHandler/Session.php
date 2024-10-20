@@ -1,4 +1,5 @@
 <?php
+include __DIR__ . '/CustomSessionHandler.php';
 /**
  * Class for using Session Handlers.
  * 
@@ -53,7 +54,7 @@ class Session
     static private $options = null;
 
     /** Session handler */
-    static private $sessionHandler = null;
+    static private $sessionContainer = null;
 
     /**
      * Generates session options argument
@@ -68,35 +69,35 @@ class Session
             case 'File':
                 break;
             case 'MySql':
-                self::$sessionHandler->DB_HOSTNAME = self::$DB_HOSTNAME;
-                self::$sessionHandler->DB_PORT = self::$DB_PORT;
-                self::$sessionHandler->DB_USERNAME = self::$DB_USERNAME;
-                self::$sessionHandler->DB_PASSWORD = self::$DB_PASSWORD;
-                self::$sessionHandler->DB_DATABASE = self::$DB_DATABASE;
+                self::$sessionContainer->DB_HOSTNAME = self::$DB_HOSTNAME;
+                self::$sessionContainer->DB_PORT = self::$DB_PORT;
+                self::$sessionContainer->DB_USERNAME = self::$DB_USERNAME;
+                self::$sessionContainer->DB_PASSWORD = self::$DB_PASSWORD;
+                self::$sessionContainer->DB_DATABASE = self::$DB_DATABASE;
                 break;
             case 'Redis':
-                self::$sessionHandler->REDIS_HOSTNAME = self::$REDIS_HOSTNAME;
-                self::$sessionHandler->REDIS_PORT = self::$REDIS_PORT;
-                self::$sessionHandler->REDIS_USERNAME = self::$REDIS_USERNAME;
-                self::$sessionHandler->REDIS_PASSWORD = self::$REDIS_PASSWORD;
-                self::$sessionHandler->REDIS_DATABASE = self::$REDIS_DATABASE;
+                self::$sessionContainer->REDIS_HOSTNAME = self::$REDIS_HOSTNAME;
+                self::$sessionContainer->REDIS_PORT = self::$REDIS_PORT;
+                self::$sessionContainer->REDIS_USERNAME = self::$REDIS_USERNAME;
+                self::$sessionContainer->REDIS_PASSWORD = self::$REDIS_PASSWORD;
+                self::$sessionContainer->REDIS_DATABASE = self::$REDIS_DATABASE;
                 break;
             case 'Memcached':
-                self::$sessionHandler->MEMCACHED_HOSTNAME = self::$MEMCACHED_HOSTNAME;
-                self::$sessionHandler->MEMCACHED_PORT = self::$MEMCACHED_PORT;
+                self::$sessionContainer->MEMCACHED_HOSTNAME = self::$MEMCACHED_HOSTNAME;
+                self::$sessionContainer->MEMCACHED_PORT = self::$MEMCACHED_PORT;
                 break;
             default:
                 break;
         }
-        self::$sessionHandler->sessionName = self::$sessionName;
-        self::$sessionHandler->sessionDataName = self::$sessionDataName;
-        self::$sessionHandler->sessionMaxlifetime = self::$sessionMaxlifetime;
+        self::$sessionContainer->sessionName = self::$sessionName;
+        self::$sessionContainer->sessionDataName = self::$sessionDataName;
+        self::$sessionContainer->sessionMaxlifetime = self::$sessionMaxlifetime;
         if (
             !empty(self::$ENCRYPTION_PASS_PHRASE) &&
             !empty(self::$ENCRYPTION_IV)
         ) {
-            self::$sessionHandler->passphrase = base64_decode(self::$ENCRYPTION_PASS_PHRASE);
-            self::$sessionHandler->iv = base64_decode(self::$ENCRYPTION_IV);    
+            self::$sessionContainer->passphrase = base64_decode(self::$ENCRYPTION_PASS_PHRASE);
+            self::$sessionContainer->iv = base64_decode(self::$ENCRYPTION_IV);    
         }
     }
 
@@ -133,12 +134,23 @@ class Session
     static public function initSessionHandler($sessionMode)
     {
         self::$sessionMode = $sessionMode;
-        $sessionModeFileLocation = __DIR__ . '/'.self::$sessionMode.'BasedSessionHandler.php';
-        include $sessionModeFileLocation;
-        $handlerClassName = self::$sessionMode.'BasedSessionHandler';
-        self::$sessionHandler = new $handlerClassName();
+        $sessionContainerFileLocation = __DIR__ . '/../Containers/'.self::$sessionMode.'BasedSessionContainer.php';
+        if (!file_exists($sessionContainerFileLocation)) {
+            die('Missing file:'.$sessionContainerFileLocation);
+        }
+        include $sessionContainerFileLocation;
+        $containerClassName = self::$sessionMode.'BasedSessionContainer';
+        self::$sessionContainer = new $containerClassName();
         self::setConfig();
-        session_set_save_handler(self::$sessionHandler, true);
+
+        $customSessionHandler = new CustomSessionHandler(self::$sessionContainer);
+        if (!empty(self::$sessionName)) {
+            $customSessionHandler->sessionName = self::$sessionName;
+        }
+        if (!empty(self::$sessionDataName)) {
+            $customSessionHandler->sessionDataName = self::$sessionDataName;
+        }
+        session_set_save_handler($customSessionHandler, true);
         self::setOptions();
     }
 

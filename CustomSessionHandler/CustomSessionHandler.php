@@ -1,8 +1,6 @@
 <?php
-include __DIR__ . '/SessionHelper.php';
-
 /**
- * Class for using Memcached based Session Handlers.
+ * Class for using File based Session Handlers.
  * 
  * @category   Session
  * @package    Session Handlers
@@ -11,19 +9,31 @@ include __DIR__ . '/SessionHelper.php';
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
+class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
-    /** DB credentials */
-    public $MEMCACHED_HOSTNAME = null;
-    public $MEMCACHED_PORT = null;
+    /** Spam flag */
+    public $container = null;
 
-    /** DB PDO object */
-    private $memcacheD = null;
+    /** Session cookie name */
+    public $sessionName = null;
+
+    /** Session data cookie name */
+    public $sessionDataName = null;
+
+    /** Session Data */
+    public $sessionData = '';
+
+    /** Session data found */
+    public $dataFound = false;
+
+    /** Spam flag */
+    public $isSpam = false;
 
     /** Constructor */
-    public function __construct()
+    public function __construct(&$container)
     {
         ob_start(); // Turn on output buffering
+        $this->container = &$container;
     }
 
     /**
@@ -35,9 +45,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
      */
     public function open($sessionSavePath, $sessionName): bool
     {
-
-        $this->connect();
-        $this->currentTimestamp = time();
+        $this->container->init($sessionSavePath, $sessionName);
 
         return true;
     }
@@ -50,8 +58,8 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
      */
     public function validateId($sessionId): bool
     {
-        if ($data = $this->get($sessionId)) {
-            $this->sessionData = $this->decryptData($data);
+        if ($sessionData = $this->container->get($sessionId)) {
+            $this->sessionData = &$sessionData;
             $this->dataFound = true;
         }
 
@@ -112,7 +120,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
             return true;
         }
 
-        return $this->set($sessionId, $this->encryptData($sessionData));
+        return $this->container->set($sessionId, $sessionData);
     }
 
     /**
@@ -134,7 +142,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
             return true;
         }
 
-        return $this->set($sessionId, $this->encryptData($sessionData));
+        return $this->container->touch($sessionId, $sessionData);
     }
 
     /**
@@ -149,7 +157,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
             return true;
         }
 
-        return true;
+        return $this->container->gc($sessionMaxlifetime);
     }
 
     /**
@@ -166,7 +174,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
 
         $this->unsetSessionCookie();
 
-        return $this->delete($sessionId);
+        return $this->container->delete($sessionId);
     }
 
     /**
@@ -180,101 +188,44 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
             $this->unsetSessionCookie();
         }
 
-        $this->memcacheD = null;
-        $this->currentTimestamp = null;
-        $this->dataFound = false;
         $this->sessionData = null;
+        $this->dataFound = false;
+        $this->isSpam = false;
 
         return true;
     }
 
     /**
-     * Set PDO connection
+     * Returns random 64 char string
      *
-     * @return void
-     */
-    private function connect()
-    {
-        try {
-            $this->memcacheD = new \Memcached();
-            $this->memcacheD->addServer($this->MEMCACHED_HOSTNAME, $this->MEMCACHED_PORT);
-        } catch (\Exception $e) {
-            $this->manageException($e);
-        }
-    }
-
-    /**
-     * Get session data.
-     *
-     * @param string $sessionId
      * @return string
      */
-    private function get($sessionId)
+    private function getRandomString()
     {
-        try {
-            $return = false;
-            if ($data = $this->memcacheD->get($sessionId)) {
-                $return = &$data;
-            }
-            return $return;
-        } catch (\Exception $e) {
-            $this->manageException($e);
-        }
+        return bin2hex(random_bytes(32));
     }
 
     /**
-     * Set Session data.
+     * Unset session cookies
      *
-     * @param string $sessionId
-     * @param string $sessionData
-     * @return bool
-     */
-    private function set($sessionId, $sessionData)
-    {
-        try {
-            $return = false;
-            if ($this->memcacheD->set($sessionId, $sessionData, $this->sessionMaxlifetime)) {
-                $return = true;
-            }
-            return $return;
-        } catch (\Exception $e) {
-            $this->manageException($e);
-        }
-    }
-
-    /**
-     * Delete Session data.
-     *
-     * @param string $sessionId
-     * @return bool
-     */
-    private function delete($sessionId)
-    {
-        try {
-            $return = false;
-            if ($this->memcacheD->delete($sessionId)) {
-                $return = true;
-            }
-            return $return;
-        } catch (\Exception $e) {
-            $this->manageException($e);
-        }
-    }
-
-    /**
-     * Handle Exception
-     *
-     * @param object $e
      * @return void
      */
-    private function manageException(\Exception $e)
+    protected function unsetSessionCookie()
     {
-        die($e->getMessage());
+        if (!empty($this->sessionName)) {
+            setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionName, '', 1, '/');    
+        }
+        if (!empty($this->sessionDataName) || isset($_COOKIE[$this->sessionDataName])) {
+            setcookie($this->sessionDataName,'',1);
+            setcookie($this->sessionDataName,'',1, '/');
+        }
     }
 
     /** Destructor */
     public function __destruct()
     {
+        $this->container = null;
         ob_end_flush(); //Flush (send) the output buffer and turn off output buffering
     }
 }

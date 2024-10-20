@@ -9,7 +9,7 @@
  * @version    Release: @1.0.0@
  * @since      Class available since Release 1.0.0
  */
-class SessionHelper
+class SessionContainerHelper
 {
     /** The cipher method */
     public $cipher_algo = 'AES-256-CBC';
@@ -23,29 +23,17 @@ class SessionHelper
     /** Usually 128-bit iv */
     public $iv = null;
 
+    /** Current timestamp */
+    public $currentTimestamp = null;
+
     /** Session cookie name */
     public $sessionName = null;
 
     /** Session data cookie name */
     public $sessionDataName = null;
 
-    /** Session Path */
-    public $sessionSavePath = null;
-
-    /** Session max lifetime */
+    /** Session timeout */
     public $sessionMaxlifetime = null;
-
-    /** Current timestamp */
-    public $currentTimestamp = null;
-
-    /** Session data found */
-    public $dataFound = false;
-    
-    /** Session Data */
-    public $sessionData = '';
-
-    /** Spam flag */
-    public $isSpam = false;
 
     /**
      * Encryption
@@ -85,32 +73,5 @@ class SessionHelper
             );
         }
         return $ciphertext;
-    }
-
-    /**
-     * Returns random 64 char string
-     *
-     * @return string
-     */
-    protected function getRandomString()
-    {
-        return bin2hex(random_bytes(32));
-    }
-
-    /**
-     * Unset session cookies
-     *
-     * @return void
-     */
-    protected function unsetSessionCookie()
-    {
-        if (!empty($this->sessionName)) {
-            setcookie($this->sessionName, '', 1);
-            setcookie($this->sessionName, '', 1, '/');    
-        }
-        if (!empty($this->sessionDataName) || isset($_COOKIE[$this->sessionDataName])) {
-            setcookie($this->sessionDataName,'',1);
-            setcookie($this->sessionDataName,'',1, '/');
-        }
     }
 }
