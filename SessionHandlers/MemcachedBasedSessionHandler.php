@@ -80,9 +80,6 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
 
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
-        if ($this->isSpam) {
-            setcookie($this->sessionName, '', 1);
-        }
 
         return true;
     }
@@ -200,6 +197,11 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
      */
     public function close(): bool
     {
+        if ($this->isSpam) {
+            setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionName, '', 1, '/');
+        }
+
         $this->memcacheD = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;

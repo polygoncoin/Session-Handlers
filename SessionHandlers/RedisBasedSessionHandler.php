@@ -83,9 +83,6 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
 
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
-        if ($this->isSpam) {
-            setcookie($this->sessionName, '', 1);
-        }
 
         return true;
     }
@@ -203,6 +200,11 @@ class RedisBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      */
     public function close(): bool
     {
+        if ($this->isSpam) {
+            setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionName, '', 1, '/');
+        }
+
         $this->redis = null;
         $this->currentTimestamp = null;
         $this->dataFound = false;

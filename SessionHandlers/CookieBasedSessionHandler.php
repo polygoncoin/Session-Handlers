@@ -243,7 +243,9 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
     {
         if ($this->isSpam) {
             setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionName, '', 1, '/');
             setcookie($this->sessionDataName,'',1);
+            setcookie($this->sessionDataName,'',1, '/');
         }
 
         $this->currentTimestamp = null;

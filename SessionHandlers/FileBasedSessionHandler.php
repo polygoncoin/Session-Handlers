@@ -213,6 +213,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
     {
         if ($this->isSpam) {
             setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionName, '', 1, '/');
         }
 
         $this->filepath = null;

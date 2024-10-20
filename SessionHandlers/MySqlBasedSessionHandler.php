@@ -240,6 +240,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     {
         if ($this->isSpam) {
             setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionName, '', 1, '/');
         }
 
         $this->pdo = null;
