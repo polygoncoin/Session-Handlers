@@ -143,18 +143,25 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
 
     /**
      * A callable with the following signature
+     * When session.lazy_write is enabled, and session data is unchanged
+     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
      * @param string $sessionId
+     * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    public function destroy($sessionId): bool
+    public function updateTimestamp($sessionId, $sessionData): bool
     {
         if ($this->isSpam) {
             return true;
         }
 
+        if (empty($this->sessionData) && empty($sessionData)) {
+            return true;
+        }
+
         if (!is_null($this->filepath) && file_exists($this->filepath)) {
-            return unlink($this->filepath);
+            return touch($this->filepath);
         }
 
         return true;
@@ -180,25 +187,18 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
 
     /**
      * A callable with the following signature
-     * When session.lazy_write is enabled, and session data is unchanged
-     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
      * @param string $sessionId
-     * @param string $sessionData
      * @return boolean true for success or false for failure
      */
-    public function updateTimestamp($sessionId, $sessionData): bool
+    public function destroy($sessionId): bool
     {
         if ($this->isSpam) {
             return true;
         }
 
-        if (empty($this->sessionData) && empty($sessionData)) {
-            return true;
-        }
-
         if (!is_null($this->filepath) && file_exists($this->filepath)) {
-            return touch($this->filepath);
+            return unlink($this->filepath);
         }
 
         return true;

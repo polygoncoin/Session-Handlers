@@ -163,39 +163,6 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
 
     /**
      * A callable with the following signature
-     *
-     * @param string $sessionId
-     * @return boolean true for success or false for failure
-     */
-    public function destroy($sessionId): bool
-    {
-        if ($this->isSpam) {
-            return true;
-        }
-
-        setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionDataName, '', 1);
-
-        return true;
-    }
-
-    /**
-     * A callable with the following signature
-     *
-     * @param integer $sessionMaxlifetime
-     * @return boolean true for success or false for failure
-     */
-    public function gc($sessionMaxlifetime): int|false
-    {
-        if ($this->isSpam) {
-            return true;
-        }
-
-        return true;
-    }
-
-    /**
-     * A callable with the following signature
      * When session.lazy_write is enabled, and session data is unchanged
      * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
      *
@@ -232,6 +199,39 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             $secure = false,
             $httponly = true
         );
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param integer $sessionMaxlifetime
+     * @return boolean true for success or false for failure
+     */
+    public function gc($sessionMaxlifetime): int|false
+    {
+        if ($this->isSpam) {
+            return true;
+        }
+
+        return true;
+    }
+
+    /**
+     * A callable with the following signature
+     *
+     * @param string $sessionId
+     * @return boolean true for success or false for failure
+     */
+    public function destroy($sessionId): bool
+    {
+        if ($this->isSpam) {
+            return true;
+        }
+
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionDataName, '', 1);
+
+        return true;
     }
 
     /**
