@@ -109,6 +109,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->isSpam) {
             return '';
         }
+
         if (!empty($this->sessionData)) {
             return $this->sessionData;
         }
@@ -128,6 +129,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
         if ($this->isSpam) {
             return true;
         }
+
         if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }

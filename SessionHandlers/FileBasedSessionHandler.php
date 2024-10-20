@@ -131,6 +131,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
         if (empty($this->sessionData) && empty($sessionData)) {
             return true;
         }
+
         if (is_null($this->filepath)) {
             $this->filepath = $this->sessionSavePath . '/' . $sessionId;
             touch($this->filepath);
