@@ -39,6 +39,7 @@ class Session
 
     /** Session options */
     static private $sessionName = 'PHPSESSID';
+    static private $sessionDataName = 'PHPSESSDATA';
     static private $sessionMaxlifetime = 30 * 60; // 30 mins.
 
     /** File Session options */
@@ -83,6 +84,8 @@ class Session
             default:
                 break;
         }
+        self::$sessionHandler->sessionName = self::$sessionName;
+        self::$sessionHandler->sessionDataName = self::$sessionDataName;
         self::$sessionHandler->sessionMaxlifetime = self::$sessionMaxlifetime;
         if (
             !empty(self::$ENCRYPTION_PASS_PHRASE) &&

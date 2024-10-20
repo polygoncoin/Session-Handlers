@@ -12,16 +12,40 @@
 class SessionHelper
 {
     /** The cipher method */
-    private $cipher_algo = 'AES-256-CBC';
+    public $cipher_algo = 'AES-256-CBC';
 
     /** Usually 256-bit passphrase */
     public $passphrase = null;
 
     /** Bitwise disjunction of the flags OPENSSL_RAW_DATA, and OPENSSL_ZERO_PADDING or OPENSSL_DONT_ZERO_PAD_KEY */
-    private $options = OPENSSL_RAW_DATA;
+    public $options = OPENSSL_RAW_DATA;
 
     /** Usually 128-bit iv */
     public $iv = null;
+
+    /** Session cookie name */
+    public $sessionName = null;
+
+    /** Session data cookie name */
+    public $sessionDataName = null;
+
+    /** Session Path */
+    public $sessionSavePath = null;
+
+    /** Session max lifetime */
+    public $sessionMaxlifetime = null;
+
+    /** Current timestamp */
+    public $currentTimestamp = null;
+
+    /** Session data found */
+    public $dataFound = false;
+    
+    /** Session Data */
+    public $sessionData = '';
+
+    /** Spam flag */
+    public $isSpam = false;
 
     /**
      * Encryption
@@ -29,7 +53,7 @@ class SessionHelper
      * @param string $plaintext
      * @return string ciphertext
      */
-    function encryptData($plaintext)
+    protected function encryptData($plaintext)
     {
         if (!empty($this->passphrase) && !empty($this->iv)) {
             return base64_encode(openssl_encrypt(
@@ -49,7 +73,7 @@ class SessionHelper
      * @param string $ciphertext
      * @return string plaintext
      */
-    function decryptData($ciphertext)
+    protected function decryptData($ciphertext)
     {
         if (!empty($this->passphrase) && !empty($this->iv)) {
             return openssl_decrypt(
@@ -68,8 +92,25 @@ class SessionHelper
      *
      * @return string
      */
-    function getRandomString()
+    protected function getRandomString()
     {
         return bin2hex(random_bytes(32));
+    }
+
+    /**
+     * Unset session cookies
+     *
+     * @return void
+     */
+    protected function unsetSessionCookie()
+    {
+        if (!empty($this->sessionName)) {
+            setcookie($this->sessionName, '', 1);
+            setcookie($this->sessionName, '', 1, '/');    
+        }
+        if (!empty($this->sessionDataName)) {
+            setcookie($this->sessionDataName,'',1);
+            setcookie($this->sessionDataName,'',1, '/');
+        }
     }
 }

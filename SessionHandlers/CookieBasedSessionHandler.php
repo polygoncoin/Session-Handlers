@@ -13,30 +13,6 @@ include __DIR__ . '/SessionHelper.php';
  */
 class CookieBasedSessionHandler extends SessionHelper implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
-    /** Session max lifetime */
-    public $sessionMaxlifetime = null;
-
-    /** Current timestamp */
-    private $currentTimestamp = null;
-
-    /** Session data found */
-    private $dataFound = false;
-    
-    /** Session Path */
-    private $sessionSavePath = null;
-
-    /** Session Name */
-    private $sessionName = null;
-
-    /** Session Data */
-    private $sessionData = '';
-
-    /** Spam flag */
-    private $isSpam = false;
-
-    /** Session data cookie name */
-    private $sessionDataName = 'PHPSESSDATA';
-
     /** Constructor */
     public function __construct()
     {
@@ -56,8 +32,6 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             die ('Please set encryption details in Session.php');
         }
 
-        $this->sessionSavePath = $sessionSavePath;
-        $this->sessionName = $sessionName;
         $this->currentTimestamp = time();
 
         return true;
@@ -249,19 +223,6 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
         $this->sessionData = null;
 
         return true;
-    }
-
-    /**
-     * Unset session cookies
-     *
-     * @return void
-     */
-    private function unsetSessionCookie()
-    {
-        setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionName, '', 1, '/');
-        setcookie($this->sessionDataName,'',1);
-        setcookie($this->sessionDataName,'',1, '/');
     }
 
     /** Destructor */

@@ -20,29 +20,8 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     public $DB_PASSWORD = null;
     public $DB_DATABASE = null;
 
-    /** Session max lifetime */
-    public $sessionMaxlifetime = null;
-
     /** DB PDO object */
     private $pdo = null;
-
-    /** Current timestamp */
-    private $currentTimestamp = null;
-
-    /** Session data found */
-    private $dataFound = false;
-    
-    /** Session Path */
-    private $sessionSavePath = null;
-
-    /** Session Name */
-    private $sessionName = null;
-
-    /** Session Data */
-    private $sessionData = '';
-
-    /** Spam flag */
-    private $isSpam = false;
 
     /** Constructor */
     public function __construct()
@@ -59,8 +38,6 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
      */
     public function open($sessionSavePath, $sessionName): bool
     {
-        $this->sessionSavePath = $sessionSavePath;
-        $this->sessionName = $sessionName;
 
         $this->connect();
         $this->currentTimestamp = time();
@@ -333,17 +310,6 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     private function manageException(\Exception $e)
     {
         die($e->getMessage());
-    }
-
-    /**
-     * Unset session cookies
-     *
-     * @return void
-     */
-    private function unsetSessionCookie()
-    {
-        setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionName, '', 1, '/');
     }
 
     /** Destructor */
