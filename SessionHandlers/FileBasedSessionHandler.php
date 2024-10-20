@@ -201,8 +201,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
             return unlink($this->filepath);
         }
 
-        setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionName, '', 1, '/');
+        $this->unsetSessionCookie();
 
         return true;
     }
@@ -215,8 +214,7 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
     public function close(): bool
     {
         if ($this->isSpam) {
-            setcookie($this->sessionName, '', 1);
-            setcookie($this->sessionName, '', 1, '/');
+            $this->unsetSessionCookie();
         }
 
         $this->filepath = null;
@@ -225,6 +223,17 @@ class FileBasedSessionHandler extends SessionHelper implements \SessionHandlerIn
         $this->sessionData = null;
 
         return true;
+    }
+
+    /**
+     * Unset session cookies
+     *
+     * @return void
+     */
+    private function unsetSessionCookie()
+    {
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
     }
 
     /** Destructor */

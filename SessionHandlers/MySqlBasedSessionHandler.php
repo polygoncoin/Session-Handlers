@@ -223,8 +223,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
             return true;
         }
 
-        setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionName, '', 1, '/');
+        $this->unsetSessionCookie();
 
         $sql = 'DELETE FROM `sessions` WHERE `sessionId` = :sessionId';
         $params = [
@@ -242,8 +241,7 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     public function close(): bool
     {
         if ($this->isSpam) {
-            setcookie($this->sessionName, '', 1);
-            setcookie($this->sessionName, '', 1, '/');
+            $this->unsetSessionCookie();
         }
 
         $this->pdo = null;
@@ -335,6 +333,17 @@ class MySqlBasedSessionHandler extends SessionHelper implements \SessionHandlerI
     private function manageException(\Exception $e)
     {
         die($e->getMessage());
+    }
+
+    /**
+     * Unset session cookies
+     *
+     * @return void
+     */
+    private function unsetSessionCookie()
+    {
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
     }
 
     /** Destructor */

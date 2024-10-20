@@ -228,10 +228,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
             return true;
         }
 
-        setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionName, '', 1, '/');
-        setcookie($this->sessionDataName,'',1);
-        setcookie($this->sessionDataName,'',1, '/');
+        $this->unsetSessionCookie();
 
         return true;
     }
@@ -244,10 +241,7 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
     public function close(): bool
     {
         if ($this->isSpam) {
-            setcookie($this->sessionName, '', 1);
-            setcookie($this->sessionName, '', 1, '/');
-            setcookie($this->sessionDataName,'',1);
-            setcookie($this->sessionDataName,'',1, '/');
+            $this->unsetSessionCookie();
         }
 
         $this->currentTimestamp = null;
@@ -255,6 +249,19 @@ class CookieBasedSessionHandler extends SessionHelper implements \SessionHandler
         $this->sessionData = null;
 
         return true;
+    }
+
+    /**
+     * Unset session cookies
+     *
+     * @return void
+     */
+    private function unsetSessionCookie()
+    {
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
+        setcookie($this->sessionDataName,'',1);
+        setcookie($this->sessionDataName,'',1, '/');
     }
 
     /** Destructor */

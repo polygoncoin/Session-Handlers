@@ -187,8 +187,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
             return true;
         }
 
-        setcookie($this->sessionName, '', 1);
-        setcookie($this->sessionName, '', 1, '/');
+        $this->unsetSessionCookie();
 
         return $this->delete($sessionId);
     }
@@ -201,8 +200,7 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
     public function close(): bool
     {
         if ($this->isSpam) {
-            setcookie($this->sessionName, '', 1);
-            setcookie($this->sessionName, '', 1, '/');
+            $this->unsetSessionCookie();
         }
 
         $this->memcacheD = null;
@@ -295,6 +293,17 @@ class MemcachedBasedSessionHandler extends SessionHelper implements \SessionHand
     private function manageException(\Exception $e)
     {
         die($e->getMessage());
+    }
+
+    /**
+     * Unset session cookies
+     *
+     * @return void
+     */
+    private function unsetSessionCookie()
+    {
+        setcookie($this->sessionName, '', 1);
+        setcookie($this->sessionName, '', 1, '/');
     }
 
     /** Destructor */
