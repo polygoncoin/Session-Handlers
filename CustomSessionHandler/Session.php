@@ -57,12 +57,20 @@ class Session
     static private $sessionContainer = null;
 
     /**
-     * Generates session options argument
+     * Initialise container
      *
      * @return void
      */
-    static private function setConfig()
+    static private function initContainer()
     {
+        $sessionContainerFileLocation = __DIR__ . '/../Containers/'.self::$sessionMode.'BasedSessionContainer.php';
+        if (!file_exists($sessionContainerFileLocation)) {
+            die('Missing file:'.$sessionContainerFileLocation);
+        }
+        include $sessionContainerFileLocation;
+        $containerClassName = self::$sessionMode.'BasedSessionContainer';
+        self::$sessionContainer = new $containerClassName();
+
         switch(self::$sessionMode) {
             case 'Cookie':
                 break;
@@ -134,14 +142,7 @@ class Session
     static public function initSessionHandler($sessionMode)
     {
         self::$sessionMode = $sessionMode;
-        $sessionContainerFileLocation = __DIR__ . '/../Containers/'.self::$sessionMode.'BasedSessionContainer.php';
-        if (!file_exists($sessionContainerFileLocation)) {
-            die('Missing file:'.$sessionContainerFileLocation);
-        }
-        include $sessionContainerFileLocation;
-        $containerClassName = self::$sessionMode.'BasedSessionContainer';
-        self::$sessionContainer = new $containerClassName();
-        self::setConfig();
+        self::initContainer();
 
         $customSessionHandler = new CustomSessionHandler(self::$sessionContainer);
         if (!empty(self::$sessionName)) {
