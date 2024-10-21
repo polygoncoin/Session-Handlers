@@ -3,7 +3,7 @@ include __DIR__ . '/SessionContainerInterface.php';
 include __DIR__ . '/SessionContainerHelper.php';
 
 /**
- * Class for using Cookie based Session Container.
+ * Class for using Cookie based Session Container
  * 
  * @category   Session
  * @package    Session Handlers

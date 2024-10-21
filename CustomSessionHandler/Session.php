@@ -1,7 +1,7 @@
 <?php
 include __DIR__ . '/CustomSessionHandler.php';
 /**
- * Class for using Session Handlers.
+ * Class for using Session Handlers
  * 
  * @category   Session
  * @package    Session Handlers

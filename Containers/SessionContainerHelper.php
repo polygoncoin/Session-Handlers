@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for using Cookie to managing session data with encryption.
+ * Class for using Cookie to managing session data with encryption
  * 
  * @category   Session
  * @package    Session Handlers

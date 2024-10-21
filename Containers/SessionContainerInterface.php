@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface for Session Containers.
+ * Interface for Session Containers
  * 
  * @category   Session
  * @package    Session Handlers

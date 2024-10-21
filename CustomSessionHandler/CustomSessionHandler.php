@@ -1,6 +1,9 @@
 <?php
 /**
- * Class for using File based Session Handlers.
+ * Class for using File based Session Handlers
+ * 
+ * DON'T make any changes in this class
+ * Make required changes in Containers
  * 
  * @category   Session
  * @package    Session Handlers
