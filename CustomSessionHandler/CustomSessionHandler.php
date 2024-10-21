@@ -32,11 +32,15 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     /** Constructor */
     public function __construct(&$container)
     {
-        ob_start(); // Turn on output buffering
+        // Turn on output buffering
+        ob_start();
+        
         $this->container = &$container;
     }
 
     /**
+     * Session open
+     * 
      * A callable with the following signature
      *
      * @param string $savePath
@@ -51,6 +55,10 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
+     * Validates session id
+     * 
+     * Calls if session cookie is present in request
+     * 
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -66,12 +74,17 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
         /** marking spam request */
         $this->isSpam = !$this->dataFound;
 
+        // Don't change this return value
         return true;
     }
 
     /**
-     * A callable with the following signature
+     * Session generates new session id
+     * 
+     * Calls if no session cookie is present
      * Invoked internally when a new session id is needed
+     * 
+     * A callable with the following signature
      *
      * @return string should be new session id
      */
@@ -85,6 +98,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
+     * Session read operation
+     * 
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -104,6 +119,11 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
+     * Write operation performed
+     * 
+     * When session.lazy_write is enabled, and session data is unchanged
+     * it will skip this method call. Instead it will call updateTimestamp
+     * 
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -124,9 +144,12 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * A callable with the following signature
+     * Updates timestamp of datastore container
+     * 
      * When session.lazy_write is enabled, and session data is unchanged
-     * UpdateTimestamp is called instead (of write) to only update the timestamp of session.
+     * UpdateTimestamp is called instead (of write) to only update the timestamp of session
+     * 
+     * A callable with the following signature
      *
      * @param string $sessionId
      * @param string $sessionData
@@ -146,6 +169,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
+     * Session garbage collector
+     * 
      * A callable with the following signature
      *
      * @param integer $sessionMaxlifetime
@@ -161,6 +186,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
+     * Session destroy
+     * 
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -178,6 +205,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
+     * Session close
+     * 
      * A callable with the following signature
      *
      * @return boolean true for success or false for failure
@@ -226,6 +255,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     public function __destruct()
     {
         $this->container = null;
-        ob_end_flush(); //Flush (send) the output buffer and turn off output buffering
+
+        // Flush (send) the output buffer and turn off output buffering
+        ob_end_flush();
     }
 }
