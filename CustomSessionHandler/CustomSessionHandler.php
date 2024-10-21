@@ -244,11 +244,11 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     protected function unsetSessionCookie()
     {
-        if (!empty($this->sessionName) || isset($_COOKIE[$this->sessionName])) {
+        if (!empty($this->sessionName)) {
             setcookie($this->sessionName, '', 1);
             setcookie($this->sessionName, '', 1, '/');    
         }
-        if (!empty($this->sessionDataName) || isset($_COOKIE[$this->sessionDataName])) {
+        if (!empty($this->sessionDataName)) {
             setcookie($this->sessionDataName,'',1);
             setcookie($this->sessionDataName,'',1, '/');
         }
