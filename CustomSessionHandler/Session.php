@@ -57,12 +57,64 @@ class Session
     static private $sessionContainer = null;
 
     /**
+     * Validate settings
+     *
+     * @return void
+     */
+    static private function validateSettings()
+    {
+        // sessionMode validation
+        if (!in_array(self::$sessionMode, ['File', 'MySql', 'Redis', 'Memcached', 'Cookie'])) {
+            die('Invalid "sessionMode"');
+        }
+
+        // Required param validations
+        if (empty(self::$sessionName)) {
+            die('Invalid "sessionName"');
+        }
+        if (empty(self::$sessionDataName) && self::$sessionMode === 'Cookie') {
+            die('Invalid "sessionDataName"');
+        }
+        if (empty(self::$sessionMaxlifetime)) die('Invalid "sessionMaxlifetime"');
+
+        // Required parameters as per sessionMode
+        switch(self::$sessionMode) {
+            case 'Cookie':
+                if (empty(self::$ENCRYPTION_PASS_PHRASE)) die('Invalid "ENCRYPTION_PASS_PHRASE"');
+                if (empty(self::$ENCRYPTION_IV)) die('Invalid "ENCRYPTION_IV"');
+                break;
+            case 'MySql':
+                if (empty(self::$DB_HOSTNAME)) die('Invalid "DB_HOSTNAME"');
+                if (empty(self::$DB_PORT)) die('Invalid "DB_PORT"');
+                if (empty(self::$DB_USERNAME)) die('Invalid "DB_USERNAME"');
+                if (empty(self::$DB_PASSWORD)) die('Invalid "DB_PASSWORD"');
+                if (empty(self::$DB_DATABASE)) die('Invalid "DB_DATABASE"');
+                break;
+            case 'Redis':
+                if (empty(self::$REDIS_HOSTNAME)) die('Invalid "REDIS_HOSTNAME"');
+                if (empty(self::$REDIS_PORT)) die('Invalid "REDIS_PORT"');
+                if (empty(self::$REDIS_USERNAME)) die('Invalid "REDIS_USERNAME"');
+                if (empty(self::$REDIS_PASSWORD)) die('Invalid "REDIS_PASSWORD"');
+                if (empty(self::$REDIS_DATABASE) && self::$REDIS_DATABASE!=0) {
+                    die('Invalid "REDIS_DATABASE"');
+                }
+                break;
+            case 'Memcached':
+                if (empty(self::$MEMCACHED_HOSTNAME)) die('Invalid "MEMCACHED_HOSTNAME"');
+                if (empty(self::$MEMCACHED_PORT)) die('Invalid "MEMCACHED_PORT"');
+                break;
+        }
+
+    }
+
+    /**
      * Initialise container
      *
      * @return void
      */
     static private function initContainer()
     {
+        // Container initialisation
         $sessionContainerFileLocation = __DIR__ . '/../Containers/'.self::$sessionMode.'BasedSessionContainer.php';
         if (!file_exists($sessionContainerFileLocation)) {
             die('Missing file:'.$sessionContainerFileLocation);
@@ -71,10 +123,16 @@ class Session
         $containerClassName = self::$sessionMode.'BasedSessionContainer';
         self::$sessionContainer = new $containerClassName();
 
+        // Setting required common parameters
+        self::$sessionContainer->sessionName = self::$sessionName;
+        self::$sessionContainer->sessionDataName = self::$sessionDataName;
+        self::$sessionContainer->sessionMaxlifetime = self::$sessionMaxlifetime;
+
+        // Setting required parameters as per sessionMode
         switch(self::$sessionMode) {
             case 'Cookie':
-                break;
-            case 'File':
+                self::$sessionContainer->passphrase = base64_decode(self::$ENCRYPTION_PASS_PHRASE);
+                self::$sessionContainer->iv = base64_decode(self::$ENCRYPTION_IV);
                 break;
             case 'MySql':
                 self::$sessionContainer->DB_HOSTNAME = self::$DB_HOSTNAME;
@@ -94,12 +152,9 @@ class Session
                 self::$sessionContainer->MEMCACHED_HOSTNAME = self::$MEMCACHED_HOSTNAME;
                 self::$sessionContainer->MEMCACHED_PORT = self::$MEMCACHED_PORT;
                 break;
-            default:
-                break;
         }
-        self::$sessionContainer->sessionName = self::$sessionName;
-        self::$sessionContainer->sessionDataName = self::$sessionDataName;
-        self::$sessionContainer->sessionMaxlifetime = self::$sessionMaxlifetime;
+
+        // Setting encryption parameters
         if (
             !empty(self::$ENCRYPTION_PASS_PHRASE) &&
             !empty(self::$ENCRYPTION_IV)
@@ -142,6 +197,11 @@ class Session
     static public function initSessionHandler($sessionMode)
     {
         self::$sessionMode = $sessionMode;
+
+        // Comment this call once you are done with settings part
+        self::validateSettings();
+        
+        // Initialise container
         self::initContainer();
 
         $customSessionHandler = new CustomSessionHandler(self::$sessionContainer);
