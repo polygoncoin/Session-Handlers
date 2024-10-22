@@ -166,7 +166,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             return true;
         }
 
-        // Won't allow creating empty entries when session.lazy_write is enabled
+        // Won't allow updating empty entries when session.lazy_write is enabled
         if (empty(unserialize($sessionData))) {
             $this->unsetSessionCookie();
             return true;
