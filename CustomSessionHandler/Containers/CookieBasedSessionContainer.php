@@ -56,7 +56,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
             $expires = 0,
             $path = '/',
             $domain = '',
-            $secure = false,
+            $secure = ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
             $httponly = true
         );
     }
@@ -79,7 +79,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
             $expires = 0,
             $path = '/',
             $domain = '',
-            $secure = false,
+            $secure = ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
             $httponly = true
         );
     }

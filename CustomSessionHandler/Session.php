@@ -115,7 +115,7 @@ class Session
     static private function initContainer()
     {
         // Container initialisation
-        $sessionContainerFileLocation = __DIR__ . '/../Containers/'.self::$sessionMode.'BasedSessionContainer.php';
+        $sessionContainerFileLocation = __DIR__ . '/Containers/'.self::$sessionMode.'BasedSessionContainer.php';
         if (!file_exists($sessionContainerFileLocation)) {
             die('Missing file:'.$sessionContainerFileLocation);
         }
