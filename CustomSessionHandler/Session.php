@@ -104,7 +104,6 @@ class Session
                 if (empty(self::$MEMCACHED_PORT)) die('Invalid "MEMCACHED_PORT"');
                 break;
         }
-
     }
 
     /**
@@ -205,7 +204,7 @@ class Session
         self::$sessionMode = $sessionMode;
 
         // Comment this call once you are done with settings part
-        self::validateSettings();
+        // self::validateSettings();
         
         // Initialise container
         self::initContainer();
