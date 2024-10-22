@@ -74,7 +74,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             $this->dataFound = true;
         }
 
-        /** marking spam request */
+        /** marking spam request, since sessionId doesn't exist */
         $this->isSpam = !$this->dataFound;
 
         // Don't change this return value
@@ -139,7 +139,9 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             return true;
         }
 
-        if (empty($this->sessionData) && empty($sessionData)) {
+        // Won't allow creating empty entries
+        if (empty(unserialize($sessionData))) {
+            $this->unsetSessionCookie();
             return true;
         }
 
@@ -164,7 +166,9 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             return true;
         }
 
-        if (empty($this->sessionData) && empty($sessionData)) {
+        // Won't allow creating empty entries when session.lazy_write is enabled
+        if (empty(unserialize($sessionData))) {
+            $this->unsetSessionCookie();
             return true;
         }
 
@@ -202,6 +206,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             return true;
         }
 
+        // Deleting session cookies set on client end
         $this->unsetSessionCookie();
 
         return $this->container->delete($sessionId);
@@ -216,6 +221,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function close(): bool
     {
+        // Deleting spam cookies set on client end
         if ($this->isSpam) {
             $this->unsetSessionCookie();
         }
