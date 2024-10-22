@@ -53,11 +53,14 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
         return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,
-            $expires = 0,
-            $path = '/',
-            $domain = '',
-            $secure = ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
-            $httponly = true
+            $options = [
+                'expires' => 0,
+                'path' => '/',
+                'domain' => '',
+                'secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]
         );
     }
 
@@ -76,11 +79,14 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
         return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,
-            $expires = 0,
-            $path = '/',
-            $domain = '',
-            $secure = ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
-            $httponly = true
+            $options = [
+                'expires' => 0,
+                'path' => '/',
+                'domain' => '',
+                'secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]
         );
     }
 
