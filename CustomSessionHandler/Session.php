@@ -176,7 +176,13 @@ class Session
             'name' => self::$sessionName,
             'serialize_handler' => 'php_serialize',
             'lazy_write' => true,
-            'gc_maxlifetime' => self::$sessionMaxlifetime
+            'gc_maxlifetime' => self::$sessionMaxlifetime,
+            'cookie_lifetime' => 0,
+            'cookie_path' => '/',
+            'cookie_domain' => '',
+            'cookie_secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
+            'cookie_httponly' => true,
+            'cookie_samesite' => 'LAX'
         ];
 
         switch(self::$sessionMode) {
