@@ -25,7 +25,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements Sessio
     public function get($sessionId)
     {
         $filepath = $this->sessionSavePath . '/' . $sessionId;
-        if (file_exists($filepath)) {
+        if (file_exists($filepath) && (($this->currentTimestamp - fileatime($filepath)) < $this->sessionMaxlifetime)) {
             return $this->decryptData(file_get_contents($filepath));
         }
         return false;

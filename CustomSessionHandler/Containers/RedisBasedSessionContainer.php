@@ -43,7 +43,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     public function touch($sessionId, $sessionData)
     {
-        return $this->setKey($sessionId, $this->encryptData($sessionData));
+        return $this->resetExpire($sessionId);
     }
 
     public function gc($sessionMaxlifetime)
@@ -92,6 +92,19 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements Sessi
         try {
             $return = false;
             if ($this->redis->set($key, $value, $this->sessionMaxlifetime)) {
+                $return = true;
+            }
+            return $return;
+        } catch (\Exception $e) {
+            $this->manageException($e);
+        }
+    }
+
+    private function resetExpire($key)
+    {
+        try {
+            $return = false;
+            if ($this->redis->expire($key, $this->sessionMaxlifetime)) {
                 $return = true;
             }
             return $return;

@@ -40,7 +40,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements S
 
     public function touch($sessionId, $sessionData)
     {
-        return $this->setKey($sessionId, $this->encryptData($sessionData));
+        return $this->resetExpire($sessionId);
     }
 
     public function gc($sessionMaxlifetime)
@@ -81,6 +81,19 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements S
         try {
             $return = false;
             if ($this->memcacheD->set($key, $value, $this->sessionMaxlifetime)) {
+                $return = true;
+            }
+            return $return;
+        } catch (\Exception $e) {
+            $this->manageException($e);
+        }
+    }
+
+    private function resetExpire($key)
+    {
+        try {
+            $return = false;
+            if ($this->memcacheD->touch($key, $this->sessionMaxlifetime)) {
                 $return = true;
             }
             return $return;

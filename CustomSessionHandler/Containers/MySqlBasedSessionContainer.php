@@ -22,6 +22,8 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     private $pdo = null;
 
+    private $foundSession = false;
+
     public function init($sessionSavePath, $sessionName)
     {
         $this->connect();
@@ -30,11 +32,13 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     public function get($sessionId)
     {
-        $sql = 'SELECT `sessionData` FROM `sessions` WHERE `sessionId` = :sessionId';
+        $sql = 'SELECT `sessionData` FROM `sessions` WHERE `sessionId` = :sessionId AND lastAccessed > :lastAccessed';
         $params = [
-            ':sessionId' => $sessionId
+            ':sessionId' => $sessionId,
+            ':lastAccessed' => ($this->currentTimestamp - $this->sessionMaxlifetime)
         ];
         if (($row = $this->getSql($sql, $params)) && isset($row['sessionData'])) {
+            $this->foundSession = true;
             return $this->decryptData($row['sessionData']);
         }
         return false;
@@ -42,14 +46,10 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     public function set($sessionId, $sessionData)
     {
-        $sql = 'SELECT COUNT(1) as `count` FROM `sessions` WHERE `sessionId` = :sessionId';
-        $params = [
-            ':sessionId' => $sessionId
-        ];
-        if (($row = $this->getSql($sql, $params)) && $row['count'] === 0) {
-            $sql = 'INSERT INTO `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed, `sessionId` = :sessionId';
-        } else {
+        if ($this->foundSession) {
             $sql = 'UPDATE `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
+        } else {
+            $sql = 'INSERT INTO `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed, `sessionId` = :sessionId';
         }
         $params = [
             ':sessionId' => $sessionId,

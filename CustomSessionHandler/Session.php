@@ -129,10 +129,6 @@ class Session
 
         // Setting required parameters as per sessionMode
         switch(self::$sessionMode) {
-            case 'Cookie':
-                self::$sessionContainer->passphrase = base64_decode(self::$ENCRYPTION_PASS_PHRASE);
-                self::$sessionContainer->iv = base64_decode(self::$ENCRYPTION_IV);
-                break;
             case 'MySql':
                 self::$sessionContainer->DB_HOSTNAME = self::$DB_HOSTNAME;
                 self::$sessionContainer->DB_PORT = self::$DB_PORT;
