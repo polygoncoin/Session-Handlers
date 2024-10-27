@@ -1,6 +1,6 @@
 <?php
-include_once __DIR__ . '/SessionContainerInterface.php';
-include_once __DIR__ . '/SessionContainerHelper.php';
+require_once __DIR__ . '/SessionContainerInterface.php';
+require_once __DIR__ . '/SessionContainerHelper.php';
 
 /**
  * Class for using Memcached based Session Container
