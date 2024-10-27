@@ -226,6 +226,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             $this->unsetSessionCookie();
         }
 
+        $this->container = null;
         $this->sessionData = null;
         $this->dataFound = false;
         $this->isSpam = false;
@@ -263,8 +264,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     /** Destructor */
     public function __destruct()
     {
-        $this->container = null;
-
         // Flush (send) the output buffer and turn off output buffering
         ob_end_flush();
     }

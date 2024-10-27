@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/CustomSessionHandler.php';
+include_once __DIR__ . '/CustomSessionHandler.php';
 /**
  * Class for using Session Handlers
  * 
@@ -15,10 +15,10 @@ class Session
     /** SET THESE TO ENABLE ENCRYPTION */
     /** base64_encode(openssl_random_pseudo_bytes(32)) */
     // Example: static private $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
-    static private $ENCRYPTION_PASS_PHRASE = null;
+    static private $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
     /** base64_encode(openssl_random_pseudo_bytes(16)) */
     // Example: static private $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
-    static private $ENCRYPTION_IV = null;
+    static private $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
     
     /** MySql Session config */
     static private $DB_HOSTNAME = 'localhost';
@@ -118,7 +118,7 @@ class Session
         if (!file_exists($sessionContainerFileLocation)) {
             die('Missing file:'.$sessionContainerFileLocation);
         }
-        include $sessionContainerFileLocation;
+        include_once $sessionContainerFileLocation;
         $containerClassName = self::$sessionMode.'BasedSessionContainer';
         self::$sessionContainer = new $containerClassName();
 
@@ -201,7 +201,15 @@ class Session
 
         // Comment this call once you are done with settings part
         // self::validateSettings();
-        
+    }
+
+    /**
+     * Initialise session_set_save_handler process
+     *
+     * @return void
+     */
+    static private function initProcess()
+    {
         // Initialise container
         self::initContainer();
 
@@ -213,7 +221,7 @@ class Session
             $customSessionHandler->sessionDataName = self::$sessionDataName;
         }
         session_set_save_handler($customSessionHandler, true);
-        self::setOptions();
+        self::setOptions();        
     }
 
     /**
@@ -224,6 +232,8 @@ class Session
     static public function start_readonly()
     {
         if (isset($_COOKIE[self::$sessionName])) {
+            self::initProcess();
+
             $options = self::$options;
             $options['read_and_close'] = true;
     
@@ -239,6 +249,8 @@ class Session
      */
     static public function start_rw_mode()
     {
+        self::initProcess();
+
         return session_start(self::$options);
     }
 }

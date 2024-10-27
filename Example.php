@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/CustomSessionHandler/Session.php';
+include_once __DIR__ . '/CustomSessionHandler/Session.php';
 
 // Initialise Session Handler
 Session::initSessionHandler('File');

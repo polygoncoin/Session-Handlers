@@ -1,6 +1,6 @@
 <?php
-include __DIR__ . '/SessionContainerInterface.php';
-include __DIR__ . '/SessionContainerHelper.php';
+include_once __DIR__ . '/SessionContainerInterface.php';
+include_once __DIR__ . '/SessionContainerHelper.php';
 
 /**
  * Class for using Cookie based Session Container
