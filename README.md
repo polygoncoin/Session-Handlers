@@ -8,7 +8,7 @@ Collection of Mostly used Session Handlers
 
 ```PHP
 <?php
-include __DIR__ . '/SessionHandlers/Session.php';
+include __DIR__ . '/CustomSessionHandler/Session.php';
 
 // Initialise Session Handler
 Session::initSessionHandler('File');
