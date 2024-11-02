@@ -110,15 +110,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function read($sessionId): string|false
     {
-        if ($this->isSpam) {
-            return '';
-        }
-
-        if (!empty($this->sessionData)) {
-            return $this->sessionData;
-        }
-
-        return '';
+        return $this->sessionData;
     }
 
     /**
@@ -227,7 +219,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
         }
 
         $this->container = null;
-        $this->sessionData = null;
+        $this->sessionData = '';
         $this->dataFound = false;
         $this->isSpam = false;
 

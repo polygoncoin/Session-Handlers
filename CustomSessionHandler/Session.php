@@ -26,6 +26,7 @@ class Session
     static private $DB_USERNAME = 'root';
     static private $DB_PASSWORD = 'shames11';
     static private $DB_DATABASE = 'db_session';
+    static private $DB_TABLE = 'sessions';
 
     /** Redis Session config */
     static private $REDIS_HOSTNAME = 'localhost';
@@ -45,7 +46,7 @@ class Session
 
     /** File Session options */
     // static private $sessionPath = '/tmp';
-    static private $sessionPath = '/Users/rameshjangid/homebrew/var/www/php-session/session-files';
+    static private $sessionPath = __DIR__ . '/session-files';
 
     /** Session Handler mode */
     static private $sessionMode = null;
@@ -89,6 +90,7 @@ class Session
                 if (empty(self::$DB_USERNAME)) die('Invalid "DB_USERNAME"');
                 if (empty(self::$DB_PASSWORD)) die('Invalid "DB_PASSWORD"');
                 if (empty(self::$DB_DATABASE)) die('Invalid "DB_DATABASE"');
+                if (empty(self::$DB_TABLE)) die('Invalid "DB_TABLE"');
                 break;
             case 'Redis':
                 if (empty(self::$REDIS_HOSTNAME)) die('Invalid "REDIS_HOSTNAME"');
@@ -135,6 +137,7 @@ class Session
                 self::$sessionContainer->DB_USERNAME = self::$DB_USERNAME;
                 self::$sessionContainer->DB_PASSWORD = self::$DB_PASSWORD;
                 self::$sessionContainer->DB_DATABASE = self::$DB_DATABASE;
+                self::$sessionContainer->DB_TABLE = self::$DB_TABLE;
                 break;
             case 'Redis':
                 self::$sessionContainer->REDIS_HOSTNAME = self::$REDIS_HOSTNAME;

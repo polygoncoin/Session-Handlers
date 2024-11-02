@@ -18,6 +18,9 @@ class FileBasedSessionContainer extends SessionContainerHelper implements Sessio
 
     public function init($sessionSavePath, $sessionName)
     {
+        if (!is_dir($sessionSavePath)) {
+            mkdir($sessionSavePath, 0755, true);
+        }
         $this->sessionSavePath = $sessionSavePath;
         $this->currentTimestamp = time();
     }

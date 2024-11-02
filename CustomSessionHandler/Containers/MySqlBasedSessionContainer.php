@@ -19,6 +19,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
     public $DB_USERNAME = null;
     public $DB_PASSWORD = null;
     public $DB_DATABASE = null;
+    public $DB_TABLE = null;
 
     private $pdo = null;
 
@@ -32,7 +33,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     public function get($sessionId)
     {
-        $sql = 'SELECT `sessionData` FROM `sessions` WHERE `sessionId` = :sessionId AND lastAccessed > :lastAccessed';
+        $sql = "SELECT `sessionData` FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}` WHERE `sessionId` = :sessionId AND lastAccessed > :lastAccessed";
         $params = [
             ':sessionId' => $sessionId,
             ':lastAccessed' => ($this->currentTimestamp - $this->sessionMaxlifetime)
@@ -47,9 +48,9 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
     public function set($sessionId, $sessionData)
     {
         if ($this->foundSession) {
-            $sql = 'UPDATE `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
+            $sql = "UPDATE `{$this->DB_DATABASE}`.`{$this->DB_TABLE}` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId";
         } else {
-            $sql = 'INSERT INTO `sessions` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed, `sessionId` = :sessionId';
+            $sql = "INSERT INTO `{$this->DB_DATABASE}`.`{$this->DB_TABLE}` SET `sessionData` = :sessionData, `lastAccessed` = :lastAccessed, `sessionId` = :sessionId";
         }
         $params = [
             ':sessionId' => $sessionId,
@@ -62,7 +63,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     public function touch($sessionId, $sessionData)
     {
-        $sql = 'UPDATE `sessions` SET `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId';
+        $sql = "UPDATE `{$this->DB_DATABASE}`.`{$this->DB_TABLE}` SET `lastAccessed` = :lastAccessed WHERE `sessionId` = :sessionId";
         $params = [
             ':sessionId' => $sessionId,
             ':lastAccessed' => $this->currentTimestamp
@@ -73,7 +74,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
     public function gc($sessionMaxlifetime)
     {
         $lastAccessed = $this->currentTimestamp - $sessionMaxlifetime;
-        $sql = 'DELETE FROM `sessions` WHERE `lastAccessed` < :lastAccessed';
+        $sql = "DELETE FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}` WHERE `lastAccessed` < :lastAccessed";
         $params = [
             ':lastAccessed' => $lastAccessed
         ];
@@ -82,7 +83,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     public function delete($sessionId)
     {
-        $sql = 'DELETE FROM `sessions` WHERE `sessionId` = :sessionId';
+        $sql = "DELETE FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}` WHERE `sessionId` = :sessionId";
         $params = [
             ':sessionId' => $sessionId
         ];
@@ -93,7 +94,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
     {
         try {
             $this->pdo = new \PDO(
-                "mysql:host={$this->DB_HOSTNAME};dbname={$this->DB_DATABASE}",
+                "mysql:host={$this->DB_HOSTNAME}",
                 $this->DB_USERNAME,
                 $this->DB_PASSWORD,
                 [
