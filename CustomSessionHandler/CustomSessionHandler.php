@@ -29,9 +29,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     /** Session data found */
     public $dataFound = false;
 
-    /** Spam flag */
-    public $isSpam = false;
-
     /** Constructor */
     public function __construct(&$container)
     {
@@ -74,11 +71,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             $this->dataFound = true;
         }
 
-        /** marking spam request, since sessionId doesn't exist */
-        $this->isSpam = !$this->dataFound;
-
         // Don't change this return value
-        return true;
+        return $this->dataFound;
     }
 
     /**
@@ -93,10 +87,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function create_sid(): string
     {
-        if ($this->isSpam) {
-            return '';
-        }
-
+        $this->unsetSessionCookie();
         return $this->getRandomString();
     }
 
@@ -127,10 +118,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function write($sessionId, $sessionData): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         // Won't allow creating empty entries
         if (empty(unserialize($sessionData))) {
             $this->unsetSessionCookie();
@@ -154,10 +141,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function updateTimestamp($sessionId, $sessionData): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         // Won't allow updating empty entries when session.lazy_write is enabled
         if (empty(unserialize($sessionData))) {
             $this->unsetSessionCookie();
@@ -177,10 +160,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function gc($sessionMaxlifetime): int|false
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         return $this->container->gc($sessionMaxlifetime);
     }
 
@@ -194,10 +173,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function destroy($sessionId): bool
     {
-        if ($this->isSpam) {
-            return true;
-        }
-
         // Deleting session cookies set on client end
         $this->unsetSessionCookie();
 
@@ -213,15 +188,9 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function close(): bool
     {
-        // Deleting spam cookies set on client end
-        if ($this->isSpam) {
-            $this->unsetSessionCookie();
-        }
-
         $this->container = null;
         $this->sessionData = '';
         $this->dataFound = false;
-        $this->isSpam = false;
 
         return true;
     }
