@@ -40,13 +40,13 @@ class Session
     static private $MEMCACHED_PORT = 11211;
 
     /** Session options */
-    static private $sessionName = 'PHPSESSID';
-    static private $sessionDataName = 'PHPSESSDATA'; // For cookie mode
+    static private $sessionName = 'PHPSESSID'; // Default
+    static private $sessionDataName = 'PHPSESSDATA'; // For cookie as container
     static private $sessionMaxlifetime = 30 * 60; // 30 mins.
 
     /** File Session options */
-    // static private $sessionPath = '/tmp';
-    static private $sessionPath = __DIR__ . '/session-files';
+    //  Example: static private $sessionSavePath = '/tmp';
+    static private $sessionSavePath = null;
 
     /** Session Handler mode */
     static private $sessionMode = null;
@@ -56,6 +56,28 @@ class Session
 
     /** Session handler */
     static private $sessionContainer = null;
+
+    /**
+     * Initialise session handler
+     *
+     * @param string $sessionMode File/MySql/Cookie
+     * @return void
+     */
+    static public function initSessionHandler($sessionMode)
+    {
+        self::$sessionMode = $sessionMode;
+
+        // Set options from php.ini if not set in this class
+        if (empty(self::$sessionName)) {
+            self::$sessionName = session_name();
+        }
+        if (self::$sessionMode === 'File' && empty(self::$sessionSavePath)) {
+            self::$sessionSavePath = (session_save_path() ? session_save_path() : sys_get_temp_dir()) . '/session-files';
+        }
+
+        // Comment this call once you are done with validating settings part
+        self::validateSettings();
+    }
 
     /**
      * Validate settings
@@ -73,7 +95,7 @@ class Session
         if (empty(self::$sessionName)) {
             die('Invalid "sessionName"');
         }
-        if (empty(self::$sessionDataName) && self::$sessionMode === 'Cookie') {
+        if (self::$sessionMode === 'Cookie' && empty(self::$sessionDataName)) {
             die('Invalid "sessionDataName"');
         }
         if (empty(self::$sessionMaxlifetime)) die('Invalid "sessionMaxlifetime"');
@@ -81,6 +103,7 @@ class Session
         // Required parameters as per sessionMode
         switch(self::$sessionMode) {
             case 'Cookie':
+                // Encryption compulsary for saving data as cookie
                 if (empty(self::$ENCRYPTION_PASS_PHRASE)) die('Invalid "ENCRYPTION_PASS_PHRASE"');
                 if (empty(self::$ENCRYPTION_IV)) die('Invalid "ENCRYPTION_IV"');
                 break;
@@ -126,7 +149,6 @@ class Session
 
         // Setting required common parameters
         self::$sessionContainer->sessionName = self::$sessionName;
-        self::$sessionContainer->sessionDataName = self::$sessionDataName;
         self::$sessionContainer->sessionMaxlifetime = self::$sessionMaxlifetime;
 
         // Setting required parameters as per sessionMode
@@ -150,6 +172,9 @@ class Session
                 self::$sessionContainer->MEMCACHED_HOSTNAME = self::$MEMCACHED_HOSTNAME;
                 self::$sessionContainer->MEMCACHED_PORT = self::$MEMCACHED_PORT;
                 break;
+            case 'Cookie':
+                self::$sessionContainer->sessionDataName = self::$sessionDataName;
+                break;
         }
 
         // Setting encryption parameters
@@ -160,6 +185,24 @@ class Session
             self::$sessionContainer->passphrase = base64_decode(self::$ENCRYPTION_PASS_PHRASE);
             self::$sessionContainer->iv = base64_decode(self::$ENCRYPTION_IV);    
         }
+    }
+
+    /**
+     * Initialise session_set_save_handler process
+     *
+     * @return void
+     */
+    static private function initProcess()
+    {
+        // Initialise container
+        self::initContainer();
+
+        $customSessionHandler = new CustomSessionHandler(self::$sessionContainer);
+        $customSessionHandler->sessionName = self::$sessionName;
+        if (self::$sessionMode === 'Cookie') {
+            $customSessionHandler->sessionDataName = self::$sessionDataName;
+        }
+        session_set_save_handler($customSessionHandler, true);
     }
 
     /**
@@ -183,48 +226,9 @@ class Session
             'cookie_samesite' => 'LAX'
         ];
 
-        switch(self::$sessionMode) {
-            case 'File':
-                self::$options['save_path'] = self::$sessionPath;
-                break;
-            default:
-                break;
+        if (self::$sessionMode === 'File') {
+            self::$options['save_path'] = self::$sessionSavePath;
         }
-    }
-
-    /**
-     * Initialise session handler
-     *
-     * @param string $sessionMode File/MySql/Cookie
-     * @return void
-     */
-    static public function initSessionHandler($sessionMode)
-    {
-        self::$sessionMode = $sessionMode;
-
-        // Comment this call once you are done with settings part
-        // self::validateSettings();
-    }
-
-    /**
-     * Initialise session_set_save_handler process
-     *
-     * @return void
-     */
-    static private function initProcess()
-    {
-        // Initialise container
-        self::initContainer();
-
-        $customSessionHandler = new CustomSessionHandler(self::$sessionContainer);
-        if (!empty(self::$sessionName)) {
-            $customSessionHandler->sessionName = self::$sessionName;
-        }
-        if (!empty(self::$sessionDataName)) {
-            $customSessionHandler->sessionDataName = self::$sessionDataName;
-        }
-        session_set_save_handler($customSessionHandler, true);
-        self::setOptions();        
     }
 
     /**
@@ -236,6 +240,7 @@ class Session
     {
         if (isset($_COOKIE[self::$sessionName])) {
             self::initProcess();
+            self::setOptions();
 
             $options = self::$options;
             $options['read_and_close'] = true;
@@ -253,6 +258,7 @@ class Session
     static public function start_rw_mode()
     {
         self::initProcess();
+        self::setOptions();
 
         return session_start(self::$options);
     }

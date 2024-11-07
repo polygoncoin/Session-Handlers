@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for using File based Session Handlers
+ * Class for Custom Session Handler
  * 
  * DON'T make any changes in this class
  * Make required changes in Containers
@@ -14,20 +14,20 @@
  */
 class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
-    /** Spam flag */
-    public $container = null;
-
     /** Session cookie name */
     public $sessionName = null;
 
     /** Session data cookie name */
     public $sessionDataName = null;
 
-    /** Session Data */
-    public $sessionData = '';
+    /** Spam flag */
+    private $container = null;
 
     /** Session data found */
-    public $dataFound = false;
+    private $dataFound = null;
+
+    /** Session Data */
+    private $sessionData = '';
 
     /** Constructor */
     public function __construct(&$container)
@@ -36,7 +36,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Session open
+     * Initialize session
      * 
      * A callable with the following signature
      *
@@ -52,7 +52,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Validates session id
+     * Validate session ID
      * 
      * Calls if session cookie is present in request
      * 
@@ -66,6 +66,9 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
         if ($sessionData = $this->container->get($sessionId)) {
             $this->sessionData = &$sessionData;
             $this->dataFound = true;
+        } else {
+            $this->unsetSessionCookie();
+            $this->dataFound = false;
         }
 
         // Don't change this return value
@@ -73,7 +76,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Session generates new session id
+     * Create session ID
      * 
      * Calls if no session cookie is present
      * Invoked internally when a new session id is needed
@@ -84,12 +87,11 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function create_sid(): string
     {
-        $this->unsetSessionCookie();
         return $this->getRandomString();
     }
 
     /**
-     * Session read operation
+     * Read session data
      * 
      * A callable with the following signature
      *
@@ -102,7 +104,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Write operation performed
+     * Write session data
      * 
      * When session.lazy_write is enabled, and session data is unchanged
      * it will skip this method call. Instead it will call updateTimestamp
@@ -125,7 +127,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Updates timestamp of datastore container
+     * Update session timestamp
      * 
      * When session.lazy_write is enabled, and session data is unchanged
      * UpdateTimestamp is called instead (of write) to only update the timestamp of session
@@ -148,7 +150,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Session garbage collector
+     * Cleanup old sessions
      * 
      * A callable with the following signature
      *
@@ -161,7 +163,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Session destroy
+     * Destroy a session
      * 
      * A callable with the following signature
      *
@@ -177,7 +179,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     }
 
     /**
-     * Session close
+     * Close the session
      * 
      * A callable with the following signature
      *
@@ -187,17 +189,22 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     {
         $this->container = null;
         $this->sessionData = '';
-        $this->dataFound = false;
+        $this->dataFound = null;
 
         return true;
     }
 
+    /** Destructor */
+    public function __destruct()
+    {
+    }
+
     /**
-     * Returns random 64 char string
+     * Returns 64 char random string
      *
      * @return string
      */
-    private function getRandomString()
+    private function getRandomString(): string
     {
         return bin2hex(random_bytes(32));
     }
@@ -207,7 +214,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      *
      * @return void
      */
-    protected function unsetSessionCookie()
+    private function unsetSessionCookie()
     {
         if (!empty($this->sessionName)) {
             setcookie($this->sessionName, '', 1);
@@ -217,10 +224,5 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             setcookie($this->sessionDataName,'',1);
             setcookie($this->sessionDataName,'',1, '/');
         }
-    }
-
-    /** Destructor */
-    public function __destruct()
-    {
     }
 }

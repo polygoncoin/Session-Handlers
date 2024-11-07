@@ -12,13 +12,13 @@
 class SessionContainerHelper
 {
     /** The cipher method */
-    public $cipher_algo = 'AES-256-CBC';
+    private $cipher_algo = 'AES-256-CBC';
+
+    /** Bitwise disjunction of the flags OPENSSL_RAW_DATA, and OPENSSL_ZERO_PADDING or OPENSSL_DONT_ZERO_PAD_KEY */
+    private $options = OPENSSL_RAW_DATA;
 
     /** Usually 256-bit passphrase */
     public $passphrase = null;
-
-    /** Bitwise disjunction of the flags OPENSSL_RAW_DATA, and OPENSSL_ZERO_PADDING or OPENSSL_DONT_ZERO_PAD_KEY */
-    public $options = OPENSSL_RAW_DATA;
 
     /** Usually 128-bit iv */
     public $iv = null;
