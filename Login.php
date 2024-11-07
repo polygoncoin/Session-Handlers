@@ -1,6 +1,9 @@
 <?php
 include __DIR__ . '/CustomSessionHandler/Session.php';
 
+// Turn on output buffering
+ob_start();        
+
 // Initialise Session Handler
 Session::initSessionHandler('File');
 

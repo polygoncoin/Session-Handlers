@@ -32,9 +32,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     /** Constructor */
     public function __construct(&$container)
     {
-        // Turn on output buffering
-        ob_start();
-        
         $this->container = &$container;
     }
 
@@ -225,7 +222,5 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     /** Destructor */
     public function __destruct()
     {
-        // Flush (send) the output buffer and turn off output buffering
-        ob_end_flush();
     }
 }
