@@ -26,8 +26,19 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     /** Session data found */
     private $dataFound = null;
 
+    /** Session ID */
+    private $sessionId = '';
+
     /** Session Data */
     private $sessionData = '';
+
+    /**
+     * updatedSessionTimestamp flag for read_and_close or readonly session behaviour
+     * To be careful with the 'read_and_close' option
+     * It doesn't update the session last modification timestamp
+     * unlike the default PHP behaviour
+     */
+    private $updatedSessionTimestamp = false;
 
     /** Constructor */
     public function __construct(&$container)
@@ -100,6 +111,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function read($sessionId): string|false
     {
+        $this->sessionId = $sessionId;
         return $this->sessionData;
     }
 
@@ -122,8 +134,12 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             $this->unsetSessionCookie();
             return true;
         }
+        
+        if ($this->container->set($sessionId, $sessionData)) {
+            $this->updatedSessionTimestamp = true;
+        }
 
-        return $this->container->set($sessionId, $sessionData);
+        return $this->updatedSessionTimestamp;
     }
 
     /**
@@ -146,7 +162,11 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             return true;
         }
 
-        return $this->container->touch($sessionId, $sessionData);
+        if ($this->container->touch($sessionId, $sessionData)) {
+            $this->updatedSessionTimestamp = true;
+        }
+
+        return $this->updatedSessionTimestamp;
     }
 
     /**
@@ -187,9 +207,15 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function close(): bool
     {
+        // Updating timestamp for readonly mode (read_and_close option)
+        if (!$this->updatedSessionTimestamp && $this->dataFound === true) {
+            $this->container->touch($this->sessionId, $this->sessionData);
+        }
+
         $this->container = null;
         $this->sessionData = '';
         $this->dataFound = null;
+        $this->updatedSessionTimestamp = false;
 
         return true;
     }

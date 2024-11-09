@@ -238,7 +238,7 @@ class Session
      */
     static public function start_readonly()
     {
-        if (isset($_COOKIE[self::$sessionName])) {
+        if (isset($_COOKIE[self::$sessionName]) && !empty($_COOKIE[self::$sessionName])) {
             self::initProcess();
             self::setOptions();
 
