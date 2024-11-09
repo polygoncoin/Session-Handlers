@@ -212,6 +212,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             $this->container->touch($this->sessionId, $this->sessionData);
         }
 
+        $this->resetUniqueCookieHeaders();
+
         $this->container = null;
         $this->sessionData = '';
         $this->dataFound = null;
@@ -249,6 +251,34 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
         if (!empty($this->sessionDataName)) {
             setcookie($this->sessionDataName,'',1);
             setcookie($this->sessionDataName,'',1, '/');
+        }
+    }
+
+    private function resetUniqueCookieHeaders()
+    {
+        // Check header is sent.
+        if (headers_sent()) {
+            return;
+        }
+
+        $headers = [];
+
+        // Collect Cookie headers
+        foreach (headers_list() as $header) {
+            // Check for Cookie header
+            if (strpos($header, 'Set-Cookie:') === 0) {
+                $headers[] = $header;
+            }
+        }
+
+        // Remove all Set-Cookie headers
+        header_remove('Set-Cookie');
+
+        // Set Unique Set-Cookie headers
+        for(;$header = array_shift($headers);) {
+            if (!in_array($header, $headers)) {
+                header($header, false);
+            }
         }
     }
 }
