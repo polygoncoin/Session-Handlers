@@ -33,6 +33,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
 
     public function get($sessionId)
     {
+        $this->foundSession = false;
         $sql = "SELECT `sessionData` FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}` WHERE `sessionId` = :sessionId AND lastAccessed > :lastAccessed";
         $params = [
             ':sessionId' => $sessionId,

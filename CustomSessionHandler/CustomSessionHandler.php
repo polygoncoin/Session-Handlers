@@ -98,7 +98,14 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      */
     public function create_sid(): string
     {
-        return $this->getRandomString();
+        // Delete session if previous sessionId exist eg; used for session_regenerate_id()
+        if (!empty($this->sessionId)) {
+            $this->container->delete($this->sessionId);
+        }
+
+        $this->sessionId = $this->getRandomString();
+
+        return $this->sessionId;
     }
 
     /**
@@ -130,7 +137,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     public function write($sessionId, $sessionData): bool
     {
         // Won't allow creating empty entries
-        if (empty(unserialize($sessionData))) {
+        // unless previous data is not empty
+        if (empty($this->sessionData) && empty(unserialize($sessionData))) {
             $this->unsetSessionCookie();
             return true;
         }
@@ -157,7 +165,8 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     public function updateTimestamp($sessionId, $sessionData): bool
     {
         // Won't allow updating empty entries when session.lazy_write is enabled
-        if (empty(unserialize($sessionData))) {
+        // unless previous data is not empty
+        if (empty($this->sessionData) && empty(unserialize($sessionData))) {
             $this->unsetSessionCookie();
             return true;
         }
@@ -214,7 +223,6 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
         $this->resetUniqueCookieHeaders();
 
-        $this->container = null;
         $this->sessionData = '';
         $this->dataFound = null;
         $this->updatedSessionTimestamp = false;

@@ -58,28 +58,6 @@ class Session
     static private $sessionContainer = null;
 
     /**
-     * Initialise session handler
-     *
-     * @param string $sessionMode File/MySql/Cookie
-     * @return void
-     */
-    static public function initSessionHandler($sessionMode)
-    {
-        self::$sessionMode = $sessionMode;
-
-        // Set options from php.ini if not set in this class
-        if (empty(self::$sessionName)) {
-            self::$sessionName = session_name();
-        }
-        if (self::$sessionMode === 'File' && empty(self::$sessionSavePath)) {
-            self::$sessionSavePath = (session_save_path() ? session_save_path() : sys_get_temp_dir()) . '/session-files';
-        }
-
-        // Comment this call once you are done with validating settings part
-        self::validateSettings();
-    }
-
-    /**
      * Validate settings
      *
      * @return void
@@ -232,6 +210,32 @@ class Session
     }
 
     /**
+     * Initialise session handler
+     *
+     * @param string $sessionMode File/MySql/Cookie
+     * @return void
+     */
+    static public function initSessionHandler($sessionMode)
+    {
+        self::$sessionMode = $sessionMode;
+
+        // Set options from php.ini if not set in this class
+        if (empty(self::$sessionName)) {
+            self::$sessionName = session_name();
+        }
+        if (self::$sessionMode === 'File' && empty(self::$sessionSavePath)) {
+            self::$sessionSavePath = (session_save_path() ? session_save_path() : sys_get_temp_dir()) . '/session-files';
+        }
+
+        // Comment this call once you are done with validating settings part
+        self::validateSettings();
+
+        // Initalise
+        self::initProcess();
+        self::setOptions();
+    }
+
+    /**
      * Start session in read only mode
      *
      * @return void
@@ -239,9 +243,6 @@ class Session
     static public function start_readonly()
     {
         if (isset($_COOKIE[self::$sessionName]) && !empty($_COOKIE[self::$sessionName])) {
-            self::initProcess();
-            self::setOptions();
-
             $options = self::$options;
             $options['read_and_close'] = true;
     
@@ -257,9 +258,6 @@ class Session
      */
     static public function start_rw_mode()
     {
-        self::initProcess();
-        self::setOptions();
-
         return session_start(self::$options);
     }
 }
