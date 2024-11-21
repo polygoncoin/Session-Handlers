@@ -101,6 +101,9 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
 
     public function delete($sessionId): bool
     {
+        if (isset($_COOKIE[$this->sessionDataName])) {
+            unset($_COOKIE[$this->sessionDataName]);
+        }
         return true;
     }
 
