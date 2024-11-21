@@ -56,6 +56,11 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements Sessi
         return $this->deleteKey($sessionId);
     }
 
+    public function close()
+    {
+        $this->redis = null;
+    }
+
     private function connect()
     {
         try {

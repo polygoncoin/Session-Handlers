@@ -28,4 +28,7 @@ interface SessionContainerInterface
 
     /** For Custom Session Handler - Destroy a session */
     public function delete($sessionId);
+
+    /** For Custom Session Handler - Close container connection */
+    public function close();
 }

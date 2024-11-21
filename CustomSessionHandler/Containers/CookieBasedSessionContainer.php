@@ -99,4 +99,8 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
     {
         return true;
     }
+
+    public function close()
+    {
+    }
 }

@@ -223,6 +223,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
         $this->resetUniqueCookieHeaders();
 
+        $this->container->close();
         $this->sessionData = '';
         $this->dataFound = null;
         $this->updatedSessionTimestamp = false;

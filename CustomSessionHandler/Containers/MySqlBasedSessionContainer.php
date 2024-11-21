@@ -91,6 +91,11 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
         return $this->setSql($sql, $params);
     }
 
+    public function close()
+    {
+        $this->pdo = null;
+    }
+
     private function connect()
     {
         try {

@@ -53,6 +53,11 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements S
         return $this->deleteKey($sessionId);
     }
 
+    public function close()
+    {
+        $this->memcacheD = null;
+    }
+
     private function connect()
     {
         try {

@@ -64,4 +64,8 @@ class FileBasedSessionContainer extends SessionContainerHelper implements Sessio
         }
         return true;
     }
+
+    public function close()
+    {
+    }
 }
