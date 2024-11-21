@@ -50,6 +50,8 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
             die('Session data length exceeds max 4 kilobytes (KB) supported per Cookie');
         }
 
+        $_COOKIE[$this->sessionDataName] = $cookieData;
+        
         return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,
@@ -76,6 +78,8 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
             die('Session data length exceeds max 4 kilobytes (KB) supported per Cookie');
         }
 
+        $_COOKIE[$this->sessionDataName] = $cookieData;
+        
         return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,
