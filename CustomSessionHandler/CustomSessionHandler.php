@@ -29,6 +29,13 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     /** Session ID */
     private $sessionId = '';
 
+    /**
+     * Session ID created flag to handle session_regenerate_id
+     * In this case validateId is called after create_sid function
+     * Also, we have used this to validate created sessionId
+    */
+    private $creatingSessionId = null;
+
     /** Session Data */
     private $sessionData = '';
 
@@ -75,10 +82,14 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     public function validateId($sessionId): bool
     {
         if ($sessionData = $this->container->get($sessionId)) {
-            $this->sessionData = &$sessionData;
+            if (is_null($this->creatingSessionId)) {
+                $this->sessionData = &$sessionData;
+            }
             $this->dataFound = true;
         } else {
-            $this->unsetSessionCookie();
+            if (is_null($this->creatingSessionId)) {
+                $this->unsetSessionCookie();
+            }
             $this->dataFound = false;
         }
 
@@ -99,13 +110,19 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     public function create_sid(): string
     {
         // Delete session if previous sessionId exist eg; used for session_regenerate_id()
-        if (!empty($this->sessionId)) {
+        if (is_null($this->creatingSessionId) && !empty($this->sessionId)) {
             $this->container->delete($this->sessionId);
         }
 
-        $this->sessionId = $this->getRandomString();
+        $this->creatingSessionId = true;
 
-        return $this->sessionId;
+        do {
+            $sessionId = $this->getRandomString();
+        } while($this->validateId($sessionId) === true);
+
+        $this->creatingSessionId = null;
+
+        return $sessionId;
     }
 
     /**
