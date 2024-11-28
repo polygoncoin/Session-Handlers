@@ -110,7 +110,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     public function create_sid(): string
     {
         // Delete session if previous sessionId exist eg; used for session_regenerate_id()
-        if (is_null($this->creatingSessionId) && !empty($this->sessionId)) {
+        if (!empty($this->sessionId)) {
             $this->container->delete($this->sessionId);
         }
 
