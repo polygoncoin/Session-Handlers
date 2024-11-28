@@ -118,7 +118,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
         do {
             $sessionId = $this->getRandomString();
-        } while($this->validateId($sessionId) === true);
+        } while ($this->validateId($sessionId) === true);
 
         $this->creatingSessionId = null;
 
