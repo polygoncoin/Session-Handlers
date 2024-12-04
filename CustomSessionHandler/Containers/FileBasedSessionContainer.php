@@ -16,6 +16,8 @@ class FileBasedSessionContainer extends SessionContainerHelper implements Sessio
 {
     public $sessionSavePath = null;
 
+    private $sessionFilePrefix = 'sess_';
+
     public function init($sessionSavePath, $sessionName)
     {
         if (!is_dir($sessionSavePath)) {
@@ -27,7 +29,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements Sessio
 
     public function get($sessionId)
     {
-        $filepath = $this->sessionSavePath . '/' . $sessionId;
+        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
         if (file_exists($filepath) && (($this->currentTimestamp - fileatime($filepath)) < $this->sessionMaxlifetime)) {
             return $this->decryptData(file_get_contents($filepath));
         }
@@ -36,7 +38,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements Sessio
 
     public function set($sessionId, $sessionData)
     {
-        $filepath = $this->sessionSavePath . '/' . $sessionId;
+        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
         if (!file_exists($filepath)) {
             touch($filepath);
         }
@@ -45,20 +47,20 @@ class FileBasedSessionContainer extends SessionContainerHelper implements Sessio
 
     public function touch($sessionId, $sessionData)
     {
-        $filepath = $this->sessionSavePath . '/' . $sessionId;
+        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
         return touch($filepath);
     }
 
     public function gc($sessionMaxlifetime)
     {
-        $datetime = date('Y-m-d H:i', ($this->currentTimestamp - $sessionMaxlifetime));
-        shell_exec("find {$this->sessionSavePath} -type f -not -newermt '{$datetime}' -delete");
+        $datetime = date('Y-m-dTH:i:s+0000', ($this->currentTimestamp - $sessionMaxlifetime));
+        shell_exec("find {$this->sessionSavePath} -name '{$this->sessionFilePrefix}*' -type f -not -newermt '{$datetime}' -delete");
         return true;
     }
 
     public function delete($sessionId)
     {
-        $filepath = $this->sessionSavePath . '/' . $sessionId;
+        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
         if (file_exists($filepath)) {
             unlink($filepath);
         }
