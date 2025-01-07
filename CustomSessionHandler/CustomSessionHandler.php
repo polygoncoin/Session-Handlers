@@ -14,29 +14,55 @@
  */
 class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterface, \SessionUpdateTimestampHandlerInterface
 {
-    /** Session cookie name */
+    /**
+     * Session cookie name
+     * 
+     * @var null|string
+     */
     public $sessionName = null;
 
-    /** Session data cookie name */
+    /**
+     * Session data cookie name
+     * 
+     * @var null|string
+     */
     public $sessionDataName = null;
 
-    /** Spam flag */
+    /**
+     * Session Container
+     * 
+     * @var null|SessionContainerInterface
+     */
     private $container = null;
 
-    /** Session data found */
+    /**
+     * Session data found
+     * 
+     * @var null|boolean
+    */
     private $dataFound = null;
 
-    /** Session ID */
+    /**
+     * Session Id
+     * 
+     * @var string
+     */
     private $sessionId = '';
 
     /**
      * Session ID created flag to handle session_regenerate_id
      * In this case validateId is called after create_sid function
      * Also, we have used this to validate created sessionId
+     * 
+     * @var null|boolean
     */
     private $creatingSessionId = null;
 
-    /** Session Data */
+    /**
+     * Session Data
+     * 
+     * @var null|string
+     */
     private $sessionData = '';
 
     /**
@@ -44,10 +70,16 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      * To be careful with the 'read_and_close' option
      * It doesn't update the session last modification timestamp
      * unlike the default PHP behaviour
+     * 
+     * @var boolean
      */
     private $updatedSessionTimestamp = false;
 
-    /** Constructor */
+    /**
+     * Constructor
+     *
+     * @param SessionContainerInterface $container
+     */
     public function __construct(&$container)
     {
         $this->container = &$container;
