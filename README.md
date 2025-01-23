@@ -6,6 +6,51 @@ Collection of Mostly used Session Handlers
 
 ## Example
 
+Using Read-only mode
+```PHP
+<?php
+include __DIR__ . '/CustomSessionHandler/Session.php';
+
+// Turn on output buffering
+ob_start();        
+
+// Initialise Session Handler
+Session::initSessionHandler('File');
+// Session::initSessionHandler('MySql');
+// Session::initSessionHandler('Redis');
+// Session::initSessionHandler('Memcached');
+// Session::initSessionHandler('Cookie');
+
+// Start session in readonly mode
+// Use when user is already logged in and we need to authorise the client cookie.
+Session::start_readonly();
+
+print_r($_SESSION);
+
+```
+
+Using Normal session
+```PHP
+<?php
+include __DIR__ . '/CustomSessionHandler/Session.php';
+
+// Turn on output buffering
+ob_start();        
+
+// Initialise Session Handler
+Session::initSessionHandler('File');
+// Session::initSessionHandler('MySql');
+// Session::initSessionHandler('Redis');
+// Session::initSessionHandler('Memcached');
+// Session::initSessionHandler('Cookie');
+
+// Start session in normal (read/write) mode.
+Session::start_rw_mode();
+$_SESSION['id'] = rand();
+
+```
+
+Using Read-only with Normal session
 ```PHP
 <?php
 include __DIR__ . '/CustomSessionHandler/Session.php';
