@@ -25,7 +25,9 @@ Session::initSessionHandler('File');
 // Use when user is already logged in and we need to authorise the client cookie.
 Session::start_readonly();
 
-print_r($_SESSION);
+if (isset($_SESSION)) {
+    print_r($_SESSION);
+}
 
 ```
 
