@@ -233,10 +233,19 @@ class Session
     /**
      * Generates session options argument
      *
+     * @param array $options
      * @return void
      */
-    static private function setOptions()
+    static private function setOptions($options = [])
     {
+        if (isset($options['name'])) {
+            self::$sessionName = $options['name'];
+        }
+
+        if (isset($options['gc_maxlifetime'])) {
+            self::$sessionMaxlifetime = $options['gc_maxlifetime'];
+        }
+
         self::$options = [ // always required.
             'use_strict_mode' => true,
             'name' => self::$sessionName,
@@ -254,15 +263,26 @@ class Session
         if (self::$sessionMode === 'File') {
             self::$options['save_path'] = self::$sessionSavePath;
         }
+
+        if (!empty($options)) {
+            foreach ($options as $key => $value) {
+                if (in_array($key, ['name', 'serialize_handler', 'gc_maxlifetime'])) {
+                    // Skip these keys
+                    continue;
+                }
+                self::$options[$key] = $value;
+            }
+        }
     }
 
     /**
      * Initialise session handler
      *
      * @param string $sessionMode File/MySql/Cookie
+     * @param array  $options
      * @return void
      */
-    static public function initSessionHandler($sessionMode)
+    static public function initSessionHandler($sessionMode, $options = [])
     {
         self::$sessionMode = $sessionMode;
 
@@ -278,8 +298,8 @@ class Session
         self::validateSettings();
 
         // Initalise
+        self::setOptions($options);
         self::initProcess();
-        self::setOptions();
     }
 
     /**

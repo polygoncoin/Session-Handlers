@@ -4,8 +4,11 @@ include_once __DIR__ . '/CustomSessionHandler/Session.php';
 // Turn on output buffering
 ob_start();        
 
+// Session Runtime Configuration 
+$options = [];
+
 // Initialise Session Handler
-Session::initSessionHandler('File');
+Session::initSessionHandler('File', $options);
 // Session::initSessionHandler('MySql');
 // Session::initSessionHandler('Redis');
 // Session::initSessionHandler('Memcached');
