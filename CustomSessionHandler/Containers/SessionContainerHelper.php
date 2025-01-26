@@ -1,7 +1,7 @@
 <?php
 /**
  * Class for using Cookie to managing session data with encryption
- * 
+ *
  * @category   Session
  * @package    Session Handlers
  * @author     Ramesh Narayan Jangid

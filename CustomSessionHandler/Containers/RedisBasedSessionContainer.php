@@ -4,7 +4,7 @@ require_once __DIR__ . '/SessionContainerHelper.php';
 
 /**
  * Class for using Redis based Session Container
- * 
+ *
  * @category   Session
  * @package    Session Handlers
  * @author     Ramesh Narayan Jangid

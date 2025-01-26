@@ -4,7 +4,7 @@ require_once __DIR__ . '/SessionContainerHelper.php';
 
 /**
  * Class for using MySql based Session Container
- * 
+ *
  * @category   Session
  * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
@@ -106,7 +106,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements Sessi
                 [
                     \PDO::ATTR_EMULATE_PREPARES => false,
                 ]
-            );    
+            );
         } catch (\Exception $e) {
             $this->manageException($e);
         }

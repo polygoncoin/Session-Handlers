@@ -3,7 +3,7 @@ require_once __DIR__ . '/CustomSessionHandler.php';
 
 /**
  * Class for using Session Handlers
- * 
+ *
  * @category   Session
  * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
@@ -16,10 +16,10 @@ class Session
     /**
      * SET THESE TO ENABLE ENCRYPTION
      * ENCRYPTION PASS PHRASE
-     * 
+     *
      * Value = base64_encode(openssl_random_pseudo_bytes(32))
      * Example: static private $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
-     * 
+     *
      * @var null|string
      */
     static private $ENCRYPTION_PASS_PHRASE = null;
@@ -27,14 +27,14 @@ class Session
     /**
      * SET THESE TO ENABLE ENCRYPTION
      * ENCRYPTION IV
-     * 
+     *
      * Value = base64_encode(openssl_random_pseudo_bytes(16))
      * Example: static private $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
-     * 
+     *
      * @var null|string
      */
     static private $ENCRYPTION_IV = null;
-    
+
     /** MySql Session config */
     static private $DB_HOSTNAME = 'localhost';
     static private $DB_PORT = 3306;
@@ -56,21 +56,21 @@ class Session
 
     /**
      * Session Id Cookie name
-     * 
+     *
      * @var string
      */
     static private $sessionName = 'PHPSESSID'; // Default
 
     /**
      * Session Data Cookie name; For cookie as container
-     * 
+     *
      * @var string
      */
     static private $sessionDataName = 'PHPSESSDATA';
-    
+
     /**
      * Session Life
-     * 
+     *
      * @var integer
      */
     static private $sessionMaxlifetime = 30 * 60; // 30 mins.
@@ -78,28 +78,28 @@ class Session
     /**
      * File Session options
      * Example: static private $sessionSavePath = '/tmp';
-     * 
+     *
      * @var null|string
      */
     static private $sessionSavePath = null;
 
     /**
      * Session Handler mode
-     * 
+     *
      * @var null|string
      */
     static private $sessionMode = null;
 
     /**
      * session_start argument
-     * 
+     *
      * @var null|array
      */
     static private $options = null;
 
     /**
      * Session handler Container
-     * 
+     *
      * @var null|SessionContainerInterface
      */
     static private $sessionContainer = null;
@@ -208,7 +208,7 @@ class Session
             !empty(self::$ENCRYPTION_IV)
         ) {
             self::$sessionContainer->passphrase = base64_decode(self::$ENCRYPTION_PASS_PHRASE);
-            self::$sessionContainer->iv = base64_decode(self::$ENCRYPTION_IV);    
+            self::$sessionContainer->iv = base64_decode(self::$ENCRYPTION_IV);
         }
     }
 
@@ -312,7 +312,7 @@ class Session
         if (isset($_COOKIE[self::$sessionName]) && !empty($_COOKIE[self::$sessionName])) {
             $options = self::$options;
             $options['read_and_close'] = true;
-    
+
             return session_start($options);
         }
         return false;

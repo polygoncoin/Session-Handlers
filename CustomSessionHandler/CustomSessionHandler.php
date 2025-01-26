@@ -1,10 +1,10 @@
 <?php
 /**
  * Class for Custom Session Handler
- * 
+ *
  * DON'T make any changes in this class
  * Make required changes in Containers
- * 
+ *
  * @category   Session
  * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
@@ -16,35 +16,35 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 {
     /**
      * Session cookie name
-     * 
+     *
      * @var null|string
      */
     public $sessionName = null;
 
     /**
      * Session data cookie name
-     * 
+     *
      * @var null|string
      */
     public $sessionDataName = null;
 
     /**
      * Session Container
-     * 
+     *
      * @var null|SessionContainerInterface
      */
     private $container = null;
 
     /**
      * Session data found
-     * 
+     *
      * @var null|boolean
     */
     private $dataFound = null;
 
     /**
      * Session Id
-     * 
+     *
      * @var string
      */
     private $sessionId = '';
@@ -53,14 +53,14 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      * Session ID created flag to handle session_regenerate_id
      * In this case validateId is called after create_sid function
      * Also, we have used this to validate created sessionId
-     * 
+     *
      * @var null|boolean
     */
     private $creatingSessionId = null;
 
     /**
      * Session Data
-     * 
+     *
      * @var null|string
      */
     private $sessionData = '';
@@ -70,7 +70,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
      * To be careful with the 'read_and_close' option
      * It doesn't update the session last modification timestamp
      * unlike the default PHP behaviour
-     * 
+     *
      * @var boolean
      */
     private $updatedSessionTimestamp = false;
@@ -87,7 +87,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Initialize session
-     * 
+     *
      * A callable with the following signature
      *
      * @param string $savePath
@@ -103,9 +103,9 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Validate session ID
-     * 
+     *
      * Calls if session cookie is present in request
-     * 
+     *
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -131,10 +131,10 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Create session ID
-     * 
+     *
      * Calls if no session cookie is present
      * Invoked internally when a new session id is needed
-     * 
+     *
      * A callable with the following signature
      *
      * @return string should be new session id
@@ -159,7 +159,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Read session data
-     * 
+     *
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -173,10 +173,10 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Write session data
-     * 
+     *
      * When session.lazy_write is enabled, and session data is unchanged
      * it will skip this method call. Instead it will call updateTimestamp
-     * 
+     *
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -191,7 +191,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
             $this->unsetSessionCookie();
             return true;
         }
-        
+
         if ($this->container->set($sessionId, $sessionData)) {
             $this->updatedSessionTimestamp = true;
         }
@@ -201,10 +201,10 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Update session timestamp
-     * 
+     *
      * When session.lazy_write is enabled, and session data is unchanged
      * UpdateTimestamp is called instead (of write) to only update the timestamp of session
-     * 
+     *
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -229,7 +229,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Cleanup old sessions
-     * 
+     *
      * A callable with the following signature
      *
      * @param integer $sessionMaxlifetime
@@ -242,7 +242,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Destroy a session
-     * 
+     *
      * A callable with the following signature
      *
      * @param string $sessionId
@@ -258,7 +258,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
 
     /**
      * Close the session
-     * 
+     *
      * A callable with the following signature
      *
      * @return boolean true for success or false for failure
@@ -304,7 +304,7 @@ class CustomSessionHandler implements \SessionHandlerInterface, \SessionIdInterf
     {
         if (!empty($this->sessionName)) {
             setcookie($this->sessionName, '', 1);
-            setcookie($this->sessionName, '', 1, '/');    
+            setcookie($this->sessionName, '', 1, '/');
         }
         if (!empty($this->sessionDataName)) {
             setcookie($this->sessionDataName,'',1);

@@ -1,7 +1,7 @@
 <?php
 /**
  * Interface for Session Containers
- * 
+ *
  * @category   Session
  * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
@@ -13,7 +13,7 @@ interface SessionContainerInterface
 {
     /**
      * For Custom Session Handler - Initialize session
-     * 
+     *
      * @param string $sessionSavePath
      * @param string $sessionName
      * @return void
@@ -22,7 +22,7 @@ interface SessionContainerInterface
 
     /**
      * For Custom Session Handler - Validate session ID
-     * 
+     *
      * @param string $sessionId
      * @return boolean|string
      */
@@ -30,7 +30,7 @@ interface SessionContainerInterface
 
     /**
      * For Custom Session Handler - Write session data
-     * 
+     *
      * @param string $sessionId
      * @param string $sessionData
      * @return boolean
@@ -39,7 +39,7 @@ interface SessionContainerInterface
 
     /**
      * For Custom Session Handler - Update session timestamp
-     * 
+     *
      * @param string $sessionId
      * @param string $sessionData
      * @return boolean
@@ -48,7 +48,7 @@ interface SessionContainerInterface
 
     /**
      * For Custom Session Handler - Cleanup old sessions
-     * 
+     *
      * @param integer $sessionMaxlifetime
      * @return boolean
      */
@@ -56,7 +56,7 @@ interface SessionContainerInterface
 
     /**
      * For Custom Session Handler - Destroy a session
-     * 
+     *
      * @param string $sessionId
      * @return boolean
      */
@@ -64,7 +64,7 @@ interface SessionContainerInterface
 
     /**
      * For Custom Session Handler - Close container connection
-     * 
+     *
      * @return void
      */
     public function close();

@@ -12,9 +12,9 @@ Using Normal session
 include __DIR__ . '/CustomSessionHandler/Session.php';
 
 // Turn on output buffering
-ob_start();        
+ob_start();
 
-// Session Runtime Configuration 
+// Session Runtime Configuration
 $options = [];
 
 // Initialise Session Handler
@@ -36,9 +36,9 @@ Using Read-only mode
 include __DIR__ . '/CustomSessionHandler/Session.php';
 
 // Turn on output buffering
-ob_start();        
+ob_start();
 
-// Session Runtime Configuration 
+// Session Runtime Configuration
 $options = [];
 
 // Initialise Session Handler
@@ -64,9 +64,9 @@ Using Read-only with Normal session
 include __DIR__ . '/CustomSessionHandler/Session.php';
 
 // Turn on output buffering
-ob_start();        
+ob_start();
 
-// Session Runtime Configuration 
+// Session Runtime Configuration
 $options = [];
 
 // Initialise Session Handler

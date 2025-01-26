@@ -4,7 +4,7 @@ require_once __DIR__ . '/SessionContainerHelper.php';
 
 /**
  * Class for using Cookie based Session Container
- * 
+ *
  * @category   Session
  * @package    Session Handlers
  * @author     Ramesh Narayan Jangid
@@ -51,7 +51,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
         }
 
         $_COOKIE[$this->sessionDataName] = $cookieData;
-        
+
         return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,
@@ -79,7 +79,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
         }
 
         $_COOKIE[$this->sessionDataName] = $cookieData;
-        
+
         return setcookie(
             $name = $this->sessionDataName,
             $value = $cookieData,

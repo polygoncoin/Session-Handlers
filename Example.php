@@ -2,9 +2,9 @@
 include_once __DIR__ . '/CustomSessionHandler/Session.php';
 
 // Turn on output buffering
-ob_start();        
+ob_start();
 
-// Session Runtime Configuration 
+// Session Runtime Configuration
 $options = [];
 
 // Initialise Session Handler
