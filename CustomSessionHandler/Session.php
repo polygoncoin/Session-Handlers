@@ -257,7 +257,7 @@ class Session
             'cookie_domain' => '',
             'cookie_secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
             'cookie_httponly' => true,
-            'cookie_samesite' => 'LAX'
+            'cookie_samesite' => 'Strict'
         ];
 
         if (self::$sessionMode === 'File') {
