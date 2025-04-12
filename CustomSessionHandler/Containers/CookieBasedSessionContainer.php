@@ -61,7 +61,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
                 'domain' => '',
                 'secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
                 'httponly' => true,
-                'samesite' => 'Lax'
+                'samesite' => 'Strict'
             ]
         );
     }
@@ -89,7 +89,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
                 'domain' => '',
                 'secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
                 'httponly' => true,
-                'samesite' => 'Lax'
+                'samesite' => 'Strict'
             ]
         );
     }
