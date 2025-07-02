@@ -18,91 +18,91 @@ class Session
      * ENCRYPTION PASS PHRASE
      *
      * Value = base64_encode(openssl_random_pseudo_bytes(32))
-     * Example: static private $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
+     * Example: static public $ENCRYPTION_PASS_PHRASE = 'H7OO2m3qe9pHyAHFiERlYJKnlTMtCJs9ZbGphX9NO/c=';
      *
      * @var null|string
      */
-    static private $ENCRYPTION_PASS_PHRASE = null;
+    static public $ENCRYPTION_PASS_PHRASE = null;
 
     /**
      * SET THESE TO ENABLE ENCRYPTION
      * ENCRYPTION IV
      *
      * Value = base64_encode(openssl_random_pseudo_bytes(16))
-     * Example: static private $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
+     * Example: static public $ENCRYPTION_IV = 'HnPG5az9Xaxam9G9tMuRaw==';
      *
      * @var null|string
      */
-    static private $ENCRYPTION_IV = null;
+    static public $ENCRYPTION_IV = null;
 
     /** MySql Session config */
-    static private $DB_HOSTNAME = 'localhost';
-    static private $DB_PORT = 3306;
-    static private $DB_USERNAME = 'root';
-    static private $DB_PASSWORD = 'shames11';
-    static private $DB_DATABASE = 'db_session';
-    static private $DB_TABLE = 'sessions';
+    static public $DB_HOSTNAME = 'localhost';
+    static public $DB_PORT = 3306;
+    static public $DB_USERNAME = 'root';
+    static public $DB_PASSWORD = 'shames11';
+    static public $DB_DATABASE = 'db_session';
+    static public $DB_TABLE = 'sessions';
 
     /** Redis Session config */
-    static private $REDIS_HOSTNAME = 'localhost';
-    static private $REDIS_PORT = 6379;
-    static private $REDIS_USERNAME = 'ramesh';
-    static private $REDIS_PASSWORD = 'shames11';
-    static private $REDIS_DATABASE = 0;
+    static public $REDIS_HOSTNAME = 'localhost';
+    static public $REDIS_PORT = 6379;
+    static public $REDIS_USERNAME = 'ramesh';
+    static public $REDIS_PASSWORD = 'shames11';
+    static public $REDIS_DATABASE = 0;
 
     /** Memcached Session config */
-    static private $MEMCACHED_HOSTNAME = 'localhost';
-    static private $MEMCACHED_PORT = 11211;
+    static public $MEMCACHED_HOSTNAME = 'localhost';
+    static public $MEMCACHED_PORT = 11211;
 
     /**
      * Session Id Cookie name
      *
      * @var string
      */
-    static private $sessionName = 'PHPSESSID'; // Default
+    static public $sessionName = 'PHPSESSID'; // Default
 
     /**
      * Session Data Cookie name; For cookie as container
      *
      * @var string
      */
-    static private $sessionDataName = 'PHPSESSDATA';
+    static public $sessionDataName = 'PHPSESSDATA';
 
     /**
      * Session Life
      *
      * @var integer
      */
-    static private $sessionMaxlifetime = 30 * 60; // 30 mins.
+    static public $sessionMaxlifetime = 30 * 60; // 30 mins.
 
     /**
      * File Session options
-     * Example: static private $sessionSavePath = '/tmp';
+     * Example: static public $sessionSavePath = '/tmp';
      *
      * @var null|string
      */
-    static private $sessionSavePath = null;
+    static public $sessionSavePath = null;
 
     /**
      * Session Handler mode
      *
      * @var null|string
      */
-    static private $sessionMode = null;
+    static public $sessionMode = null;
 
     /**
      * session_start argument
      *
      * @var null|array
      */
-    static private $options = null;
+    static public $options = null;
 
     /**
      * Session handler Container
      *
      * @var null|SessionContainerInterface
      */
-    static private $sessionContainer = null;
+    static public $sessionContainer = null;
 
     /**
      * Validate settings
