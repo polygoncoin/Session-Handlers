@@ -1,7 +1,7 @@
 <?php
 /**
  * Custom Session Handler
- * php version 8.3
+ * php version 7
  *
  * @category  SessionHandler
  * @package   CustomSessionHandler
@@ -18,7 +18,7 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
 
 /**
  * Custom Session Handler File
- * php version 8.3
+ * php version 7
  *
  * @category  CustomSessionHandler_File
  * @package   CustomSessionHandler

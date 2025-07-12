@@ -1,7 +1,7 @@
 <?php
 /**
  * Custom Session Handler
- * php version 8.3
+ * php version 7
  *
  * @category  SessionHandler
  * @package   CustomSessionHandler
@@ -24,7 +24,7 @@ use CustomSessionHandler\Containers\RedisBasedSessionContainer;
 
 /**
  * Custom Session Handler Config
- * php version 8.3
+ * php version 7
  *
  * @category  CustomSessionHandler_Config
  * @package   CustomSessionHandler
@@ -219,7 +219,7 @@ class Session
      */
     private static function _initContainer(): void
     {
-        // Container initialisation
+        // Initialize Container
         $containerClassName = 'CustomSessionHandler\\Containers\\' .
             self::$sessionMode . 'BasedSessionContainer';
         self::$sessionContainer = new $containerClassName();
