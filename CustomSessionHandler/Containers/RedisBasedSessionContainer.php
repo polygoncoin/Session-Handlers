@@ -1,18 +1,35 @@
 <?php
-require_once __DIR__ . '/SessionContainerInterface.php';
-require_once __DIR__ . '/SessionContainerHelper.php';
+/**
+ * Custom Session Handler
+ * php version 8.3
+ *
+ * @category  SessionHandler
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
+ */
+namespace CustomSessionHandler\Containers;
+
+use CustomSessionHandler\Containers\SessionContainerInterface;
+use CustomSessionHandler\Containers\SessionContainerHelper;
 
 /**
- * Class for using Redis based Session Container
+ * Custom Session Handler using Redis
+ * php version 8.3
  *
- * @category   Session
- * @package    Session Handlers
- * @author     Ramesh Narayan Jangid
- * @copyright  Ramesh Narayan Jangid
- * @version    Release: @1.0.0@
- * @since      Class available since Release 1.0.0
+ * @category  CustomSessionHandler_Redis
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
  */
-class RedisBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
+class RedisBasedSessionContainer extends SessionContainerHelper
+    implements SessionContainerInterface
 {
     public $REDIS_HOSTNAME = null;
     public $REDIS_PORT = null;
@@ -20,51 +37,116 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements Sessi
     public $REDIS_PASSWORD = null;
     public $REDIS_DATABASE = null;
 
-    private $redis = null;
+    private $_redis = null;
 
-    public function init($sessionSavePath, $sessionName)
+    /**
+     * Initialize
+     *
+     * @param string $sessionSavePath Session Save Path
+     * @param string $sessionName     Session Name
+     *
+     * @return void
+     */
+    public function init($sessionSavePath, $sessionName): void
     {
-        $this->connect();
+        $this->_connect();
         $this->currentTimestamp = time();
     }
 
-    public function get($sessionId)
+    /**
+     * For Custom Session Handler - Validate session ID
+     *
+     * @param string $sessionId Session ID
+     *
+     * @return bool|string
+     */
+    public function get($sessionId): bool|string
     {
-        if ($this->redis->exists($sessionId)) {
-            return $this->decryptData($this->getKey($sessionId));
+        if ($this->_redis->exists($sessionId)) {
+            return $this->decryptData(cipherText: $this->_getKey(key: $sessionId));
         }
         return false;
     }
 
-    public function set($sessionId, $sessionData)
+    /**
+     * For Custom Session Handler - Write session data
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool|int
+     */
+    public function set($sessionId, $sessionData): bool|int
     {
-        return $this->setKey($sessionId, $this->encryptData($sessionData));
+        return $this->_setKey(
+            key: $sessionId,
+            value: $this->encryptData(plainText: $sessionData)
+        );
     }
 
-    public function touch($sessionId, $sessionData)
+    /**
+     * For Custom Session Handler - Update session timestamp
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool
+     */
+    public function touch($sessionId, $sessionData): bool
     {
-        return $this->resetExpire($sessionId);
+        return $this->_resetExpire(key: $sessionId);
     }
 
-    public function gc($sessionMaxlifetime)
+    /**
+     * For Custom Session Handler - Cleanup old sessions
+     *
+     * @param integer $sessionMaxLifetime Session Max Lifetime
+     *
+     * @return bool
+     */
+    public function gc($sessionMaxLifetime): bool
     {
         return true;
     }
 
-    public function delete($sessionId)
+    /**
+     * For Custom Session Handler - Destroy a session
+     *
+     * @param string $sessionId Session ID
+     *
+     * @return bool
+     */
+    public function delete($sessionId): bool
     {
-        return $this->deleteKey($sessionId);
+        return $this->_deleteKey(key: $sessionId);
     }
 
-    public function close()
+    /**
+     * Close File Container
+     *
+     * @return void
+     */
+    public function close(): void
     {
-        $this->redis = null;
+        $this->_redis = null;
     }
 
-    private function connect()
+    /**
+     * Connect
+     *
+     * @return void
+     */
+    private function _connect(): void
     {
         try {
-            $this->redis = new \Redis(
+            if (!extension_loaded(extension: 'redis')) {
+                throw new \Exception(
+                    message: "Unable to find Redis extension",
+                    code: 500
+                );
+            }
+
+            $this->_redis = new \Redis(
                 [
                     'host' => $this->REDIS_HOSTNAME,
                     'port' => (int)$this->REDIS_PORT,
@@ -72,66 +154,98 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements Sessi
                     'auth' => [$this->REDIS_USERNAME, $this->REDIS_PASSWORD],
                 ]
             );
-            $this->redis->select($this->REDIS_DATABASE);
+            $this->_redis->select($this->REDIS_DATABASE);
         } catch (\Exception $e) {
-            $this->manageException($e);
+            $this->_manageException(e: $e);
         }
     }
 
-    private function getKey($key)
+    /**
+     * Get Key
+     *
+     * @param string $key Key
+     *
+     * @return mixed
+     */
+    private function _getKey($key): mixed
     {
         $row = [];
         try {
-            $return = false;
-            if ($data = $this->redis->get($key)) {
-                $return = &$data;
+            if ($data = $this->_redis->get($key)) {
+                return $data;
             }
-            return $return;
         } catch (\Exception $e) {
-            $this->manageException($e);
+            $this->_manageException(e: $e);
         }
+        return false;
     }
 
-    private function setKey($key, $value)
+    /**
+     * Set Key
+     *
+     * @param string $key   Key
+     * @param string $value Value
+     *
+     * @return mixed
+     */
+    private function _setKey($key, $value): bool
     {
         try {
-            $return = false;
-            if ($this->redis->set($key, $value, $this->sessionMaxlifetime)) {
-                $return = true;
+            if ($this->_redis->set($key, $value, $this->sessionMaxLifetime)) {
+                return true;
             }
-            return $return;
         } catch (\Exception $e) {
-            $this->manageException($e);
+            $this->_manageException(e: $e);
         }
+        return false;
     }
 
-    private function resetExpire($key)
+    /**
+     * Reset Expiry
+     *
+     * @param string $key Key
+     *
+     * @return bool
+     */
+    private function _resetExpire($key): bool
     {
         try {
-            $return = false;
-            if ($this->redis->expire($key, $this->sessionMaxlifetime)) {
-                $return = true;
+            if ($this->_redis->expire($key, $this->sessionMaxLifetime)) {
+                return true;
             }
-            return $return;
         } catch (\Exception $e) {
-            $this->manageException($e);
+            $this->_manageException(e: $e);
         }
+        return false;
     }
 
-    private function deleteKey($key)
+    /**
+     * Delete Key
+     *
+     * @param string $key Key
+     *
+     * @return bool
+     */
+    private function _deleteKey($key): bool
     {
         try {
-            $return = false;
-            if ($this->redis->del($key)) {
-                $return = true;
+            if ($this->_redis->del($key)) {
+                return true;
             }
-            return $return;
         } catch (\Exception $e) {
-            $this->manageException($e);
+            $this->_manageException(e: $e);
         }
+        return false;
     }
 
-    private function manageException(\Exception $e)
+    /**
+     * Manage Exception
+     *
+     * @param \Exception $e Exception
+     *
+     * @return never
+     */
+    private function _manageException(\Exception $e): never
     {
         die($e->getMessage());
     }

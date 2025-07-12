@@ -9,7 +9,9 @@ Collection of Mostly used Session Handlers
 Using Normal session
 ```PHP
 <?php
-include __DIR__ . '/CustomSessionHandler/Session.php';
+include_once __DIR__ . '/Autoload.php';
+
+use CustomSessionHandler\Session;
 
 // Turn on output buffering
 ob_start();
@@ -17,15 +19,15 @@ ob_start();
 // Session Runtime Configuration
 $options = [];
 
-// Initialise Session Handler
-Session::initSessionHandler('File', $options);
-// Session::initSessionHandler('MySql');
-// Session::initSessionHandler('Redis');
-// Session::initSessionHandler('Memcached');
-// Session::initSessionHandler('Cookie');
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'File', $options);
+// Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'Redis');
+// Session::initSessionHandler(sessionMode: 'Memcached');
+// Session::initSessionHandler(sessionMode: 'Cookie');
 
 // Start session in normal (read/write) mode.
-Session::start_rw_mode();
+Session::sessionStartReadWrite();
 $_SESSION['id'] = rand();
 
 ```
@@ -33,7 +35,9 @@ $_SESSION['id'] = rand();
 Using Read-only mode
 ```PHP
 <?php
-include __DIR__ . '/CustomSessionHandler/Session.php';
+include_once __DIR__ . '/Autoload.php';
+
+use CustomSessionHandler\Session;
 
 // Turn on output buffering
 ob_start();
@@ -41,16 +45,16 @@ ob_start();
 // Session Runtime Configuration
 $options = [];
 
-// Initialise Session Handler
-Session::initSessionHandler('File', $options);
-// Session::initSessionHandler('MySql');
-// Session::initSessionHandler('Redis');
-// Session::initSessionHandler('Memcached');
-// Session::initSessionHandler('Cookie');
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'File', $options);
+// Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'Redis');
+// Session::initSessionHandler(sessionMode: 'Memcached');
+// Session::initSessionHandler(sessionMode: 'Cookie');
 
 // Start session in readonly mode
-// Use when user is already logged in and we need to authorise the client cookie.
-Session::start_readonly();
+// Use when user is already logged in and we need to authorize the client cookie.
+Session::sessionStartReadonly();
 
 if (isset($_SESSION)) {
     print_r($_SESSION);
@@ -61,7 +65,9 @@ if (isset($_SESSION)) {
 Using Read-only with Normal session
 ```PHP
 <?php
-include __DIR__ . '/CustomSessionHandler/Session.php';
+include_once __DIR__ . '/Autoload.php';
+
+use CustomSessionHandler\Session;
 
 // Turn on output buffering
 ob_start();
@@ -69,25 +75,25 @@ ob_start();
 // Session Runtime Configuration
 $options = [];
 
-// Initialise Session Handler
-Session::initSessionHandler('File', $options);
-// Session::initSessionHandler('MySql');
-// Session::initSessionHandler('Redis');
-// Session::initSessionHandler('Memcached');
-// Session::initSessionHandler('Cookie');
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'File', $options);
+// Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'Redis');
+// Session::initSessionHandler(sessionMode: 'Memcached');
+// Session::initSessionHandler(sessionMode: 'Cookie');
 
 // Start session in readonly mode
-// Use when user is already logged in and we need to authorise the client cookie.
-Session::start_readonly();
+// Use when user is already logged in and we need to authorize the client cookie.
+Session::sessionStartReadonly();
 
 // Auth Check
 if (!isset($_SESSION) || !isset($_SESSION['id'])) {
-    die('Unauthorised');
+    die('Unauthorized');
 }
 
 // Start session in normal (read/write) mode.
-// Use once client is authorised and want to make changes in $_SESSION
-Session::start_rw_mode();
+// Use once client is authorized and want to make changes in $_SESSION
+Session::sessionStartReadWrite();
 $_SESSION['id'] = rand();
 
 ```
@@ -95,42 +101,47 @@ $_SESSION['id'] = rand();
 Switching from previous session to this package based session handler
 ```PHP
 <?php
-// Load session the was it was used previously in read_and_close mode
-// This will load previous session data in $_SESSION
-session_start(['read_and_close' => true]);
+include_once __DIR__ . '/Autoload.php';
 
-// Collect previous session data
-$prevSessionData = $_SESSION;
-// Destroy previous session (Note: $_SESSION data will be preserved)
-session_destroy();
+use CustomSessionHandler\Session;
 
-// Auth Check with $_SESSION data.
-if (!isset($_SESSION) || !isset($_SESSION['id'])) {
-    die('Unauthorised');
+$prevSessionData = [];
+if (isset($_COOKIE['PrevSessCookieName'])) {
+    // Load session the was it was used previously in read_and_close mode
+    // This will load previous session data in $_SESSION
+    session_start(['read_and_close' => true]);
+
+    // Collect previous session data
+    $prevSessionData = $_SESSION;
+    // Destroy previous session (Note: $_SESSION data will be preserved)
+    session_destroy();
 }
 
-// Start below to switch the session mode with current package.
-include __DIR__ . '/CustomSessionHandler/Session.php';
-
+// Starting below to switch the session mode with current package.
 // Turn on output buffering
 ob_start();
 
 // Session Runtime Configuration
 $options = [];
 
-// Initialise Session Handler
-Session::initSessionHandler('File', $options);
-// Session::initSessionHandler('MySql');
-// Session::initSessionHandler('Redis');
-// Session::initSessionHandler('Memcached');
-// Session::initSessionHandler('Cookie');
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'File', $options);
+// Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'Redis');
+// Session::initSessionHandler(sessionMode: 'Memcached');
+// Session::initSessionHandler(sessionMode: 'Cookie');
 
 // Start session in normal (read/write) mode.
-// Use once client is authorised and want to make changes in $_SESSION
-Session::start_rw_mode();
+// Use once client is authorized and want to make changes in $_SESSION
+Session::sessionStartReadWrite();
 
 if (!empty($prevSessionData)) {
     $_SESSION = $prevSessionData;
+}
+
+// Auth Check with $_SESSION data.
+if (!isset($_SESSION) || !isset($_SESSION['id'])) {
+    die('Unauthorized');
 }
 
 // PHP Code

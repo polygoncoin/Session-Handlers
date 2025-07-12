@@ -1,11 +1,13 @@
 <?php
-include __DIR__ . '/CustomSessionHandler/Session.php';
+include_once __DIR__ . '/Autoload.php';
+
+use CustomSessionHandler\Session;
 
 // Turn on output buffering
 ob_start();
 
-// Initialise Session Handler
-Session::initSessionHandler('File');
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'File');
 
 if (isset($_POST['submit'])) {
     $username = $_POST['username'];
@@ -14,9 +16,9 @@ if (isset($_POST['submit'])) {
         $userDetails = getFromDB($username);
 
         // Start session in normal (read/write) mode.
-        Session::start_rw_mode();
+        Session::sessionStartReadWrite();
         $_SESSION = $userDetails;
 
-        heaeder('Location: dashboard.php');
+        header(header: 'Location: dashboard.php');
     }
 }

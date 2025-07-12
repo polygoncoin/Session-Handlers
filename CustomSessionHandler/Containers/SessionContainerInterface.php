@@ -1,71 +1,93 @@
 <?php
 /**
- * Interface for Session Containers
+ * Custom Session Handler
+ * php version 8.3
  *
- * @category   Session
- * @package    Session Handlers
- * @author     Ramesh Narayan Jangid
- * @copyright  Ramesh Narayan Jangid
- * @version    Release: @1.0.0@
- * @since      Class available since Release 1.0.0
+ * @category  SessionHandler
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
+ */
+namespace CustomSessionHandler\Containers;
+
+/**
+ * Custom Session Handler Interface
+ * php version 8.3
+ *
+ * @category  CustomSessionHandler_Interface
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
  */
 interface SessionContainerInterface
 {
     /**
      * For Custom Session Handler - Initialize session
      *
-     * @param string $sessionSavePath
-     * @param string $sessionName
+     * @param string $sessionSavePath Session Save Path
+     * @param string $sessionName     Session Name
+     *
      * @return void
-    */
-    public function init($sessionSavePath, $sessionName);
+     */
+    public function init($sessionSavePath, $sessionName): void;
 
     /**
      * For Custom Session Handler - Validate session ID
      *
-     * @param string $sessionId
-     * @return boolean|string
+     * @param string $sessionId Session ID
+     *
+     * @return bool|string
      */
-    public function get($sessionId);
+    public function get($sessionId): bool|string;
 
     /**
      * For Custom Session Handler - Write session data
      *
-     * @param string $sessionId
-     * @param string $sessionData
-     * @return boolean
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool|int
      */
-    public function set($sessionId, $sessionData);
+    public function set($sessionId, $sessionData): bool|int;
 
     /**
      * For Custom Session Handler - Update session timestamp
      *
-     * @param string $sessionId
-     * @param string $sessionData
-     * @return boolean
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool
      */
-    public function touch($sessionId, $sessionData);
+    public function touch($sessionId, $sessionData): bool;
 
     /**
      * For Custom Session Handler - Cleanup old sessions
      *
-     * @param integer $sessionMaxlifetime
-     * @return boolean
+     * @param integer $sessionMaxLifetime Session Max Lifetime
+     *
+     * @return bool
      */
-    public function gc($sessionMaxlifetime);
+    public function gc($sessionMaxLifetime): bool;
 
     /**
      * For Custom Session Handler - Destroy a session
      *
-     * @param string $sessionId
-     * @return boolean
+     * @param string $sessionId Session ID
+     *
+     * @return bool
      */
-    public function delete($sessionId);
+    public function delete($sessionId): bool;
 
     /**
      * For Custom Session Handler - Close container connection
      *
      * @return void
      */
-    public function close();
+    public function close(): void;
 }

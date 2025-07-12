@@ -1,5 +1,7 @@
 <?php
-include_once __DIR__ . '/CustomSessionHandler/Session.php';
+include_once __DIR__ . '/Autoload.php';
+
+use CustomSessionHandler\Session;
 
 // Turn on output buffering
 ob_start();
@@ -7,27 +9,27 @@ ob_start();
 // Session Runtime Configuration
 $options = [];
 
-// Initialise Session Handler
-Session::initSessionHandler('File', $options);
-// Session::initSessionHandler('MySql');
-// Session::initSessionHandler('Redis');
-// Session::initSessionHandler('Memcached');
-// Session::initSessionHandler('Cookie');
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'File');
+// Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'Redis');
+// Session::initSessionHandler(sessionMode: 'Memcached');
+// Session::initSessionHandler(sessionMode: 'Cookie');
 
 // Start session in readonly mode
-// Use when user is already logged in and we need to authorise the client cookie.
-Session::start_readonly();
+// Use when user is already logged in and we need to authorize the client cookie.
+Session::sessionStartReadonly();
 
 if (isset($_SESSION)) {
-    print_r($_SESSION);
+    print_r(value: $_SESSION);
 }
 
 // Auth Check
 // if (!isset($_SESSION) || !isset($_SESSION['id'])) {
-//     die('Unauthorised');
+//     die('Unauthorized');
 // }
 
 // Start session in normal (read/write) mode.
-// Use once client is authorised and want to make changes in $_SESSION
-Session::start_rw_mode();
+// Use once client is authorized and want to make changes in $_SESSION
+Session::sessionStartReadWrite();
 $_SESSION['id'] = rand();

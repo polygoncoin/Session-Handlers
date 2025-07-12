@@ -1,73 +1,156 @@
 <?php
-require_once __DIR__ . '/SessionContainerInterface.php';
-require_once __DIR__ . '/SessionContainerHelper.php';
+/**
+ * Custom Session Handler
+ * php version 8.3
+ *
+ * @category  SessionHandler
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
+ */
+namespace CustomSessionHandler\Containers;
+
+use CustomSessionHandler\Containers\SessionContainerInterface;
+use CustomSessionHandler\Containers\SessionContainerHelper;
 
 /**
- * Class for using File based Session Container
+ * Custom Session Handler File
+ * php version 8.3
  *
- * @category   Session
- * @package    Session Handlers
- * @author     Ramesh Narayan Jangid
- * @copyright  Ramesh Narayan Jangid
- * @version    Release: @1.0.0@
- * @since      Class available since Release 1.0.0
+ * @category  CustomSessionHandler_File
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
  */
-class FileBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
+class FileBasedSessionContainer extends SessionContainerHelper
+    implements SessionContainerInterface
 {
     public $sessionSavePath = null;
 
-    private $sessionFilePrefix = 'sess_';
+    private $_sessionFilePrefix = 'sess_';
 
-    public function init($sessionSavePath, $sessionName)
+    /**
+     * Initialize
+     * 
+     * @param string $sessionSavePath Session Save Path
+     * @param string $sessionName     Session Name
+     * 
+     * @return void
+     */
+    public function init($sessionSavePath, $sessionName): void
     {
-        if (!is_dir($sessionSavePath)) {
-            mkdir($sessionSavePath, 0755, true);
+        if (!is_dir(filename: $sessionSavePath)) {
+            mkdir(directory: $sessionSavePath, permissions: 0755, recursive: true);
         }
         $this->sessionSavePath = $sessionSavePath;
         $this->currentTimestamp = time();
     }
 
-    public function get($sessionId)
+    /**
+     * For Custom Session Handler - Validate session ID
+     *
+     * @param string $sessionId Session ID
+     *
+     * @return bool|string
+     */
+    public function get($sessionId): bool|string
     {
-        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
-        if (file_exists($filepath) && (($this->currentTimestamp - fileatime($filepath)) < $this->sessionMaxlifetime)) {
-            return $this->decryptData(file_get_contents($filepath));
+        $filepath = $this->sessionSavePath . '/' . 
+            $this->_sessionFilePrefix . $sessionId;
+        if (file_exists(filename: $filepath)) {
+            return $this->decryptData(
+                cipherText: file_get_contents(filename: $filepath)
+            );
         }
         return false;
     }
 
-    public function set($sessionId, $sessionData)
+    /**
+     * For Custom Session Handler - Write session data
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool|int
+     */
+    public function set($sessionId, $sessionData): bool|int
     {
-        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
-        if (!file_exists($filepath)) {
-            touch($filepath);
+        $filepath = $this->sessionSavePath . '/' . 
+            $this->_sessionFilePrefix . $sessionId;
+        if (!file_exists(filename: $filepath)) {
+            touch(filename: $filepath);
         }
-        return file_put_contents($filepath, $this->encryptData($sessionData));
+        return file_put_contents(
+            filename: $filepath, 
+            data: $this->encryptData(plainText: $sessionData)
+        );
     }
 
-    public function touch($sessionId, $sessionData)
+    /**
+     * For Custom Session Handler - Update session timestamp
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     * 
+     * @return bool
+     */
+    public function touch($sessionId, $sessionData): bool
     {
-        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
-        return touch($filepath);
+        $filepath = $this->sessionSavePath . '/' . 
+            $this->_sessionFilePrefix . $sessionId;
+        return touch(filename: $filepath);
     }
 
-    public function gc($sessionMaxlifetime)
+    /**
+     * For Custom Session Handler - Cleanup old sessions
+     *
+     * @param integer $sessionMaxLifetime Session Max Lifetime
+     * 
+     * @return bool
+     */
+    public function gc($sessionMaxLifetime): bool
     {
-        $datetime = date('Y-m-dTH:i:s+0000', ($this->currentTimestamp - $sessionMaxlifetime));
-        shell_exec("find {$this->sessionSavePath} -name '{$this->sessionFilePrefix}*' -type f -not -newermt '{$datetime}' -delete");
+        $datetime = date(
+            format: 'Y-m-dTH:i:s+0000', 
+            timestamp: ($this->currentTimestamp - $sessionMaxLifetime)
+        );
+        shell_exec(
+            command: "find {$this->sessionSavePath} -name \
+                '{$this->_sessionFilePrefix}*' -type f -not -newermt \
+                '{$datetime}' -delete"
+        );
         return true;
     }
 
-    public function delete($sessionId)
+    /**
+     * For Custom Session Handler - Destroy a session
+     *
+     * @param string $sessionId Session ID
+     * 
+     * @return bool
+     */
+    public function delete($sessionId): bool
     {
-        $filepath = $this->sessionSavePath . '/' . $this->sessionFilePrefix . $sessionId;
-        if (file_exists($filepath)) {
-            unlink($filepath);
+        $filepath = $this->sessionSavePath . '/' . 
+            $this->_sessionFilePrefix . $sessionId;
+        if (file_exists(filename: $filepath)) {
+            unlink(filename: $filepath);
         }
         return true;
     }
 
-    public function close()
+    /**
+     * Close File Container
+     *
+     * @return void
+     */
+    public function close(): void
     {
     }
 }

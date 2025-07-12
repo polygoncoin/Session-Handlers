@@ -1,36 +1,72 @@
 <?php
-require_once __DIR__ . '/SessionContainerInterface.php';
-require_once __DIR__ . '/SessionContainerHelper.php';
+/**
+ * Custom Session Handler
+ * php version 8.3
+ *
+ * @category  SessionHandler
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
+ */
+namespace CustomSessionHandler\Containers;
+
+use CustomSessionHandler\Containers\SessionContainerInterface;
+use CustomSessionHandler\Containers\SessionContainerHelper;
 
 /**
- * Class for using Cookie based Session Container
+ * Custom Session Handler using Cookie
+ * php version 8.3
  *
- * @category   Session
- * @package    Session Handlers
- * @author     Ramesh Narayan Jangid
- * @copyright  Ramesh Narayan Jangid
- * @version    Release: @1.0.0@
- * @since      Class available since Release 1.0.0
+ * @category  CustomSessionHandler_Cookie
+ * @package   CustomSessionHandler
+ * @author    Ramesh N Jangid <polygon.co.in@gmail.com>
+ * @copyright 2025 Ramesh N Jangid
+ * @license   MIT https://opensource.org/license/mit
+ * @link      https://github.com/polygoncoin/Microservices
+ * @since     Class available since Release 1.0.0
  */
-class CookieBasedSessionContainer extends SessionContainerHelper implements SessionContainerInterface
+class CookieBasedSessionContainer extends SessionContainerHelper
+    implements SessionContainerInterface
 {
-    public function init($sessionSavePath, $sessionName)
+    /**
+     * Initialize
+     *
+     * @param string $sessionSavePath Session Save Path
+     * @param string $sessionName     Session Name
+     *
+     * @return void
+     */
+    public function init($sessionSavePath, $sessionName): void
     {
         if (empty($this->passphrase) || empty($this->iv)) {
-            die ('Please set encryption details in Session.php');
+            die('Please set encryption details in Session.php');
         }
 
         $this->currentTimestamp = time();
     }
 
-    public function get($sessionId)
+    /**
+     * For Custom Session Handler - Validate session ID
+     *
+     * @param string $sessionId Session ID
+     *
+     * @return bool|string
+     */
+    public function get($sessionId): bool|string
     {
-        if (isset($_COOKIE[$this->sessionDataName]) && !empty($_COOKIE[$this->sessionDataName])) {
-            $sessionData = $this->decryptData($_COOKIE[$this->sessionDataName]);
-            $sessionDataArr = unserialize($sessionData);
-            if (
-                isset($sessionDataArr['_TS_']) &&
-                ($sessionDataArr['_TS_'] + $this->sessionMaxlifetime) > $this->currentTimestamp
+        if (isset($_COOKIE[$this->sessionDataName])
+            && !empty($_COOKIE[$this->sessionDataName])
+        ) {
+            $sessionData = $this->decryptData(
+                cipherText: $_COOKIE[$this->sessionDataName]
+            );
+            $sessionDataArr = unserialize(data: $sessionData);
+            if (isset($sessionDataArr['_TS_'])
+                && ($time = $sessionDataArr['_TS_'] + $this->sessionMaxLifetime)
+                && $time > $this->currentTimestamp
             ) {
                 return $sessionData;
             }
@@ -38,67 +74,117 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
         return false;
     }
 
-    public function set($sessionId, $sessionData)
+    /**
+     * For Custom Session Handler - Write session data
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool|int
+     */
+    public function set($sessionId, $sessionData): bool|int
     {
-        $sessionDataArr = unserialize($sessionData);
+        $sessionDataArr = unserialize(data: $sessionData);
         $sessionDataArr['_TS_'] = $this->currentTimestamp;
-        $sessionData = serialize($sessionDataArr);
+        $sessionData = serialize(value: $sessionDataArr);
 
-        $cookieData = $this->encryptData($sessionData);
-        if (strlen($cookieData) > 4096) {
+        $cookieData = $this->encryptData(plainText: $sessionData);
+        if (strlen(string: $cookieData) > 4096) {
             ob_end_clean();
-            die('Session data length exceeds max 4 kilobytes (KB) supported per Cookie');
+            die(
+                'Session data length exceeds max 4 kilobytes (KB)' .
+                ' supported per Cookie'
+            );
         }
 
         $_COOKIE[$this->sessionDataName] = $cookieData;
 
         return setcookie(
-            $name = $this->sessionDataName,
-            $value = $cookieData,
-            $options = [
+            name: $this->sessionDataName,
+            value: $cookieData,
+            expires_or_options: [
                 'expires' => 0,
                 'path' => '/',
                 'domain' => '',
-                'secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
+                'secure' => (
+                    (
+                        strpos(
+                            haystack: $_SERVER['HTTP_HOST'],
+                            needle: 'localhost'
+                        ) === false
+                    ) ? true : false
+                ),
                 'httponly' => true,
                 'samesite' => 'Strict'
             ]
         );
     }
 
-    public function touch($sessionId, $sessionData)
+    /**
+     * For Custom Session Handler - Update session timestamp
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool
+     */
+    public function touch($sessionId, $sessionData): bool
     {
-        $sessionDataArr = unserialize($sessionData);
+        $sessionDataArr = unserialize(data: $sessionData);
         $sessionDataArr['_TS_'] = $this->currentTimestamp;
-        $sessionData = serialize($sessionDataArr);
+        $sessionData = serialize(value: $sessionDataArr);
 
-        $cookieData = $this->encryptData($sessionData);
-        if (strlen($cookieData) > 4096) {
+        $cookieData = $this->encryptData(plainText: $sessionData);
+        if (strlen(string: $cookieData) > 4096) {
             ob_end_clean();
-            die('Session data length exceeds max 4 kilobytes (KB) supported per Cookie');
+            die(
+                'Session data length exceeds max 4 kilobytes (KB)' .
+                ' supported per Cookie'
+            );
         }
 
         $_COOKIE[$this->sessionDataName] = $cookieData;
 
         return setcookie(
-            $name = $this->sessionDataName,
-            $value = $cookieData,
-            $options = [
+            name: $this->sessionDataName,
+            value: $cookieData,
+            expires_or_options: [
                 'expires' => 0,
                 'path' => '/',
                 'domain' => '',
-                'secure' => ((strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? true : false),
+                'secure' => (
+                    (
+                        strpos(
+                            haystack: $_SERVER['HTTP_HOST'],
+                            needle: 'localhost'
+                        ) === false
+                    ) ? true : false
+                ),
                 'httponly' => true,
                 'samesite' => 'Strict'
             ]
         );
     }
 
-    public function gc($sessionMaxlifetime)
+    /**
+     * For Custom Session Handler - Cleanup old sessions
+     *
+     * @param integer $sessionMaxLifetime Session Max Lifetime
+     *
+     * @return bool
+     */
+    public function gc($sessionMaxLifetime): bool
     {
         return true;
     }
 
+    /**
+     * For Custom Session Handler - Destroy a session
+     *
+     * @param string $sessionId Session ID
+     *
+     * @return bool
+     */
     public function delete($sessionId): bool
     {
         if (isset($_COOKIE[$this->sessionDataName])) {
@@ -107,7 +193,12 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements Sess
         return true;
     }
 
-    public function close()
+    /**
+     * Close File Container
+     *
+     * @return void
+     */
+    public function close(): void
     {
     }
 }
