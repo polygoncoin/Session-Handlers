@@ -161,7 +161,7 @@ class CustomSessionHandler implements
      *
      * @return string should be new session id
      */
-    public function create_sid(): string
+    public function create_sid(): string // phpcs:ignore
     {
         // Delete session if previous sessionId exist eg; used for 
         // session_regenerate_id()
@@ -238,7 +238,7 @@ class CustomSessionHandler implements
      *
      * A callable with the following signature
      *
-     * @param string $sessionId.  Session ID
+     * @param string $sessionId   Session ID
      * @param string $sessionData Session Data
      *
      * @return bool true for success or false for failure

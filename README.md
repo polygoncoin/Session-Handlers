@@ -147,6 +147,54 @@ if (!isset($_SESSION) || !isset($_SESSION['id'])) {
 // PHP Code
 ```
 
+Switching between session mode using this session handler package
+```PHP
+<?php
+include_once __DIR__ . '/Autoload.php';
+
+use CustomSessionHandler\Session;
+
+// Starting below to switch the session mode with current package.
+// Turn on output buffering
+ob_start();
+
+Session::$sessionName = 'PHPSESSID';
+Session::initSessionHandler(sessionMode: 'File');
+Session::sessionStartReadonly();
+
+$prevSessionData = [];
+if (!empty($_SESSION) {
+    // Collect previous session data
+    $prevSessionData = $_SESSION;
+
+    // Destroy previous session (Note: $_SESSION data will be preserved)
+    session_destroy();
+}
+
+// To switch session to MySQL - setting details
+Session::$DB_HOSTNAME = 'localhost';
+Session::$DB_PORT = 3306;
+Session::$DB_USERNAME = 'root';
+Session::$DB_PASSWORD = 'shames11';
+Session::$DB_DATABASE = 'db_session';
+Session::$DB_TABLE = 'sessions';
+Session::$sessionName = 'PHPSESSID_New';
+
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'MySql');
+
+if (!empty($prevSessionData)) {
+    $_SESSION = $prevSessionData;
+}
+
+// Auth Check with $_SESSION data.
+if (!isset($_SESSION) || !isset($_SESSION['id'])) {
+    die('Unauthorized');
+}
+
+// PHP Code
+```
+
 ## Database Table for MySql
 
 ```SQL

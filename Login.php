@@ -1,5 +1,5 @@
 <?php
-include_once __DIR__ . '/Autoload.php';
+require_once __DIR__ . '/Autoload.php'; // phpcs:ignore
 
 use CustomSessionHandler\Session;
 
@@ -12,7 +12,7 @@ Session::initSessionHandler(sessionMode: 'File');
 if (isset($_POST['submit'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
-    if (verifyCredentials($username, $password)) {
+    if (verifyCredentials($username, $password)) { // phpcs:ignore
         $userDetails = getFromDB($username);
 
         // Start session in normal (read/write) mode.

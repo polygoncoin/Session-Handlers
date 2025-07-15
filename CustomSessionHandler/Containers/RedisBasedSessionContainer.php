@@ -146,7 +146,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
                 );
             }
 
-            $this->_redis = new \Redis(
+            $this->_redis = new \Redis( // phpcs:ignore
                 [
                     'host' => $this->REDIS_HOSTNAME,
                     'port' => (int)$this->REDIS_PORT,

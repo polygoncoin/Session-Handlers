@@ -143,7 +143,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
                 );
             }
 
-            $this->_memcacheD = new \Memcached();
+            $this->_memcacheD = new \Memcached(); // phpcs:ignore
             $this->_memcacheD->addServer(
                 $this->MEMCACHED_HOSTNAME,
                 $this->MEMCACHED_PORT

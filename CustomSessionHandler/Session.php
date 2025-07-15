@@ -16,12 +16,6 @@ namespace CustomSessionHandler;
 use CustomSessionHandler\CustomSessionHandler;
 use CustomSessionHandler\Containers\SessionContainerInterface;
 
-use CustomSessionHandler\Containers\CookieBasedSessionContainer;
-use CustomSessionHandler\Containers\FileBasedSessionContainer;
-use CustomSessionHandler\Containers\MemcachedBasedSessionContainer;
-use CustomSessionHandler\Containers\MySqlBasedSessionContainer;
-use CustomSessionHandler\Containers\RedisBasedSessionContainer;
-
 /**
  * Custom Session Handler Config
  * php version 7
@@ -151,7 +145,9 @@ class Session
         if (self::$sessionMode === 'Cookie' && empty(self::$sessionDataName)) {
             die('Invalid "sessionDataName"');
         }
-        if (empty(self::$sessionMaxLifetime)) die('Invalid "sessionMaxLifetime"');
+        if (empty(self::$sessionMaxLifetime)) {
+            die('Invalid "sessionMaxLifetime"');
+        }
 
         // Required parameters as per sessionMode
         switch(self::$sessionMode) {
