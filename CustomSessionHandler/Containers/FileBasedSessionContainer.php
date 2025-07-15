@@ -37,10 +37,10 @@ class FileBasedSessionContainer extends SessionContainerHelper
 
     /**
      * Initialize
-     * 
+     *
      * @param string $sessionSavePath Session Save Path
      * @param string $sessionName     Session Name
-     * 
+     *
      * @return void
      */
     public function init($sessionSavePath, $sessionName): void
@@ -61,7 +61,7 @@ class FileBasedSessionContainer extends SessionContainerHelper
      */
     public function get($sessionId): bool|string
     {
-        $filepath = $this->sessionSavePath . '/' . 
+        $filepath = $this->sessionSavePath . '/' .
             $this->_sessionFilePrefix . $sessionId;
         if (file_exists(filename: $filepath)) {
             return $this->decryptData(
@@ -81,13 +81,13 @@ class FileBasedSessionContainer extends SessionContainerHelper
      */
     public function set($sessionId, $sessionData): bool|int
     {
-        $filepath = $this->sessionSavePath . '/' . 
+        $filepath = $this->sessionSavePath . '/' .
             $this->_sessionFilePrefix . $sessionId;
         if (!file_exists(filename: $filepath)) {
             touch(filename: $filepath);
         }
         return file_put_contents(
-            filename: $filepath, 
+            filename: $filepath,
             data: $this->encryptData(plainText: $sessionData)
         );
     }
@@ -97,12 +97,12 @@ class FileBasedSessionContainer extends SessionContainerHelper
      *
      * @param string $sessionId   Session ID
      * @param string $sessionData Session Data
-     * 
+     *
      * @return bool
      */
     public function touch($sessionId, $sessionData): bool
     {
-        $filepath = $this->sessionSavePath . '/' . 
+        $filepath = $this->sessionSavePath . '/' .
             $this->_sessionFilePrefix . $sessionId;
         return touch(filename: $filepath);
     }
@@ -111,13 +111,13 @@ class FileBasedSessionContainer extends SessionContainerHelper
      * For Custom Session Handler - Cleanup old sessions
      *
      * @param integer $sessionMaxLifetime Session Max Lifetime
-     * 
+     *
      * @return bool
      */
     public function gc($sessionMaxLifetime): bool
     {
         $datetime = date(
-            format: 'Y-m-dTH:i:s+0000', 
+            format: 'Y-m-dTH:i:s+0000',
             timestamp: ($this->currentTimestamp - $sessionMaxLifetime)
         );
         shell_exec(
@@ -132,12 +132,12 @@ class FileBasedSessionContainer extends SessionContainerHelper
      * For Custom Session Handler - Destroy a session
      *
      * @param string $sessionId Session ID
-     * 
+     *
      * @return bool
      */
     public function delete($sessionId): bool
     {
-        $filepath = $this->sessionSavePath . '/' . 
+        $filepath = $this->sessionSavePath . '/' .
             $this->_sessionFilePrefix . $sessionId;
         if (file_exists(filename: $filepath)) {
             unlink(filename: $filepath);

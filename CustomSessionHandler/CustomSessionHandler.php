@@ -27,9 +27,9 @@ use CustomSessionHandler\Containers\SessionContainerInterface;
  * @link      https://github.com/polygoncoin/Microservices
  * @since     Class available since Release 1.0.0
  */
-class CustomSessionHandler implements 
-    \SessionHandlerInterface, 
-    \SessionIdInterface, 
+class CustomSessionHandler implements
+    \SessionHandlerInterface,
+    \SessionIdInterface,
     \SessionUpdateTimestampHandlerInterface
 {
     /**
@@ -115,7 +115,7 @@ class CustomSessionHandler implements
     public function open($sessionSavePath, $sessionName): bool
     {
         $this->_container->init(
-            sessionSavePath: $sessionSavePath, 
+            sessionSavePath: $sessionSavePath,
             sessionName: $sessionName
         );
 
@@ -163,7 +163,7 @@ class CustomSessionHandler implements
      */
     public function create_sid(): string // phpcs:ignore
     {
-        // Delete session if previous sessionId exist eg; used for 
+        // Delete session if previous sessionId exist eg; used for
         // session_regenerate_id()
         if (!empty($this->_sessionId)) {
             $this->_container->delete(sessionId: $this->_sessionId);
@@ -254,7 +254,7 @@ class CustomSessionHandler implements
         }
 
         if ($this->_container->touch(
-            sessionId: $sessionId, 
+            sessionId: $sessionId,
             sessionData: $sessionData
         )
         ) {
@@ -307,7 +307,7 @@ class CustomSessionHandler implements
         // Updating timestamp for readonly mode (read_and_close option)
         if (!$this->_isTimestampUpdated && $this->_dataFound === true) {
             $this->_container->touch(
-                sessionId: $this->_sessionId, 
+                sessionId: $this->_sessionId,
                 sessionData: $this->_sessionData
             );
         }
@@ -341,14 +341,14 @@ class CustomSessionHandler implements
     {
         if (!empty($this->sessionName)) {
             setcookie(
-                name: $this->sessionName, 
-                value: '', 
+                name: $this->sessionName,
+                value: '',
                 expires_or_options: 1
             );
             setcookie(
-                name: $this->sessionName, 
-                value: '', 
-                expires_or_options: 1, 
+                name: $this->sessionName,
+                value: '',
+                expires_or_options: 1,
                 path: '/'
             );
         }
@@ -361,7 +361,7 @@ class CustomSessionHandler implements
             setcookie(
                 name: $this->sessionDataName,
                 value: '',
-                expires_or_options: 1, 
+                expires_or_options: 1,
                 path: '/'
             );
         }
