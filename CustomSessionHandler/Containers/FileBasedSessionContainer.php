@@ -61,9 +61,13 @@ class FileBasedSessionContainer extends SessionContainerHelper
      */
     public function get($sessionId): bool|string
     {
+        
         $filepath = $this->sessionSavePath . '/' .
             $this->_sessionFilePrefix . $sessionId;
-        if (file_exists(filename: $filepath)) {
+        $fileatime = fileatime(filename: $filepath);
+        if (file_exists(filename: $filepath)
+            && (($this->currentTimestamp - $fileatime) < $this->sessionMaxlifetime)
+        ) {
             return $this->decryptData(
                 cipherText: file_get_contents(filename: $filepath)
             );
