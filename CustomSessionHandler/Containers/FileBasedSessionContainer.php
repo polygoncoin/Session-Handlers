@@ -67,7 +67,7 @@ class FileBasedSessionContainer extends SessionContainerHelper
 
         if (file_exists(filename: $filepath)) {
             $fileatime = fileatime(filename: $filepath);
-            if (($this->currentTimestamp - $fileatime) < $this->sessionMaxlifetime) {
+            if (($this->currentTimestamp - $fileatime) < $this->sessionMaxLifetime) {
                 return $this->decryptData(
                     cipherText: file_get_contents(filename: $filepath)
                 );
