@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler\Containers;
 
 use CustomSessionHandler\Containers\SessionContainerInterface;
@@ -28,12 +30,12 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
-class FileBasedSessionContainer extends SessionContainerHelper
-    implements SessionContainerInterface
+class FileBasedSessionContainer extends SessionContainerHelper implements
+    SessionContainerInterface
 {
     public $sessionSavePath = null;
 
-    private $_sessionFilePrefix = 'sess_';
+    private $sessionFilePrefix = 'sess_';
 
     /**
      * Initialize
@@ -61,9 +63,9 @@ class FileBasedSessionContainer extends SessionContainerHelper
      */
     public function get($sessionId): bool|string
     {
-        
+
         $filepath = $this->sessionSavePath . '/' .
-            $this->_sessionFilePrefix . $sessionId;
+            $this->sessionFilePrefix . $sessionId;
 
         if (file_exists(filename: $filepath)) {
             $fileatime = fileatime(filename: $filepath);
@@ -87,7 +89,7 @@ class FileBasedSessionContainer extends SessionContainerHelper
     public function set($sessionId, $sessionData): bool|int
     {
         $filepath = $this->sessionSavePath . '/' .
-            $this->_sessionFilePrefix . $sessionId;
+            $this->sessionFilePrefix . $sessionId;
         if (!file_exists(filename: $filepath)) {
             touch(filename: $filepath);
         }
@@ -108,7 +110,7 @@ class FileBasedSessionContainer extends SessionContainerHelper
     public function touch($sessionId, $sessionData): bool
     {
         $filepath = $this->sessionSavePath . '/' .
-            $this->_sessionFilePrefix . $sessionId;
+            $this->sessionFilePrefix . $sessionId;
         return touch(filename: $filepath);
     }
 
@@ -127,7 +129,7 @@ class FileBasedSessionContainer extends SessionContainerHelper
         );
         shell_exec(
             command: "find {$this->sessionSavePath} -name \
-                '{$this->_sessionFilePrefix}*' -type f -not -newermt \
+                '{$this->sessionFilePrefix}*' -type f -not -newermt \
                 '{$datetime}' -delete"
         );
         return true;
@@ -143,7 +145,7 @@ class FileBasedSessionContainer extends SessionContainerHelper
     public function delete($sessionId): bool
     {
         $filepath = $this->sessionSavePath . '/' .
-            $this->_sessionFilePrefix . $sessionId;
+            $this->sessionFilePrefix . $sessionId;
         if (file_exists(filename: $filepath)) {
             unlink(filename: $filepath);
         }

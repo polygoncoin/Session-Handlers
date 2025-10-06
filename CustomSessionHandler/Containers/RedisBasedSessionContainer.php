@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler\Containers;
 
 use CustomSessionHandler\Containers\SessionContainerInterface;
@@ -28,8 +30,8 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
-class RedisBasedSessionContainer extends SessionContainerHelper
-    implements SessionContainerInterface
+class RedisBasedSessionContainer extends SessionContainerHelper implements
+    SessionContainerInterface
 {
     public $REDIS_HOSTNAME = null;
     public $REDIS_PORT = null;
@@ -37,7 +39,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
     public $REDIS_PASSWORD = null;
     public $REDIS_DATABASE = null;
 
-    private $_redis = null;
+    private $redis = null;
 
     /**
      * Initialize
@@ -49,7 +51,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      */
     public function init($sessionSavePath, $sessionName): void
     {
-        $this->_connect();
+        $this->connect();
         $this->currentTimestamp = time();
     }
 
@@ -62,8 +64,8 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      */
     public function get($sessionId): bool|string
     {
-        if ($this->_redis->exists($sessionId)) {
-            return $this->decryptData(cipherText: $this->_getKey(key: $sessionId));
+        if ($this->redis->exists($sessionId)) {
+            return $this->decryptData(cipherText: $this->getKey(key: $sessionId));
         }
         return false;
     }
@@ -78,7 +80,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      */
     public function set($sessionId, $sessionData): bool|int
     {
-        return $this->_setKey(
+        return $this->setKey(
             key: $sessionId,
             value: $this->encryptData(plainText: $sessionData)
         );
@@ -94,7 +96,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      */
     public function touch($sessionId, $sessionData): bool
     {
-        return $this->_resetExpire(key: $sessionId);
+        return $this->resetExpire(key: $sessionId);
     }
 
     /**
@@ -118,7 +120,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      */
     public function delete($sessionId): bool
     {
-        return $this->_deleteKey(key: $sessionId);
+        return $this->deleteKey(key: $sessionId);
     }
 
     /**
@@ -128,7 +130,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      */
     public function close(): void
     {
-        $this->_redis = null;
+        $this->redis = null;
     }
 
     /**
@@ -136,7 +138,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      *
      * @return void
      */
-    private function _connect(): void
+    private function connect(): void
     {
         try {
             if (!extension_loaded(extension: 'redis')) {
@@ -146,7 +148,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
                 );
             }
 
-            $this->_redis = new \Redis( // phpcs:ignore
+            $this->redis = new \Redis( // phpcs:ignore
                 [
                     'host' => $this->REDIS_HOSTNAME,
                     'port' => (int)$this->REDIS_PORT,
@@ -154,9 +156,9 @@ class RedisBasedSessionContainer extends SessionContainerHelper
                     'auth' => [$this->REDIS_USERNAME, $this->REDIS_PASSWORD],
                 ]
             );
-            $this->_redis->select($this->REDIS_DATABASE);
+            $this->redis->select($this->REDIS_DATABASE);
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
     }
 
@@ -167,15 +169,15 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      *
      * @return mixed
      */
-    private function _getKey($key): mixed
+    private function getKey($key): mixed
     {
         $row = [];
         try {
-            if ($data = $this->_redis->get($key)) {
+            if ($data = $this->redis->get($key)) {
                 return $data;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -188,14 +190,14 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      *
      * @return mixed
      */
-    private function _setKey($key, $value): bool
+    private function setKey($key, $value): bool
     {
         try {
-            if ($this->_redis->set($key, $value, $this->sessionMaxLifetime)) {
+            if ($this->redis->set($key, $value, $this->sessionMaxLifetime)) {
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -207,14 +209,14 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      *
      * @return bool
      */
-    private function _resetExpire($key): bool
+    private function resetExpire($key): bool
     {
         try {
-            if ($this->_redis->expire($key, $this->sessionMaxLifetime)) {
+            if ($this->redis->expire($key, $this->sessionMaxLifetime)) {
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -226,14 +228,14 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      *
      * @return bool
      */
-    private function _deleteKey($key): bool
+    private function deleteKey($key): bool
     {
         try {
-            if ($this->_redis->del($key)) {
+            if ($this->redis->del($key)) {
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -245,7 +247,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper
      *
      * @return never
      */
-    private function _manageException(\Exception $e): never
+    private function manageException(\Exception $e): never
     {
         die($e->getMessage());
     }

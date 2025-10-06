@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/Autoload.php'; // phpcs:ignore
+
+require_once __DIR__ . '/AutoloadSessionHandler.php'; // phpcs:ignore
 
 use CustomSessionHandler\Session;
 
@@ -9,9 +10,9 @@ ob_start();
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File');
 
-if (isset($_POST['submit'])) {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+if (isset($POST['submit'])) {
+    $username = $POST['username'];
+    $password = $POST['password'];
     if (verifyCredentials($username, $password)) { // phpcs:ignore
         $userDetails = getFromDB($username);
 

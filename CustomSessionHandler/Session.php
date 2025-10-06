@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler;
 
 use CustomSessionHandler\CustomSessionHandler;
@@ -127,13 +129,14 @@ class Session
      *
      * @return void
      */
-    private static function _validateSettings(): void
+    private static function validateSettings(): void
     {
         // sessionMode validation
-        if (!in_array(
-            needle: self::$sessionMode,
-            haystack: ['File', 'MySql', 'Redis', 'Memcached', 'Cookie']
-        )
+        if (
+            !in_array(
+                needle: self::$sessionMode,
+                haystack: ['File', 'MySql', 'Redis', 'Memcached', 'Cookie']
+            )
         ) {
             die('Invalid "sessionMode"');
         }
@@ -150,61 +153,61 @@ class Session
         }
 
         // Required parameters as per sessionMode
-        switch(self::$sessionMode) {
-        case 'Cookie':
-            // Encryption compulsary for saving data as cookie
-            if (empty(self::$ENCRYPTION_PASS_PHRASE)) {
-                die('Invalid "ENCRYPTION_PASS_PHRASE"');
-            }
-            if (empty(self::$ENCRYPTION_IV)) {
-                die('Invalid "ENCRYPTION_IV"');
-            }
-            break;
-        case 'MySql':
-            if (empty(self::$DB_HOSTNAME)) {
-                die('Invalid "DB_HOSTNAME"');
-            }
-            if (empty(self::$DB_PORT)) {
-                die('Invalid "DB_PORT"');
-            }
-            if (empty(self::$DB_USERNAME)) {
-                die('Invalid "DB_USERNAME"');
-            }
-            if (empty(self::$DB_PASSWORD)) {
-                die('Invalid "DB_PASSWORD"');
-            }
-            if (empty(self::$DB_DATABASE)) {
-                die('Invalid "DB_DATABASE"');
-            }
-            if (empty(self::$DB_TABLE)) {
-                die('Invalid "DB_TABLE"');
-            }
-            break;
-        case 'Redis':
-            if (empty(self::$REDIS_HOSTNAME)) {
-                die('Invalid "REDIS_HOSTNAME"');
-            }
-            if (empty(self::$REDIS_PORT)) {
-                die('Invalid "REDIS_PORT"');
-            }
-            if (empty(self::$REDIS_USERNAME)) {
-                die('Invalid "REDIS_USERNAME"');
-            }
-            if (empty(self::$REDIS_PASSWORD)) {
-                die('Invalid "REDIS_PASSWORD"');
-            }
-            if (empty(self::$REDIS_DATABASE) && self::$REDIS_DATABASE!=0) {
-                die('Invalid "REDIS_DATABASE"');
-            }
-            break;
-        case 'Memcached':
-            if (empty(self::$MEMCACHED_HOSTNAME)) {
-                die('Invalid "MEMCACHED_HOSTNAME"');
-            }
-            if (empty(self::$MEMCACHED_PORT)) {
-                die('Invalid "MEMCACHED_PORT"');
-            }
-            break;
+        switch (self::$sessionMode) {
+            case 'Cookie':
+                // Encryption compulsary for saving data as cookie
+                if (empty(self::$ENCRYPTION_PASS_PHRASE)) {
+                    die('Invalid "ENCRYPTION_PASS_PHRASE"');
+                }
+                if (empty(self::$ENCRYPTION_IV)) {
+                    die('Invalid "ENCRYPTION_IV"');
+                }
+                break;
+            case 'MySql':
+                if (empty(self::$DB_HOSTNAME)) {
+                    die('Invalid "DB_HOSTNAME"');
+                }
+                if (empty(self::$DB_PORT)) {
+                    die('Invalid "DB_PORT"');
+                }
+                if (empty(self::$DB_USERNAME)) {
+                    die('Invalid "DB_USERNAME"');
+                }
+                if (empty(self::$DB_PASSWORD)) {
+                    die('Invalid "DB_PASSWORD"');
+                }
+                if (empty(self::$DB_DATABASE)) {
+                    die('Invalid "DB_DATABASE"');
+                }
+                if (empty(self::$DB_TABLE)) {
+                    die('Invalid "DB_TABLE"');
+                }
+                break;
+            case 'Redis':
+                if (empty(self::$REDIS_HOSTNAME)) {
+                    die('Invalid "REDIS_HOSTNAME"');
+                }
+                if (empty(self::$REDIS_PORT)) {
+                    die('Invalid "REDIS_PORT"');
+                }
+                if (empty(self::$REDIS_USERNAME)) {
+                    die('Invalid "REDIS_USERNAME"');
+                }
+                if (empty(self::$REDIS_PASSWORD)) {
+                    die('Invalid "REDIS_PASSWORD"');
+                }
+                if (empty(self::$REDIS_DATABASE) && self::$REDIS_DATABASE != 0) {
+                    die('Invalid "REDIS_DATABASE"');
+                }
+                break;
+            case 'Memcached':
+                if (empty(self::$MEMCACHED_HOSTNAME)) {
+                    die('Invalid "MEMCACHED_HOSTNAME"');
+                }
+                if (empty(self::$MEMCACHED_PORT)) {
+                    die('Invalid "MEMCACHED_PORT"');
+                }
+                break;
         }
     }
 
@@ -213,7 +216,7 @@ class Session
      *
      * @return void
      */
-    private static function _initContainer(): void
+    private static function initContainer(): void
     {
         // Initialize Container
         $containerClassName = 'CustomSessionHandler\\Containers\\' .
@@ -225,33 +228,34 @@ class Session
         self::$sessionContainer->sessionMaxLifetime = self::$sessionMaxLifetime;
 
         // Setting required parameters as per sessionMode
-        switch(self::$sessionMode) {
-        case 'MySql':
-            self::$sessionContainer->DB_HOSTNAME = self::$DB_HOSTNAME;
-            self::$sessionContainer->DB_PORT = self::$DB_PORT;
-            self::$sessionContainer->DB_USERNAME = self::$DB_USERNAME;
-            self::$sessionContainer->DB_PASSWORD = self::$DB_PASSWORD;
-            self::$sessionContainer->DB_DATABASE = self::$DB_DATABASE;
-            self::$sessionContainer->DB_TABLE = self::$DB_TABLE;
-            break;
-        case 'Redis':
-            self::$sessionContainer->REDIS_HOSTNAME = self::$REDIS_HOSTNAME;
-            self::$sessionContainer->REDIS_PORT = self::$REDIS_PORT;
-            self::$sessionContainer->REDIS_USERNAME = self::$REDIS_USERNAME;
-            self::$sessionContainer->REDIS_PASSWORD = self::$REDIS_PASSWORD;
-            self::$sessionContainer->REDIS_DATABASE = self::$REDIS_DATABASE;
-            break;
-        case 'Memcached':
-            self::$sessionContainer->MEMCACHED_HOSTNAME = self::$MEMCACHED_HOSTNAME;
-            self::$sessionContainer->MEMCACHED_PORT = self::$MEMCACHED_PORT;
-            break;
-        case 'Cookie':
-            self::$sessionContainer->sessionDataName = self::$sessionDataName;
-            break;
+        switch (self::$sessionMode) {
+            case 'MySql':
+                self::$sessionContainer->DB_HOSTNAME = self::$DB_HOSTNAME;
+                self::$sessionContainer->DB_PORT = self::$DB_PORT;
+                self::$sessionContainer->DB_USERNAME = self::$DB_USERNAME;
+                self::$sessionContainer->DB_PASSWORD = self::$DB_PASSWORD;
+                self::$sessionContainer->DB_DATABASE = self::$DB_DATABASE;
+                self::$sessionContainer->DB_TABLE = self::$DB_TABLE;
+                break;
+            case 'Redis':
+                self::$sessionContainer->REDIS_HOSTNAME = self::$REDIS_HOSTNAME;
+                self::$sessionContainer->REDIS_PORT = self::$REDIS_PORT;
+                self::$sessionContainer->REDIS_USERNAME = self::$REDIS_USERNAME;
+                self::$sessionContainer->REDIS_PASSWORD = self::$REDIS_PASSWORD;
+                self::$sessionContainer->REDIS_DATABASE = self::$REDIS_DATABASE;
+                break;
+            case 'Memcached':
+                self::$sessionContainer->MEMCACHED_HOSTNAME = self::$MEMCACHED_HOSTNAME;
+                self::$sessionContainer->MEMCACHED_PORT = self::$MEMCACHED_PORT;
+                break;
+            case 'Cookie':
+                self::$sessionContainer->sessionDataName = self::$sessionDataName;
+                break;
         }
 
         // Setting encryption parameters
-        if (!empty(self::$ENCRYPTION_PASS_PHRASE)
+        if (
+            !empty(self::$ENCRYPTION_PASS_PHRASE)
             && !empty(self::$ENCRYPTION_IV)
         ) {
             self::$sessionContainer->passphrase = base64_decode(
@@ -268,10 +272,10 @@ class Session
      *
      * @return void
      */
-    private static function _initProcess(): void
+    private static function initProcess(): void
     {
         // Initialize container
-        self::_initContainer();
+        self::initContainer();
 
         $customSessionHandler = new CustomSessionHandler(
             container: self::$sessionContainer
@@ -290,7 +294,7 @@ class Session
      *
      * @return void
      */
-    private static function _setOptions($options = []): void
+    private static function setOptions($options = []): void
     {
         if (isset($options['name'])) {
             self::$sessionName = $options['name'];
@@ -323,10 +327,11 @@ class Session
 
         if (!empty($options)) {
             foreach ($options as $key => $value) {
-                if (in_array(
-                    needle: $key,
-                    haystack: ['name', 'serialize_handler', 'gc_maxlifetime']
-                )
+                if (
+                    in_array(
+                        needle: $key,
+                        haystack: ['name', 'serialize_handler', 'gc_maxlifetime']
+                    )
                 ) {
                     // Skip these keys
                     continue;
@@ -358,11 +363,11 @@ class Session
         }
 
         // Comment this call once you are done with validating settings part
-        self::_validateSettings();
+        self::validateSettings();
 
         // Initialize
-        self::_setOptions(options: $options);
-        self::_initProcess();
+        self::setOptions(options: $options);
+        self::initProcess();
     }
 
     /**
@@ -372,7 +377,8 @@ class Session
      */
     public static function sessionStartReadonly(): bool
     {
-        if (isset($_COOKIE[self::$sessionName])
+        if (
+            isset($_COOKIE[self::$sessionName])
             && !empty($_COOKIE[self::$sessionName])
         ) {
             $options = self::$options;

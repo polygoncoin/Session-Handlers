@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler\Containers;
 
 use CustomSessionHandler\Containers\SessionContainerInterface;
@@ -28,13 +30,13 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
-class MemcachedBasedSessionContainer extends SessionContainerHelper
-    implements SessionContainerInterface
+class MemcachedBasedSessionContainer extends SessionContainerHelper implements
+    SessionContainerInterface
 {
     public $MEMCACHED_HOSTNAME = null;
     public $MEMCACHED_PORT = null;
 
-    private $_memcacheD = null;
+    private $memcacheD = null;
 
     /**
      * Initialize
@@ -46,7 +48,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      */
     public function init($sessionSavePath, $sessionName): void
     {
-        $this->_connect();
+        $this->connect();
         $this->currentTimestamp = time();
     }
 
@@ -59,7 +61,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      */
     public function get($sessionId): bool|string
     {
-        if ($data = $this->_getKey(key: $sessionId)) {
+        if ($data = $this->getKey(key: $sessionId)) {
             return $this->decryptData(cipherText: $data);
         }
         return false;
@@ -75,7 +77,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      */
     public function set($sessionId, $sessionData): bool|int
     {
-        return $this->_setKey(
+        return $this->setKey(
             key: $sessionId,
             value: $this->encryptData(plainText: $sessionData)
         );
@@ -91,7 +93,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      */
     public function touch($sessionId, $sessionData): bool
     {
-        return $this->_resetExpire(key: $sessionId);
+        return $this->resetExpire(key: $sessionId);
     }
 
     /**
@@ -115,7 +117,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      */
     public function delete($sessionId): bool
     {
-        return $this->_deleteKey(key: $sessionId);
+        return $this->deleteKey(key: $sessionId);
     }
 
     /**
@@ -125,7 +127,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      */
     public function close(): void
     {
-        $this->_memcacheD = null;
+        $this->memcacheD = null;
     }
 
     /**
@@ -133,7 +135,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      *
      * @return void
      */
-    private function _connect(): void
+    private function connect(): void
     {
         try {
             if (!extension_loaded(extension: 'memcached')) {
@@ -143,13 +145,13 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
                 );
             }
 
-            $this->_memcacheD = new \Memcached(); // phpcs:ignore
-            $this->_memcacheD->addServer(
+            $this->memcacheD = new \Memcached(); // phpcs:ignore
+            $this->memcacheD->addServer(
                 $this->MEMCACHED_HOSTNAME,
                 $this->MEMCACHED_PORT
             );
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
     }
 
@@ -160,14 +162,14 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      *
      * @return mixed
      */
-    private function _getKey($key): mixed
+    private function getKey($key): mixed
     {
         try {
-            if ($data = $this->_memcacheD->get($key)) {
+            if ($data = $this->memcacheD->get($key)) {
                 return $data;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -180,14 +182,14 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      *
      * @return bool
      */
-    private function _setKey($key, $value): bool
+    private function setKey($key, $value): bool
     {
         try {
-            if ($this->_memcacheD->set($key, $value, $this->sessionMaxLifetime)) {
+            if ($this->memcacheD->set($key, $value, $this->sessionMaxLifetime)) {
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -199,14 +201,14 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      *
      * @return bool
      */
-    private function _resetExpire($key): bool
+    private function resetExpire($key): bool
     {
         try {
-            if ($this->_memcacheD->touch($key, $this->sessionMaxLifetime)) {
+            if ($this->memcacheD->touch($key, $this->sessionMaxLifetime)) {
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -218,14 +220,14 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      *
      * @return bool
      */
-    private function _deleteKey($key): bool
+    private function deleteKey($key): bool
     {
         try {
-            if ($this->_memcacheD->delete($key)) {
+            if ($this->memcacheD->delete($key)) {
                 return true;
             }
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -237,7 +239,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper
      *
      * @return never
      */
-    private function _manageException(\Exception $e): never
+    private function manageException(\Exception $e): never
     {
         die($e->getMessage());
     }

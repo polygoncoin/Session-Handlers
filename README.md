@@ -9,7 +9,7 @@ Collection of Mostly used Session Handlers
 Using Normal session
 ```PHP
 <?php
-include_once __DIR__ . '/Autoload.php';
+include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
 
@@ -35,7 +35,7 @@ $_SESSION['id'] = rand();
 Using Read-only mode
 ```PHP
 <?php
-include_once __DIR__ . '/Autoload.php';
+include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
 
@@ -65,7 +65,7 @@ if (isset($_SESSION)) {
 Using Read-only with Normal session
 ```PHP
 <?php
-include_once __DIR__ . '/Autoload.php';
+include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
 
@@ -101,7 +101,7 @@ $_SESSION['id'] = rand();
 Switching from previous session to this package based session handler
 ```PHP
 <?php
-include_once __DIR__ . '/Autoload.php';
+include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
 
@@ -150,7 +150,7 @@ if (!isset($_SESSION) || !isset($_SESSION['id'])) {
 Switching between session mode using this session handler package
 ```PHP
 <?php
-include_once __DIR__ . '/Autoload.php';
+include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
 

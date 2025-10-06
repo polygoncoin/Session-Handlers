@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler;
 
 /**
@@ -34,7 +36,7 @@ class Autoload
      *
      * @return void
      */
-    static public function register($className): void
+    public static function register($className): void
     {
         $className = str_replace(
             search: "\\",
@@ -48,5 +50,3 @@ class Autoload
         include_once $file;
     }
 }
-
-spl_autoload_register(callback: __NAMESPACE__ . '\Autoload::register');

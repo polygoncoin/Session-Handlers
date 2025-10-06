@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler\Containers;
 
 use CustomSessionHandler\Containers\SessionContainerInterface;
@@ -28,8 +30,8 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
-class MySqlBasedSessionContainer extends SessionContainerHelper
-    implements SessionContainerInterface
+class MySqlBasedSessionContainer extends SessionContainerHelper implements
+    SessionContainerInterface
 {
     public $DB_HOSTNAME = null;
     public $DB_PORT = null;
@@ -38,9 +40,9 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
     public $DB_DATABASE = null;
     public $DB_TABLE = null;
 
-    private $_pdo = null;
+    private $pdo = null;
 
-    private $_foundSession = false;
+    private $foundSession = false;
 
     /**
      * Initialize
@@ -52,7 +54,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      */
     public function init($sessionSavePath, $sessionName): void
     {
-        $this->_connect();
+        $this->connect();
         $this->currentTimestamp = time();
     }
 
@@ -65,7 +67,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      */
     public function get($sessionId): bool|string
     {
-        $this->_foundSession = false;
+        $this->foundSession = false;
         $sql = "
             SELECT `sessionData`
             FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
@@ -75,10 +77,11 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
             ':sessionId' => $sessionId,
             ':lastAccessed' => ($this->currentTimestamp - $this->sessionMaxLifetime)
         ];
-        if (($row = $this->_getSql(sql: $sql, params: $params))
+        if (
+            ($row = $this->getSql(sql: $sql, params: $params))
             && isset($row['sessionData'])
         ) {
-            $this->_foundSession = true;
+            $this->foundSession = true;
             return $this->decryptData(cipherText: $row['sessionData']);
         }
         return false;
@@ -94,7 +97,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      */
     public function set($sessionId, $sessionData): bool|int
     {
-        if ($this->_foundSession) {
+        if ($this->foundSession) {
             $sql = "
                 UPDATE `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
                 SET
@@ -118,7 +121,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
             ':lastAccessed' => $this->currentTimestamp
         ];
 
-        return $this->_setSql(sql: $sql, params: $params);
+        return $this->setSql(sql: $sql, params: $params);
     }
 
     /**
@@ -140,7 +143,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
             ':sessionId' => $sessionId,
             ':lastAccessed' => $this->currentTimestamp
         ];
-        return $this->_setSql(sql: $sql, params: $params);
+        return $this->setSql(sql: $sql, params: $params);
     }
 
     /**
@@ -160,7 +163,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
         $params = [
             ':lastAccessed' => $lastAccessed
         ];
-        return $this->_setSql(sql: $sql, params: $params);
+        return $this->setSql(sql: $sql, params: $params);
     }
 
     /**
@@ -179,7 +182,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
         $params = [
             ':sessionId' => $sessionId
         ];
-        return $this->_setSql(sql: $sql, params: $params);
+        return $this->setSql(sql: $sql, params: $params);
     }
 
     /**
@@ -189,7 +192,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      */
     public function close(): void
     {
-        $this->_pdo = null;
+        $this->pdo = null;
     }
 
     /**
@@ -197,10 +200,10 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      *
      * @return void
      */
-    private function _connect(): void
+    private function connect(): void
     {
         try {
-            $this->_pdo = new \PDO(
+            $this->pdo = new \PDO(
                 dsn: "mysql:host={$this->DB_HOSTNAME}",
                 username: $this->DB_USERNAME,
                 password: $this->DB_PASSWORD,
@@ -209,7 +212,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
                 ]
             );
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
     }
 
@@ -221,29 +224,29 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      *
      * @return mixed
      */
-    private function _getSql($sql, $params = []): mixed
+    private function getSql($sql, $params = []): mixed
     {
         $row = [];
         try {
-            $stmt = $this->_pdo->prepare(
+            $stmt = $this->pdo->prepare(
                 query: $sql,
                 options: [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]
             );
             $stmt->execute(params: $params);
-            switch($stmt->rowCount()) {
-            case 0:
-                $row = [];
-                break;
-            case 1:
-                $row = $stmt->fetch();
-                break;
-            default:
-                $row = false;
-                break;
+            switch ($stmt->rowCount()) {
+                case 0:
+                    $row = [];
+                    break;
+                case 1:
+                    $row = $stmt->fetch();
+                    break;
+                default:
+                    $row = false;
+                    break;
             }
             $stmt->closeCursor();
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return $row;
     }
@@ -256,17 +259,17 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      *
      * @return bool
      */
-    private function _setSql($sql, $params = []): bool
+    private function setSql($sql, $params = []): bool
     {
         try {
-            $stmt = $this->_pdo->prepare(
+            $stmt = $this->pdo->prepare(
                 query: $sql,
                 options: [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]
             );
             $stmt->execute(params: $params);
             $stmt->closeCursor();
         } catch (\Exception $e) {
-            $this->_manageException(e: $e);
+            $this->manageException(e: $e);
         }
         return true;
     }
@@ -278,7 +281,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper
      *
      * @return never
      */
-    private function _manageException(\Exception $e): never
+    private function manageException(\Exception $e): never
     {
         die($e->getMessage());
     }

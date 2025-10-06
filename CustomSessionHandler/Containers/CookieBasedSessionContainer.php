@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler\Containers;
 
 use CustomSessionHandler\Containers\SessionContainerInterface;
@@ -28,8 +30,8 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
-class CookieBasedSessionContainer extends SessionContainerHelper
-    implements SessionContainerInterface
+class CookieBasedSessionContainer extends SessionContainerHelper implements
+    SessionContainerInterface
 {
     /**
      * Initialize
@@ -57,14 +59,16 @@ class CookieBasedSessionContainer extends SessionContainerHelper
      */
     public function get($sessionId): bool|string
     {
-        if (isset($_COOKIE[$this->sessionDataName])
+        if (
+            isset($_COOKIE[$this->sessionDataName])
             && !empty($_COOKIE[$this->sessionDataName])
         ) {
             $sessionData = $this->decryptData(
                 cipherText: $_COOKIE[$this->sessionDataName]
             );
             $sessionDataArr = unserialize(data: $sessionData);
-            if (isset($sessionDataArr['_TS_'])
+            if (
+                isset($sessionDataArr['_TS_'])
                 && ($time = $sessionDataArr['_TS_'] + $this->sessionMaxLifetime)
                 && $time > $this->currentTimestamp
             ) {

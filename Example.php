@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/Autoload.php'; // phpcs:ignore
+
+require_once __DIR__ . '/AutoloadSessionHandler.php'; // phpcs:ignore
 
 use CustomSessionHandler\Session;
 

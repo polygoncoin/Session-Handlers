@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Custom Session Handler
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Session-Handlers
  * @since     Class available since Release 1.0.0
  */
+
 namespace CustomSessionHandler\Containers;
 
 /**
@@ -28,11 +30,11 @@ namespace CustomSessionHandler\Containers;
 class SessionContainerHelper
 {
     // The cipher method
-    private $_cipher_algo = 'AES-256-CBC';
+    private $cipher_algo = 'AES-256-CBC';
 
     // Bitwise disjunction of the flags OPENSSL_RAW_DATA,
     // and OPENSSL_ZERO_PADDING or OPENSSL_DON'T_ZERO_PAD_KEY */
-    private $_options = OPENSSL_RAW_DATA;
+    private $options = OPENSSL_RAW_DATA;
 
     // Usually 256-bit passphrase
     public $passphrase = null;
@@ -65,9 +67,9 @@ class SessionContainerHelper
             return base64_encode(
                 string: openssl_encrypt(
                     data: $plainText,
-                    cipher_algo: $this->_cipher_algo,
+                    cipher_algo: $this->cipher_algo,
                     passphrase: $this->passphrase,
-                    options: $this->_options,
+                    options: $this->options,
                     iv: $this->iv
                 )
             );
@@ -87,9 +89,9 @@ class SessionContainerHelper
         if (!empty($this->passphrase) && !empty($this->iv)) {
             return openssl_decrypt(
                 data: base64_decode(string: $cipherText),
-                cipher_algo: $this->_cipher_algo,
+                cipher_algo: $this->cipher_algo,
                 passphrase: $this->passphrase,
-                options: $this->_options,
+                options: $this->options,
                 iv: $this->iv
             );
         }
