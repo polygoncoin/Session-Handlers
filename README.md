@@ -191,6 +191,7 @@ Session::$sessionName = 'PHPSESSID_New';
 
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'MySql');
+Session::sessionStartReadonly();
 
 if (!empty($prevSessionData)) {
     $_SESSION = $prevSessionData;
