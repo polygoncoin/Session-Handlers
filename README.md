@@ -100,6 +100,8 @@ if (!isset($_SESSION) || !isset($_SESSION['id'])) {
 // Start session in normal (read/write) mode.
 // Use once client is authorized and want to make changes in $_SESSION
 Session::sessionStartReadWrite();
+
+// Starting use of session in normal code from here
 $_SESSION['id'] = rand();
 
 ```
