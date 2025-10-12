@@ -181,12 +181,12 @@ if (!empty($_SESSION) {
 }
 
 // To switch session to MySQL - setting details
-Session::$DB_HOSTNAME = 'localhost';
-Session::$DB_PORT = 3306;
-Session::$DB_USERNAME = 'root';
-Session::$DB_PASSWORD = 'shames11';
-Session::$DB_DATABASE = 'db_session';
-Session::$DB_TABLE = 'sessions';
+Session::$MYSQL_HOSTNAME = 'localhost';
+Session::$MYSQL_PORT = 3306;
+Session::$MYSQL_USERNAME = 'root';
+Session::$MYSQL_PASSWORD = 'shames11';
+Session::$MYSQL_DATABASE = 'db_session';
+Session::$MYSQL_TABLE = 'sessions';
 Session::$sessionName = 'PHPSESSID_New';
 
 // Initialize Session Handler

@@ -159,7 +159,6 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
                 }
                 $this->MONGODB_URI = 'mongodb://' . $UP .
                     $this->MONGODB_HOSTNAME . ':' . $this->MONGODB_PORT;
-                    // '/' . $this->MONGODB_DATABASE;
             }
             $this->mongo = new \MongoDB\Client($this->MONGODB_URI);
 
