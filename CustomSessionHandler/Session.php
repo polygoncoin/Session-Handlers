@@ -56,12 +56,20 @@ class Session
     public static $ENCRYPTION_IV = null;
 
     /* MySql Session config */
-    public static $DB_HOSTNAME = 'localhost';
-    public static $DB_PORT = 3306;
-    public static $DB_USERNAME = 'root';
-    public static $DB_PASSWORD = 'shames11';
-    public static $DB_DATABASE = 'db_session';
-    public static $DB_TABLE = 'sessions';
+    public static $MYSQL_HOSTNAME = 'localhost';
+    public static $MYSQL_PORT = 3306;
+    public static $MYSQL_USERNAME = 'root';
+    public static $MYSQL_PASSWORD = 'shames11';
+    public static $MYSQL_DATABASE = 'session_db';
+    public static $MYSQL_TABLE = 'sessions';
+
+    /* MongoDb Session config */
+    public static $MONGODB_HOSTNAME = 'localhost';
+    public static $MONGODB_PORT = 27017;
+    public static $MONGODB_USERNAME = 'ramesh';
+    public static $MONGODB_PASSWORD = 'shames11';
+    public static $MONGODB_DATABASE = 'session_db';
+    public static $MONGODB_COLLECTION = 'sessions';
 
     /* Redis Session config */
     public static $REDIS_HOSTNAME = 'localhost';
@@ -135,7 +143,7 @@ class Session
         if (
             !in_array(
                 needle: self::$sessionMode,
-                haystack: ['File', 'MySql', 'Redis', 'Memcached', 'Cookie']
+                haystack: ['File', 'MySql',  'MongoDb', 'Redis', 'Memcached', 'Cookie']
             )
         ) {
             die('Invalid "sessionMode"');
@@ -164,23 +172,37 @@ class Session
                 }
                 break;
             case 'MySql':
-                if (empty(self::$DB_HOSTNAME)) {
-                    die('Invalid "DB_HOSTNAME"');
+                if (empty(self::$MYSQL_HOSTNAME)) {
+                    die('Invalid "MYSQL_HOSTNAME"');
                 }
-                if (empty(self::$DB_PORT)) {
-                    die('Invalid "DB_PORT"');
+                if (empty(self::$MYSQL_PORT)) {
+                    die('Invalid "MYSQL_PORT"');
                 }
-                if (empty(self::$DB_USERNAME)) {
-                    die('Invalid "DB_USERNAME"');
+                if (empty(self::$MYSQL_USERNAME)) {
+                    die('Invalid "MYSQL_USERNAME"');
                 }
-                if (empty(self::$DB_PASSWORD)) {
-                    die('Invalid "DB_PASSWORD"');
+                if (empty(self::$MYSQL_PASSWORD)) {
+                    die('Invalid "MYSQL_PASSWORD"');
                 }
-                if (empty(self::$DB_DATABASE)) {
-                    die('Invalid "DB_DATABASE"');
+                if (empty(self::$MYSQL_DATABASE)) {
+                    die('Invalid "MYSQL_DATABASE"');
                 }
-                if (empty(self::$DB_TABLE)) {
-                    die('Invalid "DB_TABLE"');
+                if (empty(self::$MYSQL_TABLE)) {
+                    die('Invalid "MYSQL_TABLE"');
+                }
+                break;
+            case 'MongoDb':
+                if (empty(self::$MONGODB_HOSTNAME)) {
+                    die('Invalid "MONGODB_HOSTNAME"');
+                }
+                if (empty(self::$MONGODB_PORT)) {
+                    die('Invalid "MONGODB_PORT"');
+                }
+                if (empty(self::$MONGODB_DATABASE)) {
+                    die('Invalid "MONGODB_DATABASE"');
+                }
+                if (empty(self::$MONGODB_COLLECTION)) {
+                    die('Invalid "MONGODB_COLLECTION"');
                 }
                 break;
             case 'Redis':
@@ -230,12 +252,20 @@ class Session
         // Setting required parameters as per sessionMode
         switch (self::$sessionMode) {
             case 'MySql':
-                self::$sessionContainer->DB_HOSTNAME = self::$DB_HOSTNAME;
-                self::$sessionContainer->DB_PORT = self::$DB_PORT;
-                self::$sessionContainer->DB_USERNAME = self::$DB_USERNAME;
-                self::$sessionContainer->DB_PASSWORD = self::$DB_PASSWORD;
-                self::$sessionContainer->DB_DATABASE = self::$DB_DATABASE;
-                self::$sessionContainer->DB_TABLE = self::$DB_TABLE;
+                self::$sessionContainer->MYSQL_HOSTNAME = self::$MYSQL_HOSTNAME;
+                self::$sessionContainer->MYSQL_PORT = self::$MYSQL_PORT;
+                self::$sessionContainer->MYSQL_USERNAME = self::$MYSQL_USERNAME;
+                self::$sessionContainer->MYSQL_PASSWORD = self::$MYSQL_PASSWORD;
+                self::$sessionContainer->MYSQL_DATABASE = self::$MYSQL_DATABASE;
+                self::$sessionContainer->MYSQL_TABLE = self::$MYSQL_TABLE;
+                break;
+            case 'MongoDb':
+                self::$sessionContainer->MONGODB_HOSTNAME = self::$MONGODB_HOSTNAME;
+                self::$sessionContainer->MONGODB_PORT = self::$MONGODB_PORT;
+                self::$sessionContainer->MONGODB_USERNAME = self::$MONGODB_USERNAME;
+                self::$sessionContainer->MONGODB_PASSWORD = self::$MONGODB_PASSWORD;
+                self::$sessionContainer->MONGODB_DATABASE = self::$MONGODB_DATABASE;
+                self::$sessionContainer->MONGODB_COLLECTION = self::$MONGODB_COLLECTION;
                 break;
             case 'Redis':
                 self::$sessionContainer->REDIS_HOSTNAME = self::$REDIS_HOSTNAME;

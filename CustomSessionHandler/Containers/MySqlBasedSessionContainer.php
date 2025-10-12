@@ -33,12 +33,12 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
 class MySqlBasedSessionContainer extends SessionContainerHelper implements
     SessionContainerInterface
 {
-    public $DB_HOSTNAME = null;
-    public $DB_PORT = null;
-    public $DB_USERNAME = null;
-    public $DB_PASSWORD = null;
-    public $DB_DATABASE = null;
-    public $DB_TABLE = null;
+    public $MYSQL_HOSTNAME = null;
+    public $MYSQL_PORT = null;
+    public $MYSQL_USERNAME = null;
+    public $MYSQL_PASSWORD = null;
+    public $MYSQL_DATABASE = null;
+    public $MYSQL_TABLE = null;
 
     private $pdo = null;
 
@@ -70,7 +70,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
         $this->foundSession = false;
         $sql = "
             SELECT `sessionData`
-            FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
+            FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
             WHERE `sessionId` = :sessionId AND lastAccessed > :lastAccessed
         ";
         $params = [
@@ -99,7 +99,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
     {
         if ($this->foundSession) {
             $sql = "
-                UPDATE `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
+                UPDATE `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
                 SET
                     `sessionData` = :sessionData,
                     `lastAccessed` = :lastAccessed
@@ -108,7 +108,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
             ";
         } else {
             $sql = "
-                INSERT INTO `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
+                INSERT INTO `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
                 SET
                     `sessionData` = :sessionData,
                     `lastAccessed` = :lastAccessed,
@@ -135,7 +135,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
     public function touch($sessionId, $sessionData): bool
     {
         $sql = "
-            UPDATE `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
+            UPDATE `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
             SET `lastAccessed` = :lastAccessed
             WHERE `sessionId` = :sessionId
         ";
@@ -157,7 +157,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
     {
         $lastAccessed = $this->currentTimestamp - $sessionMaxLifetime;
         $sql = "
-            DELETE FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
+            DELETE FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
             WHERE `lastAccessed` < :lastAccessed
         ";
         $params = [
@@ -176,7 +176,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
     public function delete($sessionId): bool
     {
         $sql = "
-            DELETE FROM `{$this->DB_DATABASE}`.`{$this->DB_TABLE}`
+            DELETE FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
             WHERE `sessionId` = :sessionId
         ";
         $params = [
@@ -204,9 +204,9 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
     {
         try {
             $this->pdo = new \PDO(
-                dsn: "mysql:host={$this->DB_HOSTNAME}",
-                username: $this->DB_USERNAME,
-                password: $this->DB_PASSWORD,
+                dsn: "mysql:host={$this->MYSQL_HOSTNAME}",
+                username: $this->MYSQL_USERNAME,
+                password: $this->MYSQL_PASSWORD,
                 options: [
                     \PDO::ATTR_EMULATE_PREPARES => false,
                 ]

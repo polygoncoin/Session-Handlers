@@ -1,5 +1,8 @@
 <?php
 
+// For Mongo DB (composer require mongodb/mongodb)
+// require __DIR__ . '/vendor/autoload.php';
+
 require_once __DIR__ . '/AutoloadSessionHandler.php'; // phpcs:ignore
 
 use CustomSessionHandler\Session;
@@ -13,6 +16,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File');
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
 // Session::initSessionHandler(sessionMode: 'Cookie');

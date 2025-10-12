@@ -1,7 +1,7 @@
 # Session Handlers
 Collection of Mostly used Session Handlers
 
-- Supports File / MySql / Redis / Memcached / Cookie based Session Handlers
+- Supports File / MySql / MongoDb / Redis / Memcached / Cookie based Session Handlers
 - Supports Readonly mode as well for all the above mentioned Session Handlers
 
 ## Example
@@ -9,6 +9,7 @@ Collection of Mostly used Session Handlers
 Using Normal session
 ```PHP
 <?php
+
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
@@ -22,6 +23,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
 // Session::initSessionHandler(sessionMode: 'Cookie');
@@ -35,6 +37,7 @@ $_SESSION['id'] = rand();
 Using Read-only mode
 ```PHP
 <?php
+
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
@@ -48,6 +51,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
 // Session::initSessionHandler(sessionMode: 'Cookie');
@@ -65,6 +69,7 @@ if (isset($_SESSION)) {
 Using Read-only with Normal session
 ```PHP
 <?php
+
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
@@ -78,6 +83,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
 // Session::initSessionHandler(sessionMode: 'Cookie');
@@ -101,6 +107,7 @@ $_SESSION['id'] = rand();
 Switching from previous session to this package based session handler
 ```PHP
 <?php
+
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
@@ -127,6 +134,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
 // Session::initSessionHandler(sessionMode: 'Cookie');
@@ -150,6 +158,7 @@ if (!isset($_SESSION) || !isset($_SESSION['id'])) {
 Switching between session mode using this session handler package
 ```PHP
 <?php
+
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
