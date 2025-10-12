@@ -189,7 +189,7 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
                 $update = [
                     '$set' => [
                         'lastAccessed' => $this->currentTimestamp,
-                        "sessionData" => $value
+                        "sessionData" => $this->encryptData(plainText: $value)
                     ]
                 ];
                 if ($this->collection->updateOne($filter, $update)) {
@@ -199,7 +199,7 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
                 $document = [
                     "sessionId" => $key,
                     "lastAccessed" => $this->currentTimestamp,
-                    "sessionData" => $value
+                    "sessionData" => $this->encryptData(plainText: $value)
                 ];
                 if ($this->collection->insertOne($document)) {
                     return true;
@@ -227,7 +227,7 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
             if ($document = $this->collection->findOne($filter)) {
                 $lastAccessed = $this->currentTimestamp - $this->sessionMaxLifetime;
                 if ($document['lastAccessed'] > $lastAccessed) {
-                    return $document['sessionData'];
+                    return $this->decryptData(cipherText: $document['sessionData']);
                 }
             }
         } catch (\Exception $e) {
