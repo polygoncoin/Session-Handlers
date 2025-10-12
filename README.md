@@ -113,13 +113,17 @@ include_once __DIR__ . '/AutoloadSessionHandler.php';
 use CustomSessionHandler\Session;
 
 $prevSessionData = [];
+
 if (isset($_COOKIE['PrevSessCookieName'])) {
     // Load session the was it was used previously in read_and_close mode
     // This will load previous session data in $_SESSION
     session_start(['read_and_close' => true]);
 
     // Collect previous session data
-    $prevSessionData = $_SESSION;
+    if (!empty($_SESSION)) {
+        $prevSessionData = $_SESSION;
+    }
+
     // Destroy previous session (Note: $_SESSION data will be preserved)
     session_destroy();
 }
@@ -152,6 +156,17 @@ if (!isset($_SESSION) || !isset($_SESSION['id'])) {
     die('Unauthorized');
 }
 
+// Start session in normal (read/write) mode.
+// Use once client is authorized and want to make changes in $_SESSION
+Session::sessionStartReadWrite();
+
+if (!empty($prevSessionData)) {
+    $_SESSION = $prevSessionData;
+}
+
+// Starting use of session in normal code from here
+$_SESSION['id'] = rand();
+
 // PHP Code
 ```
 
@@ -167,14 +182,18 @@ use CustomSessionHandler\Session;
 // Turn on output buffering
 ob_start();
 
-Session::$sessionName = 'PHPSESSID';
-Session::initSessionHandler(sessionMode: 'File');
-Session::sessionStartReadonly();
-
 $prevSessionData = [];
-if (!empty($_SESSION) {
+
+Session::$sessionName = 'PHPSESSID';
+
+if (isset($_COOKIE[Session::$sessionName])) {
+    Session::initSessionHandler(sessionMode: 'File');
+    Session::sessionStartReadonly();
+
     // Collect previous session data
-    $prevSessionData = $_SESSION;
+    if (!empty($_SESSION)) {
+        $prevSessionData = $_SESSION;
+    }
 
     // Destroy previous session (Note: $_SESSION data will be preserved)
     session_destroy();
@@ -201,6 +220,17 @@ if (!empty($prevSessionData)) {
 if (!isset($_SESSION) || !isset($_SESSION['id'])) {
     die('Unauthorized');
 }
+
+// Start session in normal (read/write) mode.
+// Use once client is authorized and want to make changes in $_SESSION
+Session::sessionStartReadWrite();
+
+if (!empty($prevSessionData)) {
+    $_SESSION = $prevSessionData;
+}
+
+// Starting use of session in normal code from here
+$_SESSION['id'] = rand();
 
 // PHP Code
 ```
