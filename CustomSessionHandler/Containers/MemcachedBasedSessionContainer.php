@@ -99,7 +99,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    private function updateSession($sessionId, $sessionData): bool
+    public function updateSession($sessionId, $sessionData): bool
     {
         return $this->setSession(
             sessionId: $sessionId,
@@ -149,7 +149,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
     public function deleteSession($sessionId): bool
     {
         try {
-            if ($this->memcacheD->deleteSession($sessionId)) {
+            if ($this->memcacheD->delete($sessionId)) {
                 return true;
             }
         } catch (\Exception $e) {
