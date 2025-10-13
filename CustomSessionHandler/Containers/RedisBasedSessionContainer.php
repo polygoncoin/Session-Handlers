@@ -62,10 +62,17 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|string
      */
-    public function get($sessionId): bool|string
+    public function getSession($sessionId): bool|string
     {
-        if ($this->redis->exists($sessionId)) {
-            return $this->decryptData(cipherText: $this->getKey(key: $sessionId));
+        try {
+            if (
+                $this->redis->exists($sessionId)
+                && ($data = $this->redis->get($sessionId))
+            ) {
+                return $this->decryptData(cipherText: $data);
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -78,11 +85,37 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|int
      */
-    public function set($sessionId, $sessionData): bool|int
+    public function setSession($sessionId, $sessionData): bool|int
     {
-        return $this->setKey(
-            key: $sessionId,
-            value: $this->encryptData(plainText: $sessionData)
+        try {
+            if (
+                $this->redis->set(
+                    $sessionId,
+                    $this->encryptData(plainText: $sessionData),
+                    $this->sessionMaxLifetime
+                )
+            ) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
+    }
+
+    /**
+     * Update Session
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool
+     */
+    public function updateSession($sessionId, $sessionData): bool
+    {
+        return $this->setSession(
+            sessionId: $sessionId,
+            sessionData: $sessionData
         );
     }
 
@@ -94,9 +127,16 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function touch($sessionId, $sessionData): bool
+    public function touchSession($sessionId, $sessionData): bool
     {
-        return $this->resetExpire(key: $sessionId);
+        try {
+            if ($this->redis->expire($sessionId, $this->sessionMaxLifetime)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
     }
 
     /**
@@ -106,7 +146,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function gc($sessionMaxLifetime): bool
+    public function gcSession($sessionMaxLifetime): bool
     {
         return true;
     }
@@ -118,9 +158,16 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function delete($sessionId): bool
+    public function deleteSession($sessionId): bool
     {
-        return $this->deleteKey(key: $sessionId);
+        try {
+            if ($this->redis->del($sessionId)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
     }
 
     /**
@@ -128,7 +175,7 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return void
      */
-    public function close(): void
+    public function closeSession(): void
     {
         $this->redis = null;
     }
@@ -160,84 +207,6 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
         } catch (\Exception $e) {
             $this->manageException(e: $e);
         }
-    }
-
-    /**
-     * Get Key
-     *
-     * @param string $key Key
-     *
-     * @return mixed
-     */
-    private function getKey($key): mixed
-    {
-        $row = [];
-        try {
-            if ($data = $this->redis->get($key)) {
-                return $data;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Set Key
-     *
-     * @param string $key   Key
-     * @param string $value Value
-     *
-     * @return mixed
-     */
-    private function setKey($key, $value): bool
-    {
-        try {
-            if ($this->redis->set($key, $value, $this->sessionMaxLifetime)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Reset Expiry
-     *
-     * @param string $key Key
-     *
-     * @return bool
-     */
-    private function resetExpire($key): bool
-    {
-        try {
-            if ($this->redis->expire($key, $this->sessionMaxLifetime)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Delete Key
-     *
-     * @param string $key Key
-     *
-     * @return bool
-     */
-    private function deleteKey($key): bool
-    {
-        try {
-            if ($this->redis->del($key)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
     }
 
     /**

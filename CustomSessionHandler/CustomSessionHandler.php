@@ -56,11 +56,11 @@ class CustomSessionHandler implements
     private $container = null;
 
     /**
-     * Session data found
+     * Session found
      *
      * @var null|bool
      */
-    private $dataFound = null;
+    private $foundSession = null;
 
     /**
      * Session Id
@@ -137,20 +137,20 @@ class CustomSessionHandler implements
      */
     public function validateId($sessionId): bool
     {
-        if ($sessionData = $this->container->get(sessionId: $sessionId)) {
+        if ($sessionData = $this->container->getSession(sessionId: $sessionId)) {
             if (is_null(value: $this->creatingSessionId)) {
                 $this->sessionData = &$sessionData;
             }
-            $this->dataFound = true;
+            $this->foundSession = true;
         } else {
             if (is_null(value: $this->creatingSessionId)) {
                 $this->unsetSessionCookie();
             }
-            $this->dataFound = false;
+            $this->foundSession = false;
         }
 
         // Don't change this return value
-        return $this->dataFound;
+        return $this->foundSession;
     }
 
     /**
@@ -168,7 +168,7 @@ class CustomSessionHandler implements
         // Delete session if previous sessionId exist eg; used for
         // session_regenerate_id()
         if (!empty($this->sessionId)) {
-            $this->container->delete(sessionId: $this->sessionId);
+            $this->container->deleteSession(sessionId: $this->sessionId);
         }
 
         $this->creatingSessionId = true;
@@ -220,8 +220,9 @@ class CustomSessionHandler implements
             return true;
         }
 
+        $fn = ($this->foundSession) ? 'updateSession' : 'setSession';
         if (
-            $this->container->set(
+            $this->container->$fn(
                 sessionId: $sessionId,
                 sessionData: $sessionData
             )
@@ -257,7 +258,7 @@ class CustomSessionHandler implements
         }
 
         if (
-            $this->container->touch(
+            $this->container->touchSession(
                 sessionId: $sessionId,
                 sessionData: $sessionData
             )
@@ -279,7 +280,7 @@ class CustomSessionHandler implements
      */
     public function gc($sessionMaxLifetime): int|false
     {
-        return $this->container->gc(sessionMaxLifetime: $sessionMaxLifetime);
+        return $this->container->gcSession(sessionMaxLifetime: $sessionMaxLifetime);
     }
 
     /**
@@ -296,7 +297,7 @@ class CustomSessionHandler implements
         // Deleting session cookies set on client end
         $this->unsetSessionCookie();
 
-        return $this->container->delete(sessionId: $sessionId);
+        return $this->container->deleteSession(sessionId: $sessionId);
     }
 
     /**
@@ -309,8 +310,8 @@ class CustomSessionHandler implements
     public function close(): bool
     {
         // Updating timestamp for readonly mode (read_and_close option)
-        if (!$this->isTimestampUpdated && $this->dataFound === true) {
-            $this->container->touch(
+        if (!$this->isTimestampUpdated && $this->foundSession === true) {
+            $this->container->touchSession(
                 sessionId: $this->sessionId,
                 sessionData: $this->sessionData
             );
@@ -318,9 +319,9 @@ class CustomSessionHandler implements
 
         $this->resetUniqueCookieHeaders();
 
-        $this->container->close();
+        $this->container->closeSession();
         $this->sessionData = '';
-        $this->dataFound = null;
+        $this->foundSession = null;
         $this->isTimestampUpdated = false;
 
         return true;

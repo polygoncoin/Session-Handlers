@@ -46,7 +46,7 @@ interface SessionContainerInterface
      *
      * @return bool|string
      */
-    public function get($sessionId): bool|string;
+    public function getSession($sessionId): bool|string;
 
     /**
      * For Custom Session Handler - Write session data
@@ -56,7 +56,17 @@ interface SessionContainerInterface
      *
      * @return bool|int
      */
-    public function set($sessionId, $sessionData): bool|int;
+    public function setSession($sessionId, $sessionData): bool|int;
+
+    /**
+     * For Custom Session Handler - Update session data
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool|int
+     */
+    public function updateSession($sessionId, $sessionData): bool|int;
 
     /**
      * For Custom Session Handler - Update session timestamp
@@ -66,7 +76,7 @@ interface SessionContainerInterface
      *
      * @return bool
      */
-    public function touch($sessionId, $sessionData): bool;
+    public function touchSession($sessionId, $sessionData): bool;
 
     /**
      * For Custom Session Handler - Cleanup old sessions
@@ -75,7 +85,7 @@ interface SessionContainerInterface
      *
      * @return bool
      */
-    public function gc($sessionMaxLifetime): bool;
+    public function gcSession($sessionMaxLifetime): bool;
 
     /**
      * For Custom Session Handler - Destroy a session
@@ -84,12 +94,12 @@ interface SessionContainerInterface
      *
      * @return bool
      */
-    public function delete($sessionId): bool;
+    public function deleteSession($sessionId): bool;
 
     /**
      * For Custom Session Handler - Close container connection
      *
      * @return void
      */
-    public function close(): void;
+    public function closeSession(): void;
 }

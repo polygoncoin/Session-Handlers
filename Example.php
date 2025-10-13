@@ -1,7 +1,7 @@
 <?php
 
 // For Mongo DB (composer require mongodb/mongodb)
-// require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 require_once __DIR__ . '/AutoloadSessionHandler.php'; // phpcs:ignore
 

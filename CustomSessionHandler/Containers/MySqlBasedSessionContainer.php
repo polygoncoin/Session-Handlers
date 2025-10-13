@@ -42,8 +42,6 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
 
     private $pdo = null;
 
-    private $foundSession = false;
-
     /**
      * Initialize
      *
@@ -65,9 +63,8 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|string
      */
-    public function get($sessionId): bool|string
+    public function getSession($sessionId): bool|string
     {
-        $this->foundSession = false;
         $sql = "
             SELECT `sessionData`
             FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
@@ -81,7 +78,6 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
             ($row = $this->getSql(sql: $sql, params: $params))
             && isset($row['sessionData'])
         ) {
-            $this->foundSession = true;
             return $this->decryptData(cipherText: $row['sessionData']);
         }
         return false;
@@ -95,33 +91,49 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|int
      */
-    public function set($sessionId, $sessionData): bool|int
+    public function setSession($sessionId, $sessionData): bool|int
     {
-        if ($this->foundSession) {
-            $sql = "
-                UPDATE `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-                SET
-                    `sessionData` = :sessionData,
-                    `lastAccessed` = :lastAccessed
-                WHERE
-                    `sessionId` = :sessionId
-            ";
-        } else {
-            $sql = "
-                INSERT INTO `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-                SET
-                    `sessionData` = :sessionData,
-                    `lastAccessed` = :lastAccessed,
-                    `sessionId` = :sessionId
-            ";
-        }
+        $sql = "
+            INSERT INTO `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
+            SET
+                `sessionData` = :sessionData,
+                `lastAccessed` = :lastAccessed,
+                `sessionId` = :sessionId
+        ";
         $params = [
             ':sessionId' => $sessionId,
             ':sessionData' => $this->encryptData(plainText: $sessionData),
             ':lastAccessed' => $this->currentTimestamp
         ];
 
-        return $this->setSql(sql: $sql, params: $params);
+        return $this->execSql(sql: $sql, params: $params);
+    }
+
+    /**
+     * For Custom Session Handler - Update session data
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool|int
+     */
+    public function updateSession($sessionId, $sessionData): bool|int
+    {
+        $sql = "
+            UPDATE `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
+            SET
+                `sessionData` = :sessionData,
+                `lastAccessed` = :lastAccessed
+            WHERE
+                `sessionId` = :sessionId
+        ";
+        $params = [
+            ':sessionId' => $sessionId,
+            ':sessionData' => $this->encryptData(plainText: $sessionData),
+            ':lastAccessed' => $this->currentTimestamp
+        ];
+
+        return $this->execSql(sql: $sql, params: $params);
     }
 
     /**
@@ -132,7 +144,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function touch($sessionId, $sessionData): bool
+    public function touchSession($sessionId, $sessionData): bool
     {
         $sql = "
             UPDATE `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
@@ -143,7 +155,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
             ':sessionId' => $sessionId,
             ':lastAccessed' => $this->currentTimestamp
         ];
-        return $this->setSql(sql: $sql, params: $params);
+        return $this->execSql(sql: $sql, params: $params);
     }
 
     /**
@@ -153,7 +165,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function gc($sessionMaxLifetime): bool
+    public function gcSession($sessionMaxLifetime): bool
     {
         $lastAccessed = $this->currentTimestamp - $sessionMaxLifetime;
         $sql = "
@@ -163,7 +175,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
         $params = [
             ':lastAccessed' => $lastAccessed
         ];
-        return $this->setSql(sql: $sql, params: $params);
+        return $this->execSql(sql: $sql, params: $params);
     }
 
     /**
@@ -173,7 +185,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function delete($sessionId): bool
+    public function deleteSession($sessionId): bool
     {
         $sql = "
             DELETE FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
@@ -182,7 +194,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
         $params = [
             ':sessionId' => $sessionId
         ];
-        return $this->setSql(sql: $sql, params: $params);
+        return $this->execSql(sql: $sql, params: $params);
     }
 
     /**
@@ -190,7 +202,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return void
      */
-    public function close(): void
+    public function closeSession(): void
     {
         $this->pdo = null;
     }
@@ -217,7 +229,7 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
     }
 
     /**
-     * Get SQL
+     * Get Session
      *
      * @param string $sql    SQL
      * @param array  $params Params
@@ -252,14 +264,14 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
     }
 
     /**
-     * Set SQL
+     * Execute SQL
      *
      * @param string $sql    SQL
      * @param array  $params Params
      *
      * @return bool
      */
-    private function setSql($sql, $params = []): bool
+    private function execSql($sql, $params = []): bool
     {
         try {
             $stmt = $this->pdo->prepare(

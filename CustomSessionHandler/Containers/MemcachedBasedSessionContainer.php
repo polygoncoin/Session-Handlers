@@ -59,10 +59,14 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|string
      */
-    public function get($sessionId): bool|string
+    public function getSession($sessionId): bool|string
     {
-        if ($data = $this->getKey(key: $sessionId)) {
-            return $this->decryptData(cipherText: $data);
+        try {
+            if ($data = $this->memcacheD->get($sessionId)) {
+                return $this->decryptData(cipherText: $data);
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -75,11 +79,31 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|int
      */
-    public function set($sessionId, $sessionData): bool|int
+    public function setSession($sessionId, $sessionData): bool|int
     {
-        return $this->setKey(
-            key: $sessionId,
-            value: $this->encryptData(plainText: $sessionData)
+        try {
+            if ($this->memcacheD->set($sessionId, $sessionData, $this->sessionMaxLifetime)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
+    }
+
+    /**
+     * Update Session
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool
+     */
+    private function updateSession($sessionId, $sessionData): bool
+    {
+        return $this->setSession(
+            sessionId: $sessionId,
+            sessionData: $sessionData
         );
     }
 
@@ -91,9 +115,16 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function touch($sessionId, $sessionData): bool
+    public function touchSession($sessionId, $sessionData): bool
     {
-        return $this->resetExpire(key: $sessionId);
+        try {
+            if ($this->memcacheD->touch($sessionId, $this->sessionMaxLifetime)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
     }
 
     /**
@@ -103,7 +134,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function gc($sessionMaxLifetime): bool
+    public function gcSession($sessionMaxLifetime): bool
     {
         return true;
     }
@@ -115,9 +146,16 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function delete($sessionId): bool
+    public function deleteSession($sessionId): bool
     {
-        return $this->deleteKey(key: $sessionId);
+        try {
+            if ($this->memcacheD->deleteSession($sessionId)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
     }
 
     /**
@@ -125,7 +163,7 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return void
      */
-    public function close(): void
+    public function closeSession(): void
     {
         $this->memcacheD = null;
     }
@@ -153,83 +191,6 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
         } catch (\Exception $e) {
             $this->manageException(e: $e);
         }
-    }
-
-    /**
-     * Get Key
-     *
-     * @param string $key Key
-     *
-     * @return mixed
-     */
-    private function getKey($key): mixed
-    {
-        try {
-            if ($data = $this->memcacheD->get($key)) {
-                return $data;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Set Key
-     *
-     * @param string $key   Key
-     * @param string $value Value
-     *
-     * @return bool
-     */
-    private function setKey($key, $value): bool
-    {
-        try {
-            if ($this->memcacheD->set($key, $value, $this->sessionMaxLifetime)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Reset Expiry
-     *
-     * @param string $key Key
-     *
-     * @return bool
-     */
-    private function resetExpire($key): bool
-    {
-        try {
-            if ($this->memcacheD->touch($key, $this->sessionMaxLifetime)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Delete Key
-     *
-     * @param string $key Key
-     *
-     * @return bool
-     */
-    private function deleteKey($key): bool
-    {
-        try {
-            if ($this->memcacheD->delete($key)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
     }
 
     /**

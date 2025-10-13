@@ -48,8 +48,6 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
     private $database = null;
     private $collection = null;
 
-    private $foundSession = false;
-
     /**
      * Initialize
      *
@@ -71,12 +69,19 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|string
      */
-    public function get($sessionId): bool|string
+    public function getSession($sessionId): bool|string
     {
-        $this->foundSession = false;
-        if ($this->getKey($sessionId)) {
-            $this->foundSession = true;
-            return $this->decryptData(cipherText: $this->getKey(key: $sessionId));
+        try {
+            $filter = ['sessionId' => $sessionId];
+
+            if ($document = $this->collection->findOne($filter)) {
+                $lastAccessed = $this->currentTimestamp - $this->sessionMaxLifetime;
+                if ($document['lastAccessed'] > $lastAccessed) {
+                    return $this->decryptData(cipherText: $document['sessionData']);
+                }
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
         }
         return false;
     }
@@ -89,12 +94,48 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|int
      */
-    public function set($sessionId, $sessionData): bool|int
+    public function setSession($sessionId, $sessionData): bool|int
     {
-        return $this->setKey(
-            key: $sessionId,
-            value: $this->encryptData(plainText: $sessionData)
-        );
+        try {
+            $document = [
+                "sessionId" => $sessionId,
+                "lastAccessed" => $this->currentTimestamp,
+                "sessionData" => $this->encryptData(plainText: $sessionData)
+            ];
+            if ($this->collection->insertOne($document)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
+    }
+
+    /**
+     * Update Session
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool
+     */
+    public function updateSession($sessionId, $sessionData): bool
+    {
+        try {
+            $filter = ['sessionId' => $sessionId];
+            $update = [
+                '$set' => [
+                    'lastAccessed' => $this->currentTimestamp,
+                    "sessionData" => $this->encryptData(plainText: $sessionData)
+                ]
+            ];
+            if ($this->collection->updateOne($filter, $update)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
     }
 
     /**
@@ -105,9 +146,23 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function touch($sessionId, $sessionData): bool
+    public function touchSession($sessionId, $sessionData): bool
     {
-        return $this->resetExpire(key: $sessionId);
+        try {
+            $filter = ['sessionId' => $sessionId];
+            $update = [
+                '$set' => [
+                    'lastAccessed' => $this->currentTimestamp
+                ]
+            ];
+
+            if ($this->collection->updateOne($filter, $update)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
     }
 
     /**
@@ -117,7 +172,7 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function gc($sessionMaxLifetime): bool
+    public function gcSession($sessionMaxLifetime): bool
     {
         return true;
     }
@@ -129,9 +184,18 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function delete($sessionId): bool
+    public function deleteSession($sessionId): bool
     {
-        return $this->deleteKey(key: $sessionId);
+        try {
+            $filter = ['sessionId' => $sessionId];
+
+            if ($this->collection->deleteOne($filter)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->manageException(e: $e);
+        }
+        return false;
     }
 
     /**
@@ -139,7 +203,7 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return void
      */
-    public function close(): void
+    public function closeSession(): void
     {
         $this->mongo = null;
     }
@@ -170,116 +234,6 @@ class MongoDbBasedSessionContainer extends SessionContainerHelper implements
         } catch (\Exception $e) {
             $this->manageException(e: $e);
         }
-    }
-
-    /**
-     * Set Key
-     *
-     * @param string $key   Key
-     * @param string $value Value
-     *
-     * @return mixed
-     */
-    private function setKey($key, $value): bool
-    {
-        try {
-            if ($this->foundSession) {
-                $filter = ['sessionId' => $key];
-                $update = [
-                    '$set' => [
-                        'lastAccessed' => $this->currentTimestamp,
-                        "sessionData" => $this->encryptData(plainText: $value)
-                    ]
-                ];
-                if ($this->collection->updateOne($filter, $update)) {
-                    return true;
-                }
-            } else {
-                $document = [
-                    "sessionId" => $key,
-                    "lastAccessed" => $this->currentTimestamp,
-                    "sessionData" => $this->encryptData(plainText: $value)
-                ];
-                if ($this->collection->insertOne($document)) {
-                    return true;
-                }
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Get Key
-     *
-     * @param string $key Key
-     *
-     * @return mixed
-     */
-    private function getKey($key): mixed
-    {
-        $row = [];
-        try {
-            $filter = ['sessionId' => $key];
-
-            if ($document = $this->collection->findOne($filter)) {
-                $lastAccessed = $this->currentTimestamp - $this->sessionMaxLifetime;
-                if ($document['lastAccessed'] > $lastAccessed) {
-                    return $this->decryptData(cipherText: $document['sessionData']);
-                }
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Reset Expiry
-     *
-     * @param string $key Key
-     *
-     * @return bool
-     */
-    private function resetExpire($key): bool
-    {
-        try {
-            $filter = ['sessionId' => $key];
-            $update = [
-                '$set' => [
-                    'lastAccessed' => $this->currentTimestamp
-                ]
-            ];
-
-            if ($this->collection->updateOne($filter, $update)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
-
-    /**
-     * Delete Key
-     *
-     * @param string $key Key
-     *
-     * @return bool
-     */
-    private function deleteKey($key): bool
-    {
-        try {
-            $filter = ['sessionId' => $key];
-
-            if ($this->collection->deleteOne($filter)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
     }
 
     /**

@@ -356,17 +356,17 @@ class Session
         }
 
         if (!empty($options)) {
-            foreach ($options as $key => $value) {
+            foreach ($options as $option => $value) {
                 if (
                     in_array(
-                        needle: $key,
+                        needle: $option,
                         haystack: ['name', 'serialize_handler', 'gc_maxlifetime']
                     )
                 ) {
-                    // Skip these keys
+                    // Skip option
                     continue;
                 }
-                self::$options[$key] = $value;
+                self::$options[$option] = $value;
             }
         }
     }

@@ -61,7 +61,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|string
      */
-    public function get($sessionId): bool|string
+    public function getSession($sessionId): bool|string
     {
 
         $filepath = $this->sessionSavePath . '/' .
@@ -86,7 +86,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool|int
      */
-    public function set($sessionId, $sessionData): bool|int
+    public function setSession($sessionId, $sessionData): bool|int
     {
         $filepath = $this->sessionSavePath . '/' .
             $this->sessionFilePrefix . $sessionId;
@@ -99,6 +99,20 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
         );
     }
 
+
+    /**
+     * For Custom Session Handler - Update session data
+     *
+     * @param string $sessionId   Session ID
+     * @param string $sessionData Session Data
+     *
+     * @return bool|int
+     */
+    public function updateSession($sessionId, $sessionData): bool|int
+    {
+        return $this->setSession(sessionId: $sessionId, sessionData: $sessionData);
+    }
+
     /**
      * For Custom Session Handler - Update session timestamp
      *
@@ -107,7 +121,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function touch($sessionId, $sessionData): bool
+    public function touchSession($sessionId, $sessionData): bool
     {
         $filepath = $this->sessionSavePath . '/' .
             $this->sessionFilePrefix . $sessionId;
@@ -121,7 +135,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function gc($sessionMaxLifetime): bool
+    public function gcSession($sessionMaxLifetime): bool
     {
         $datetime = date(
             format: 'Y-m-dTH:i:s+0000',
@@ -142,7 +156,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return bool
      */
-    public function delete($sessionId): bool
+    public function deleteSession($sessionId): bool
     {
         $filepath = $this->sessionSavePath . '/' .
             $this->sessionFilePrefix . $sessionId;
@@ -157,7 +171,7 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
      *
      * @return void
      */
-    public function close(): void
+    public function closeSession(): void
     {
     }
 }
