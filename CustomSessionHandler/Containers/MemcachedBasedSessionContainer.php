@@ -82,7 +82,13 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
     public function setSession($sessionId, $sessionData): bool|int
     {
         try {
-            if ($this->memcacheD->set($sessionId, $sessionData, $this->sessionMaxLifetime)) {
+            if (
+                $this->memcacheD->set(
+                    $sessionId,
+                    $this->encryptData(plainText: $sessionData),
+                    $this->sessionMaxLifetime
+                )
+            ) {
                 return true;
             }
         } catch (\Exception $e) {
@@ -97,9 +103,9 @@ class MemcachedBasedSessionContainer extends SessionContainerHelper implements
      * @param string $sessionId   Session ID
      * @param string $sessionData Session Data
      *
-     * @return bool
+     * @return bool|int
      */
-    public function updateSession($sessionId, $sessionData): bool
+    public function updateSession($sessionId, $sessionData): bool|int
     {
         return $this->setSession(
             sessionId: $sessionId,

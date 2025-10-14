@@ -109,9 +109,9 @@ class RedisBasedSessionContainer extends SessionContainerHelper implements
      * @param string $sessionId   Session ID
      * @param string $sessionData Session Data
      *
-     * @return bool
+     * @return bool|int
      */
-    public function updateSession($sessionId, $sessionData): bool
+    public function updateSession($sessionId, $sessionData): bool|int
     {
         return $this->setSession(
             sessionId: $sessionId,
