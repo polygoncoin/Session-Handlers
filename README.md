@@ -10,6 +10,9 @@ Using Normal session
 ```PHP
 <?php
 
+// For Mongo DB (composer require mongodb/mongodb)
+// require __DIR__ . '/vendor/autoload.php';
+
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
@@ -38,6 +41,9 @@ $_SESSION['id'] = rand();
 Using Read-only mode
 ```PHP
 <?php
+
+// For Mongo DB (composer require mongodb/mongodb)
+// require __DIR__ . '/vendor/autoload.php';
 
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
