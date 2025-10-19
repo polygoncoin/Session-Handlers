@@ -16,6 +16,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File');
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'PostgreSql');
 // Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');

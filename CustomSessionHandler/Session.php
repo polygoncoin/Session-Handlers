@@ -63,19 +63,27 @@ class Session
     public static $MYSQL_DATABASE = 'session_db';
     public static $MYSQL_TABLE = 'sessions';
 
+    /* PostgreSql Session config */
+    public static $PGSQL_HOSTNAME = 'localhost';
+    public static $PGSQL_PORT = 5432;
+    public static $PGSQL_USERNAME = null;
+    public static $PGSQL_PASSWORD = null;
+    public static $PGSQL_DATABASE = 'session_db';
+    public static $PGSQL_TABLE = 'sessions';
+
     /* MongoDb Session config */
     public static $MONGODB_HOSTNAME = 'localhost';
     public static $MONGODB_PORT = 27017;
-    public static $MONGODB_USERNAME = 'ramesh';
-    public static $MONGODB_PASSWORD = 'shames11';
+    public static $MONGODB_USERNAME = null;
+    public static $MONGODB_PASSWORD = null;
     public static $MONGODB_DATABASE = 'session_db';
     public static $MONGODB_COLLECTION = 'sessions';
 
     /* Redis Session config */
     public static $REDIS_HOSTNAME = 'localhost';
     public static $REDIS_PORT = 6379;
-    public static $REDIS_USERNAME = 'ramesh';
-    public static $REDIS_PASSWORD = 'shames11';
+    public static $REDIS_USERNAME = null;
+    public static $REDIS_PASSWORD = null;
     public static $REDIS_DATABASE = 0;
 
     /* Memcached Session config */
@@ -143,7 +151,7 @@ class Session
         if (
             !in_array(
                 needle: self::$sessionMode,
-                haystack: ['File', 'MySql',  'MongoDb', 'Redis', 'Memcached', 'Cookie']
+                haystack: ['File', 'MySql', 'PostgreSql', 'MongoDb', 'Redis', 'Memcached', 'Cookie']
             )
         ) {
             die('Invalid "sessionMode"');
@@ -191,6 +199,20 @@ class Session
                     die('Invalid "MYSQL_TABLE"');
                 }
                 break;
+            case 'PostgreSql':
+                if (empty(self::$PGSQL_HOSTNAME)) {
+                    die('Invalid "PGSQL_HOSTNAME"');
+                }
+                if (empty(self::$PGSQL_PORT)) {
+                    die('Invalid "PGSQL_PORT"');
+                }
+                if (empty(self::$PGSQL_DATABASE)) {
+                    die('Invalid "PGSQL_DATABASE"');
+                }
+                if (empty(self::$PGSQL_TABLE)) {
+                    die('Invalid "PGSQL_TABLE"');
+                }
+                break;
             case 'MongoDb':
                 if (empty(self::$MONGODB_HOSTNAME)) {
                     die('Invalid "MONGODB_HOSTNAME"');
@@ -211,12 +233,6 @@ class Session
                 }
                 if (empty(self::$REDIS_PORT)) {
                     die('Invalid "REDIS_PORT"');
-                }
-                if (empty(self::$REDIS_USERNAME)) {
-                    die('Invalid "REDIS_USERNAME"');
-                }
-                if (empty(self::$REDIS_PASSWORD)) {
-                    die('Invalid "REDIS_PASSWORD"');
                 }
                 if (empty(self::$REDIS_DATABASE) && self::$REDIS_DATABASE != 0) {
                     die('Invalid "REDIS_DATABASE"');
@@ -258,6 +274,14 @@ class Session
                 self::$sessionContainer->MYSQL_PASSWORD = self::$MYSQL_PASSWORD;
                 self::$sessionContainer->MYSQL_DATABASE = self::$MYSQL_DATABASE;
                 self::$sessionContainer->MYSQL_TABLE = self::$MYSQL_TABLE;
+                break;
+            case 'PostgreSql':
+                self::$sessionContainer->PGSQL_HOSTNAME = self::$PGSQL_HOSTNAME;
+                self::$sessionContainer->PGSQL_PORT = self::$PGSQL_PORT;
+                self::$sessionContainer->PGSQL_USERNAME = self::$PGSQL_USERNAME;
+                self::$sessionContainer->PGSQL_PASSWORD = self::$PGSQL_PASSWORD;
+                self::$sessionContainer->PGSQL_DATABASE = self::$PGSQL_DATABASE;
+                self::$sessionContainer->PGSQL_TABLE = self::$PGSQL_TABLE;
                 break;
             case 'MongoDb':
                 self::$sessionContainer->MONGODB_HOSTNAME = self::$MONGODB_HOSTNAME;

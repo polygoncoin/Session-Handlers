@@ -23,6 +23,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'PostgreSql');
 // Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
@@ -51,6 +52,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'PostgreSql');
 // Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
@@ -70,6 +72,9 @@ Using Read-only with Normal session
 ```PHP
 <?php
 
+// For Mongo DB (composer require mongodb/mongodb)
+// require __DIR__ . '/vendor/autoload.php';
+
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
@@ -83,6 +88,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'PostgreSql');
 // Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
@@ -109,6 +115,9 @@ $_SESSION['id'] = rand();
 Switching from previous session to this package based session handler
 ```PHP
 <?php
+
+// For Mongo DB (composer require mongodb/mongodb)
+// require __DIR__ . '/vendor/autoload.php';
 
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
@@ -140,6 +149,7 @@ $options = [];
 // Initialize Session Handler
 Session::initSessionHandler(sessionMode: 'File', $options);
 // Session::initSessionHandler(sessionMode: 'MySql');
+// Session::initSessionHandler(sessionMode: 'PostgreSql');
 // Session::initSessionHandler(sessionMode: 'MongoDb');
 // Session::initSessionHandler(sessionMode: 'Redis');
 // Session::initSessionHandler(sessionMode: 'Memcached');
@@ -175,6 +185,9 @@ $_SESSION['id'] = rand();
 Switching between session mode using this session handler package
 ```PHP
 <?php
+
+// For Mongo DB (composer require mongodb/mongodb)
+// require __DIR__ . '/vendor/autoload.php';
 
 include_once __DIR__ . '/AutoloadSessionHandler.php';
 
@@ -246,4 +259,15 @@ CREATE TABLE IF NOT EXISTS `sessions` (
     `sessionData` MEDIUMBLOB,
     PRIMARY KEY (`sessionId`)
 ) ENGINE=InnoDB;
+```
+
+## Database Table for PostgreSql
+
+```SQL
+CREATE TABLE IF NOT EXISTS sessions (
+    session_id CHAR(64) NOT NULL,
+    last_accessed BIGINT NOT NULL,
+    session_data TEXT,
+    PRIMARY KEY (session_id)
+);
 ```
