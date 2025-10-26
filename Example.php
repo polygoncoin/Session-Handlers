@@ -14,13 +14,13 @@ ob_start();
 $options = [];
 
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File');
-// Session::initSessionHandler(sessionMode: 'MySql');
-// Session::initSessionHandler(sessionMode: 'PostgreSql');
-// Session::initSessionHandler(sessionMode: 'MongoDb');
-// Session::initSessionHandler(sessionMode: 'Redis');
-// Session::initSessionHandler(sessionMode: 'Memcached');
-// Session::initSessionHandler(sessionMode: 'Cookie');
+Session::initSessionHandler(sessionMode: 'File', options: $options);
+// Session::initSessionHandler(sessionMode: 'MySql', options: $options);
+// Session::initSessionHandler(sessionMode: 'PostgreSql', options: $options);
+// Session::initSessionHandler(sessionMode: 'MongoDb', options: $options);
+// Session::initSessionHandler(sessionMode: 'Redis', options: $options);
+// Session::initSessionHandler(sessionMode: 'Memcached', options: $options);
+// Session::initSessionHandler(sessionMode: 'Cookie', options: $options);
 
 // Start session in readonly mode
 // Use when user is already logged in and we need to authorize the client cookie.

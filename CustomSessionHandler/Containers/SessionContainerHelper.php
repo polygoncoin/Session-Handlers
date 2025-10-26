@@ -45,6 +45,9 @@ class SessionContainerHelper
     // Current timestamp
     public $currentTimestamp = null;
 
+    // Session Start $options param
+    public $sessionOptions = null;
+
     // Session cookie name
     public $sessionName = null;
 

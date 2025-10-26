@@ -262,6 +262,7 @@ class Session
         self::$sessionContainer = new $containerClassName();
 
         // Setting required common parameters
+        self::$sessionContainer->sessionOptions = self::$options;
         self::$sessionContainer->sessionName = self::$sessionName;
         self::$sessionContainer->sessionMaxLifetime = self::$sessionMaxLifetime;
 

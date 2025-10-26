@@ -348,26 +348,16 @@ class CustomSessionHandler implements
             setcookie(
                 name: $this->sessionName,
                 value: '',
-                expires_or_options: 1
-            );
-            setcookie(
-                name: $this->sessionName,
-                value: '',
                 expires_or_options: 1,
-                path: '/'
+                path: $this->container->sessionOptions['cookie_path']
             );
         }
         if (!empty($this->sessionDataName)) {
             setcookie(
                 name: $this->sessionDataName,
                 value: '',
-                expires_or_options: 1
-            );
-            setcookie(
-                name: $this->sessionDataName,
-                value: '',
                 expires_or_options: 1,
-                path: '/'
+                path: $this->container->sessionOptions['cookie_path']
             );
         }
     }

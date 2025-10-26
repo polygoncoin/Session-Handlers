@@ -108,7 +108,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
             value: $cookieData,
             expires_or_options: [
                 'expires' => 0,
-                'path' => '/',
+                'path' => $this->sessionOptions['cookie_path'],
                 'domain' => '',
                 'secure' => (
                     (
@@ -168,7 +168,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
             value: $cookieData,
             expires_or_options: [
                 'expires' => 0,
-                'path' => '/',
+                'path' => $this->sessionOptions['cookie_path'],
                 'domain' => '',
                 'secure' => (
                     (
