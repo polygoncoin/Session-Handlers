@@ -189,6 +189,7 @@ $_SESSION['id'] = rand();
 ```
 
 Switching between session mode using this session handler package
+
 ```PHP
 <?php
 
@@ -252,6 +253,30 @@ if (!empty($prevSessionData)) {
 
 // Starting use of session in normal code from here
 $_SESSION['id'] = rand();
+
+// PHP Code
+```
+
+Delete user sessions (E.g. used in feature like logout all sessions)
+
+```PHP
+<?php
+
+// For Mongo DB (composer require mongodb/mongodb)
+// require __DIR__ . '/vendor/autoload.php';
+
+include_once __DIR__ . '/AutoloadSessionHandler.php';
+
+use CustomSessionHandler\Session;
+
+// Initialize Session Handler
+Session::initSessionHandler(sessionMode: 'File');
+
+// Delete single session
+Session::deleteSession($sessionId);
+
+// Delete sessions in array
+Session::deleteSessions($sessionIds);
 
 // PHP Code
 ```
