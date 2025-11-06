@@ -339,7 +339,7 @@ class Session
         if (self::$sessionMode === 'Cookie') {
             $customSessionHandler->sessionDataName = self::$sessionDataName;
         }
-        session_set_save_handler(open: $customSessionHandler, close: true);
+        session_set_save_handler($customSessionHandler, true);
     }
 
     /**
@@ -452,5 +452,34 @@ class Session
     public static function sessionStartReadWrite(): bool
     {
         return session_start(options: self::$options);
+    }
+
+    /**
+     * For Custom Session Handler - Destroy a session
+     *
+     * @param string $sessionId Session ID
+     *
+     * @return bool
+     */
+    public static function deleteSession($sessionId): bool
+    {
+        if (self::$sessionContainer) {
+            return self::$sessionContainer->deleteSession($sessionId);
+        }
+        return false;
+    }
+
+    /**
+     * For Custom Session Handler - Destroy a session
+     *
+     * @param array $sessionIds Session IDs
+     *
+     * @return void
+     */
+    public static function deleteSessions($sessionIds): void
+    {
+        for ($i = 0, $iCount = count($sessionIds); $i < $iCount; $i++) {
+            self::deleteSession($sessionIds[$i]);
+        }
     }
 }
