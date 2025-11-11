@@ -317,7 +317,7 @@ class CustomSessionHandler implements
             );
         }
 
-        $this->resetUniqueCookieHeaders();
+        $this->checkCookiesHeader();
 
         $this->container->closeSession();
         $this->sessionData = '';
@@ -363,35 +363,24 @@ class CustomSessionHandler implements
     }
 
     /**
-     * Set Unique Cookie Headers
+     * Check Cookies Header
      *
      * @return void
      */
-    private function resetUniqueCookieHeaders(): void
+    private function checkCookiesHeader(): void
     {
         // Check header is sent.
         if (headers_sent()) {
             return;
         }
 
-        $headers = [];
-
-        // Collect Cookie headers
-        foreach (headers_list() as $header) {
-            // Check for Cookie header
-            if (strpos(haystack: $header, needle: 'Set-Cookie:') === 0) {
-                $headers[] = $header;
-            }
-        }
-
-        // Remove all Set-Cookie headers
-        header_remove(name: 'Set-Cookie');
-
-        // Set Unique Set-Cookie headers
-        for (; $header = array_shift(array: $headers);) {
-            if (!in_array(needle: $header, haystack: $headers)) {
-                header(header: $header, replace: false);
-            }
+        // Removed Session Cookie if read_and_close is enabled
+        if (
+            isset($this->container->sessionOptions['read_and_close'])
+            && $this->container->sessionOptions['read_and_close'] === true
+        ) {
+            // Remove all Set-Cookie headers
+            header_remove(name: 'Set-Cookie');
         }
     }
 }
