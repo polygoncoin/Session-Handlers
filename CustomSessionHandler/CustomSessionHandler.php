@@ -379,8 +379,14 @@ class CustomSessionHandler implements
             isset($this->container->sessionOptions['read_and_close'])
             && $this->container->sessionOptions['read_and_close'] === true
         ) {
-            // Remove all Set-Cookie headers
-            header_remove(name: 'Set-Cookie');
+            // Remove Session Set-Cookie headers
+            // header_remove(name: 'Set-Cookie');
+            setcookie(
+                name: $this->sessionName,
+                value: '',
+                expires_or_options: 1,
+                path: $this->container->sessionOptions['cookie_path']
+            );
         }
     }
 }
