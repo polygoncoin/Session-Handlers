@@ -305,4 +305,4 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 ## License
 
-[MIT](License)
+[MIT](LICENSE)
