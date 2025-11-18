@@ -302,3 +302,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     PRIMARY KEY (session_id)
 );
 ```
+
+## License
+
+[MIT](License)
