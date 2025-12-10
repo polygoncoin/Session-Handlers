@@ -99,7 +99,6 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
         );
     }
 
-
     /**
      * For Custom Session Handler - Update session data
      *
