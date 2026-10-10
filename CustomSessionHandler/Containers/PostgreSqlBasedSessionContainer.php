@@ -110,15 +110,6 @@ class PostgreSqlBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool|int {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$sql = "
 			INSERT INTO {$this->sessionServerTable} (session_id, last_accessed, session_data)
 			VALUES ($1, $2, $3)
@@ -149,15 +140,6 @@ class PostgreSqlBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool|int {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$sql = "
 			UPDATE {$this->sessionServerTable}
 			SET
@@ -192,15 +174,6 @@ class PostgreSqlBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$sql = "
 			UPDATE {$this->sessionServerTable}
 			SET last_accessed = $1

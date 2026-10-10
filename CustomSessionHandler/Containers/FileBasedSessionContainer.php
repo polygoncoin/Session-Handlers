@@ -116,14 +116,6 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool|int {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$filepath = $this->sessionSavePath . '/'
 			. $this->sessionFilePrefix . $sessionId;
 		if (
@@ -155,14 +147,6 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool|int {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		return $this->setSession(
 			sessionId: $sessionId,
 			sessionData: $sessionData
@@ -181,14 +165,6 @@ class FileBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$filepath = $this->sessionSavePath . '/'
 			. $this->sessionFilePrefix . $sessionId;
 		return touch(

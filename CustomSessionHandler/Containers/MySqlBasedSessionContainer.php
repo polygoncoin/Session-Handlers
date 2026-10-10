@@ -113,15 +113,6 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool|int {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$sql = "
 			INSERT INTO `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
 			SET
@@ -155,15 +146,6 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool|int {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$sql = "
 			UPDATE `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
 			SET
@@ -198,15 +180,6 @@ class MySqlBasedSessionContainer extends SessionContainerHelper implements
 		$sessionId,
 		$sessionData
 	): bool {
-		$sessionDataArray = unserialize(
-			data: $sessionData
-		);
-
-		
-		$sessionData = serialize(
-			value: $sessionDataArray
-		);
-
 		$sql = "
 			UPDATE `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
 			SET `last_accessed` = :last_accessed

@@ -104,8 +104,6 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
             );
         }
 
-        $_COOKIE[$this->sessionDataCookieName] = $cookieData;
-
         return setcookie(
             name: $this->sessionDataCookieName,
             value: $cookieData,
@@ -154,8 +152,6 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
                 ' supported per Cookie'
             );
         }
-
-        $_COOKIE[$this->sessionDataCookieName] = $cookieData;
 
         return setcookie(
             name: $this->sessionDataCookieName,
