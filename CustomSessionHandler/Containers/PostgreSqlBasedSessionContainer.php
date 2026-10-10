@@ -31,261 +31,361 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @since     Class available since Release 1.0.0
  */
 class PostgreSqlBasedSessionContainer extends SessionContainerHelper implements
-    SessionContainerInterface
+	SessionContainerInterface
 {
-    public $PGSQL_HOSTNAME = null;
-    public $PGSQL_PORT = null;
-    public $PGSQL_USERNAME = null;
-    public $PGSQL_PASSWORD = null;
-    public $PGSQL_DATABASE = null;
-    public $PGSQL_TABLE = null;
+	public $sessionServerHost = null;
+	public $sessionServerPort = null;
+	public $sessionServerUser = null;
+	public $sessionServerPassword = null;
+	public $sessionServerDb = null;
+	public $sessionServerTable = null;
 
-    private $pgSqlConn = null;
+	private $sessionServerObject = null;
 
-    /**
-     * Initialize
-     *
-     * @param string $sessionSavePath Session Save Path
-     * @param string $sessionName     Session Name
-     *
-     * @return void
-     */
-    public function init($sessionSavePath, $sessionName): void
-    {
-        $this->connect();
-        $this->currentTimestamp = time();
-    }
 
-    /**
-     * For Custom Session Handler - Validate session ID
-     *
-     * @param string $sessionId Session ID
-     *
-     * @return bool|string
-     */
-    public function getSession($sessionId): bool|string
-    {
-        $sql = "
-            SELECT session_data
-            FROM {$this->PGSQL_TABLE}
-            WHERE session_id = $1 AND last_accessed > $2
-        ";
-        $params = [
-            $sessionId,
-            ($this->currentTimestamp - $this->sessionMaxLifetime)
-        ];
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		
+	}
 
-        $row = $this->getSql(sql: $sql, params: $params);
-        if (isset($row['session_data'])) {
-            return $this->decryptData(cipherText: $row['session_data']);
-        }
-        return false;
-    }
+	/**
+	 * Initialize
+	 * 
+	 * @param string $sessionSavePath Session Save Path
+	 * @param string $sessionName     Session Name
+	 * 
+	 * @return void
+	 */
+	public function init(
+		$sessionSavePath,
+		$sessionName
+	): void {
+		$this->connect();
+	}
 
-    /**
-     * For Custom Session Handler - Write session data
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool|int
-     */
-    public function setSession($sessionId, $sessionData): bool|int
-    {
-        $sql = "
-            INSERT INTO {$this->PGSQL_TABLE} (session_id, last_accessed, session_data)
-            VALUES ($1, $2, $3)
-        ";
-        $params = [
-            $sessionId,
-            $this->currentTimestamp,
-            $this->encryptData(plainText: $sessionData),
-        ];
+	/**
+	 * For Custom Session Handler - Validate session id
+	 * 
+	 * @param string $sessionId Session id
+	 * 
+	 * @return bool|string
+	 */
+	public function getSession(
+		$sessionId
+	): bool|string {
+		$sql = "
+			SELECT *
+			FROM {$this->sessionServerTable}
+			WHERE session_id = $1 AND last_accessed > $2
+		";
+		$paramArray = [
+			$sessionId,
+			($this->ENV->timestamp - $this->sessionOptions['cookie_lifetime'])
+		];
 
-        return $this->execSql(sql: $sql, params: $params);
-    }
+		$record = $this->getSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+		if (isset($record['session_data'])) {
+			$sessionData = $this->decryptData(
+				cipherText: $record['session_data']
+			);
+			return $sessionData;
+		}
+		return false;
+	}
 
-    /**
-     * For Custom Session Handler - Update session data
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool|int
-     */
-    public function updateSession($sessionId, $sessionData): bool|int
-    {
-        $sql = "
-            UPDATE {$this->PGSQL_TABLE}
-            SET
-                last_accessed = $1,
-                session_data = $2
-            WHERE
-                session_id = $3
-        ";
-        $params = [
-            $this->currentTimestamp,
-            $this->encryptData(plainText: $sessionData),
-            $sessionId
-        ];
+	/**
+	 * For Custom Session Handler - Write session data
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool|int
+	 */
+	public function setSession(
+		$sessionId,
+		$sessionData
+	): bool|int {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-        return $this->execSql(sql: $sql, params: $params);
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
 
-    /**
-     * For Custom Session Handler - Update session timestamp
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool
-     */
-    public function touchSession($sessionId, $sessionData): bool
-    {
-        $sql = "
-            UPDATE {$this->PGSQL_TABLE}
-            SET last_accessed = $1
-            WHERE session_id = $2
-        ";
-        $params = [
-            $this->currentTimestamp,
-            $sessionId
-        ];
-        return $this->execSql(sql: $sql, params: $params);
-    }
+		$sql = "
+			INSERT INTO {$this->sessionServerTable} (session_id, last_accessed, session_data)
+			VALUES ($1, $2, $3)
+		";
+		$paramArray = [
+			$sessionId,
+			$this->ENV->timestamp,
+			$this->encryptData(
+				plainText: $sessionData
+			),
+		];
 
-    /**
-     * For Custom Session Handler - Cleanup old sessions
-     *
-     * @param integer $sessionMaxLifetime Session Max Lifetime
-     *
-     * @return bool
-     */
-    public function gcSession($sessionMaxLifetime): bool
-    {
-        $sql = "
-            DELETE FROM {$this->PGSQL_TABLE}
-            WHERE last_accessed < $1
-        ";
-        $params = [
-            ($this->currentTimestamp - $sessionMaxLifetime)
-        ];
-        return $this->execSql(sql: $sql, params: $params);
-    }
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
 
-    /**
-     * For Custom Session Handler - Destroy a session
-     *
-     * @param string $sessionId Session ID
-     *
-     * @return bool
-     */
-    public function deleteSession($sessionId): bool
-    {
-        $sql = "
-            DELETE FROM {$this->PGSQL_TABLE}
-            WHERE session_id = $1
-        ";
-        $params = [
-            $sessionId
-        ];
-        return $this->execSql(sql: $sql, params: $params);
-    }
+	/**
+	 * For Custom Session Handler - Update session data
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool|int
+	 */
+	public function updateSession(
+		$sessionId,
+		$sessionData
+	): bool|int {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-    /**
-     * Close File Container
-     *
-     * @return void
-     */
-    public function closeSession(): void
-    {
-        pg_close($this->pgSqlConn);
-        $this->pgSqlConn = null;
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
 
-    /**
-     * Connect
-     *
-     * @return void
-     */
-    private function connect(): void
-    {
-        try {
-            $UP = '';
-            if (
-                $this->PGSQL_USERNAME !== null
-                && $this->PGSQL_PASSWORD !== null
-            ) {
-                $UP = "user={$this->PGSQL_USERNAME} password={$this->PGSQL_PASSWORD}";
-            }
-            $this->pgSqlConn = pg_connect(
-                "host={$this->PGSQL_HOSTNAME} " .
-                "port={$this->PGSQL_PORT} " .
-                "dbname={$this->PGSQL_DATABASE} {$UP}"
-            );
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-    }
+		$sql = "
+			UPDATE {$this->sessionServerTable}
+			SET
+				last_accessed = $1,
+				session_data = $2
+			WHERE
+				session_id = $3
+		";
+		$paramArray = [
+			$this->ENV->timestamp,
+			$this->encryptData(
+				plainText: $sessionData
+			),
+			$sessionId
+		];
 
-    /**
-     * Get Session
-     *
-     * @param string $sql    SQL
-     * @param array  $params Params
-     *
-     * @return mixed
-     */
-    private function getSql($sql, $params): mixed
-    {
-        try {
-            // Execute the query with parameters
-            $result = pg_query_params($this->pgSqlConn, $sql, $params);
-            if ($result) {
-                $row = [];
-                $rowsCount = pg_num_rows($result);
-                if ($rowsCount === 1) {
-                    $row = pg_fetch_assoc($result);
-                }
-                pg_free_result($result);
-                return $row;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
 
-    /**
-     * Execute SQL
-     *
-     * @param string $sql    SQL
-     * @param array  $params Params
-     *
-     * @return bool
-     */
-    private function execSql($sql, $params): bool
-    {
-        try {
-            $result = pg_query_params($this->pgSqlConn, $sql, $params);
-            if ($result) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
+	/**
+	 * For Custom Session Handler - Update session timestamp
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool
+	 */
+	public function touchSession(
+		$sessionId,
+		$sessionData
+	): bool {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-    /**
-     * Manage Exception
-     *
-     * @param \Exception $e Exception
-     *
-     * @return never
-     */
-    private function manageException(\Exception $e): never
-    {
-        die($e->getMessage());
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
+
+		$sql = "
+			UPDATE {$this->sessionServerTable}
+			SET last_accessed = $1
+			WHERE session_id = $2
+		";
+		$paramArray = [
+			$this->ENV->timestamp,
+			$sessionId
+		];
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
+
+	/**
+	 * For Custom Session Handler - Cleanup old sessions
+	 * 
+	 * @param integer $sessionMaxLifetime Session Max Lifetime
+	 * 
+	 * @return bool
+	 */
+	public function gcSession(
+		$sessionMaxLifetime
+	): bool {
+		$sql = "
+			DELETE FROM {$this->sessionServerTable}
+			WHERE last_accessed < $1
+		";
+		$paramArray = [
+			($this->ENV->timestamp - $sessionMaxLifetime)
+		];
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
+
+	/**
+	 * For Custom Session Handler - Destroy a session
+	 * 
+	 * @param string $sessionId Session id
+	 * 
+	 * @return bool
+	 */
+	public function deleteSession(
+		$sessionId
+	): bool {
+		$sql = "
+			DELETE FROM {$this->sessionServerTable}
+			WHERE session_id = $1
+		";
+		$paramArray = [
+			$sessionId
+		];
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
+
+	/**
+	 * Close File Containers
+	 * 
+	 * @return void
+	 */
+	public function closeSession(): void
+	{
+		pg_close(
+			$this->sessionServerObject
+		);
+		$this->sessionServerObject = null;
+	}
+
+	/**
+	 * Connect
+	 * 
+	 * @return void
+	 */
+	private function connect(): void
+	{
+		try {
+			$UP = '';
+			if (
+				$this->sessionServerUser !== null
+				&& $this->sessionServerPassword !== null
+			) {
+				$UP = "user={$this->sessionServerUser} password={$this->sessionServerPassword}";
+			}
+			$this->sessionServerObject = pg_connect(
+				"host={$this->sessionServerHost} "
+				. "port={$this->sessionServerPort} "
+				. "dbname={$this->sessionServerDb} {$UP}"
+			);
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+	}
+
+	/**
+	 * Get Session
+	 * 
+	 * @param string $sql        Sql query
+	 * @param array  $paramArray Sql query params
+	 * 
+	 * @return mixed
+	 */
+	private function getSql(
+		$sql,
+		$paramArray
+	): mixed {
+		try {
+			// Execute the query with parameters
+			$result = pg_query_params(
+				$this->sessionServerObject,
+				$sql,
+				$paramArray
+			);
+			if ($result) {
+				$record = [];
+				$rowsCount = pg_num_rows(
+					$result
+				);
+				if ($rowsCount === 1) {
+					$record = pg_fetch_assoc(
+						$result
+					);
+				}
+				pg_free_result(
+					$result
+				);
+				return $record;
+			}
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return false;
+	}
+
+	/**
+	 * Execute Sql
+	 * 
+	 * @param string $sql        Sql query
+	 * @param array  $paramArray Sql query params
+	 * 
+	 * @return bool
+	 */
+	private function execSql(
+		$sql,
+		$paramArray
+	): bool {
+		try {
+			$result = pg_query_params(
+				$this->sessionServerObject,
+				$sql,
+				$paramArray
+			);
+			if ($result) {
+				return true;
+			}
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return false;
+	}
+
+	/**
+	 * Manage Exception
+	 * 
+	 * @param \Exception $e Exception
+	 * 
+	 * @return never
+	 */
+	private function manageException(
+		\Exception $e
+	): never {
+		throw new \Exception(
+			message: $e->getMessage(),
+			code: 500
+		);
+	}
 }

@@ -20,20 +20,14 @@ use CustomSessionHandler\Session;
 // Turn on output buffering
 ob_start();
 
-// Session Runtime Configuration
-$options = [];
+// Session Object
+$sessionObject = new Session('.env');
 
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File', $options);
-// Session::initSessionHandler(sessionMode: 'MySql');
-// Session::initSessionHandler(sessionMode: 'PostgreSql');
-// Session::initSessionHandler(sessionMode: 'MongoDb');
-// Session::initSessionHandler(sessionMode: 'Redis');
-// Session::initSessionHandler(sessionMode: 'Memcached');
-// Session::initSessionHandler(sessionMode: 'Cookie');
+$sessionObject->initSessionHandler();
 
 // Start session in normal (read/write) mode.
-Session::sessionStartReadWrite();
+$sessionObject->startReadWrite();
 $_SESSION['id'] = rand();
 
 ```
@@ -52,24 +46,18 @@ use CustomSessionHandler\Session;
 // Turn on output buffering
 ob_start();
 
-// Session Runtime Configuration
-$options = [];
+// Session Object
+$sessionObject = new Session('.env');
 
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File', $options);
-// Session::initSessionHandler(sessionMode: 'MySql');
-// Session::initSessionHandler(sessionMode: 'PostgreSql');
-// Session::initSessionHandler(sessionMode: 'MongoDb');
-// Session::initSessionHandler(sessionMode: 'Redis');
-// Session::initSessionHandler(sessionMode: 'Memcached');
-// Session::initSessionHandler(sessionMode: 'Cookie');
+$sessionObject->initSessionHandler();
 
 // Start session in readonly mode
 // Use when user is already logged in and we need to authorize the client cookie.
-Session::sessionStartReadonly();
+$sessionObject->startReadonly();
 
 if (isset($_SESSION)) {
-    print_r($_SESSION);
+	print_r($_SESSION);
 }
 
 ```
@@ -88,30 +76,24 @@ use CustomSessionHandler\Session;
 // Turn on output buffering
 ob_start();
 
-// Session Runtime Configuration
-$options = [];
+// Session Object
+$sessionObject = new Session('.env');
 
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File', $options);
-// Session::initSessionHandler(sessionMode: 'MySql');
-// Session::initSessionHandler(sessionMode: 'PostgreSql');
-// Session::initSessionHandler(sessionMode: 'MongoDb');
-// Session::initSessionHandler(sessionMode: 'Redis');
-// Session::initSessionHandler(sessionMode: 'Memcached');
-// Session::initSessionHandler(sessionMode: 'Cookie');
+$sessionObject->initSessionHandler();
 
 // Start session in readonly mode
 // Use when user is already logged in and we need to authorize the client cookie.
-Session::sessionStartReadonly();
+$sessionObject->startReadonly();
 
 // Auth Check
 if (!isset($_SESSION) || !isset($_SESSION['id'])) {
-    die('Unauthorized');
+	die('Unauthorized');
 }
 
 // Start session in normal (read/write) mode.
 // Use once client is authorized and want to make changes in $_SESSION
-Session::sessionStartReadWrite();
+$sessionObject->startReadWrite();
 
 // Starting use of session in normal code from here
 $_SESSION['id'] = rand();
@@ -129,57 +111,57 @@ include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
 
-$prevSessionData = [];
-
-if (isset($_COOKIE['PrevSessCookieName'])) {
-    // Load session the was it was used previously in read_and_close mode
-    // This will load previous session data in $_SESSION
-    session_start(['read_and_close' => true]);
-
-    // Collect previous session data
-    if (!empty($_SESSION)) {
-        $prevSessionData = $_SESSION;
-    }
-
-    // Destroy previous session (Note: $_SESSION data will be preserved)
-    session_destroy();
-}
-
 // Starting below to switch the session mode with current package.
 // Turn on output buffering
 ob_start();
 
-// Session Runtime Configuration
-$options = [];
+// Session Object
+$sessionObject = new Session('.env');
 
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File', $options);
-// Session::initSessionHandler(sessionMode: 'MySql');
-// Session::initSessionHandler(sessionMode: 'PostgreSql');
-// Session::initSessionHandler(sessionMode: 'MongoDb');
-// Session::initSessionHandler(sessionMode: 'Redis');
-// Session::initSessionHandler(sessionMode: 'Memcached');
-// Session::initSessionHandler(sessionMode: 'Cookie');
+$sessionObject->initSessionHandler();
+
+$startSwitchTimestamp = strtotime("2026-01-01 00:00:00");
+$switchRemainingTimestamp = $startSwitchTimestamp + $sessionObject->ENV->SESSION_LIFETIME
+
+$prevSessionData = [];
+
+if (
+	isset($_COOKIE['PrevSessCookieName'])
+	&& $switchRemainingTimestamp >= $sessionObject->ENV->timestamp
+) {
+	// Load session the was it was used previously in read_and_close mode
+	// This will load previous session data in $_SESSION
+	session_start(['read_and_close' => true]);
+
+	// Collect previous session data
+	if (!empty($_SESSION)) {
+		$prevSessionData = $_SESSION;
+	}
+
+	// Destroy previous session (Note: $_SESSION data will be preserved)
+	session_destroy();
+}
 
 // Start session in normal (read/write) mode.
 // Use once client is authorized and want to make changes in $_SESSION
-Session::sessionStartReadWrite();
+$sessionObject->startReadWrite();
 
 if (!empty($prevSessionData)) {
-    $_SESSION = $prevSessionData;
+	$_SESSION = $prevSessionData;
 }
 
 // Auth Check with $_SESSION data.
 if (!isset($_SESSION) || !isset($_SESSION['id'])) {
-    die('Unauthorized');
+	die('Unauthorized');
 }
 
 // Start session in normal (read/write) mode.
 // Use once client is authorized and want to make changes in $_SESSION
-Session::sessionStartReadWrite();
+$sessionObject->startReadWrite();
 
 if (!empty($prevSessionData)) {
-    $_SESSION = $prevSessionData;
+	$_SESSION = $prevSessionData;
 }
 
 // Starting use of session in normal code from here
@@ -206,49 +188,59 @@ ob_start();
 
 $prevSessionData = [];
 
-Session::$sessionName = 'PHPSESSID';
+// Session Object
+$sessionObject = new Session('.env');
 
-if (isset($_COOKIE[Session::$sessionName])) {
-    Session::initSessionHandler(sessionMode: 'File');
-    Session::sessionStartReadonly();
+$sessionObject->ENV->SESSION_COOKIE_NAME = 'PHPSESSID';
 
-    // Collect previous session data
-    if (!empty($_SESSION)) {
-        $prevSessionData = $_SESSION;
-    }
+$startSwitchTimestamp = strtotime("2026-01-01 00:00:00");
+$switchRemainingTimestamp = $startSwitchTimestamp + $sessionObject->ENV->SESSION_LIFETIME
 
-    // Destroy previous session (Note: $_SESSION data will be preserved)
-    session_destroy();
+if (
+	isset($_COOKIE[$sessionObject->ENV->SESSION_COOKIE_NAME])
+	&& $switchRemainingTimestamp >= $sessionObject->ENV->timestamp
+) {
+	$sessionObject->initSessionHandler();
+	$sessionObject->startReadonly();
+
+	// Collect previous session data
+	if (!empty($_SESSION)) {
+		$prevSessionData = $_SESSION;
+	}
+
+	// Destroy previous session (Note: $_SESSION data will be preserved)
+	session_destroy();
 }
 
 // To switch session to MySQL - setting details
-Session::$MYSQL_HOSTNAME = 'localhost';
-Session::$MYSQL_PORT = 3306;
-Session::$MYSQL_USERNAME = 'root';
-Session::$MYSQL_PASSWORD = 'shames11';
-Session::$MYSQL_DATABASE = 'db_session';
-Session::$MYSQL_TABLE = 'sessions';
-Session::$sessionName = 'PHPSESSID_New';
+$sessionObject->ENV->SESSION_STORE_MODE='MySql';
+$sessionObject->ENV->SESSION_MYSQL_HOST = 'localhost';
+$sessionObject->ENV->SESSION_MYSQL_PORT = 3306;
+$sessionObject->ENV->SESSION_MYSQL_USER = 'root';
+$sessionObject->ENV->SESSION_MYSQL_PASSWORD = 'shames11';
+$sessionObject->ENV->SESSION_MYSQL_DB = 'db_session';
+$sessionObject->ENV->SESSION_MYSQL_TABLE = 'sessions';
+$sessionObject->ENV->SESSION_COOKIE_NAME = 'PHPSESSID_New';
 
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'MySql');
-Session::sessionStartReadonly();
+$sessionObject->initSessionHandler();
+$sessionObject->startReadonly();
 
 if (!empty($prevSessionData)) {
-    $_SESSION = $prevSessionData;
+	$_SESSION = $prevSessionData;
 }
 
 // Auth Check with $_SESSION data.
 if (!isset($_SESSION) || !isset($_SESSION['id'])) {
-    die('Unauthorized');
+	die('Unauthorized');
 }
 
 // Start session in normal (read/write) mode.
 // Use once client is authorized and want to make changes in $_SESSION
-Session::sessionStartReadWrite();
+$sessionObject->startReadWrite();
 
 if (!empty($prevSessionData)) {
-    $_SESSION = $prevSessionData;
+	$_SESSION = $prevSessionData;
 }
 
 // Starting use of session in normal code from here
@@ -269,14 +261,17 @@ include_once __DIR__ . '/AutoloadSessionHandler.php';
 
 use CustomSessionHandler\Session;
 
+// Session Object
+$sessionObject = new Session('.env');
+
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File');
+$sessionObject->initSessionHandler();
 
 // Delete single session
-Session::deleteSession($sessionId);
+$sessionObject->deleteSession($sessionId);
 
 // Delete sessions in array
-Session::deleteSessions($sessionIds);
+$sessionObject->deleteSessions($sessionIds);
 
 // PHP Code
 ```
@@ -285,10 +280,10 @@ Session::deleteSessions($sessionIds);
 
 ```SQL
 CREATE TABLE IF NOT EXISTS `sessions` (
-    `sessionId` CHAR(64) NOT NULL,
-    `lastAccessed` INT UNSIGNED NOT NULL,
-    `sessionData` MEDIUMBLOB,
-    PRIMARY KEY (`sessionId`)
+    `session_id` CHAR(64) NOT NULL,
+    `last_accessed` INT UNSIGNED NOT NULL,
+    `session_data` MEDIUMBLOB,
+    PRIMARY KEY (`session_id`)
 ) ENGINE=InnoDB;
 ```
 
@@ -296,10 +291,10 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 
 ```SQL
 CREATE TABLE IF NOT EXISTS sessions (
-    session_id CHAR(64) NOT NULL,
-    last_accessed BIGINT NOT NULL,
-    session_data TEXT,
-    PRIMARY KEY (session_id)
+	session_id CHAR(64) NOT NULL,
+	last_accessed BIGINT NOT NULL,
+	session_data TEXT,
+	PRIMARY KEY (session_id)
 );
 ```
 

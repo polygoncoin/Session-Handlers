@@ -33,6 +33,8 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
 class CookieBasedSessionContainer extends SessionContainerHelper implements
     SessionContainerInterface
 {
+    public $sessionDataCookieName = null;
+    
     /**
      * Initialize
      *
@@ -43,11 +45,12 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
      */
     public function init($sessionSavePath, $sessionName): void
     {
-        if (empty($this->passphrase) || empty($this->iv)) {
+        if (
+            empty($this->ENV->SESSION_ENCRYPTION_IV)
+            || empty($this->ENV->SESSION_ENCRYPTION_PASS_PHRASE)
+        ) {
             die('Please set encryption details in Session.php');
         }
-
-        $this->currentTimestamp = time();
     }
 
     /**
@@ -60,17 +63,17 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
     public function getSession($sessionId): bool|string
     {
         if (
-            isset($_COOKIE[$this->sessionDataName])
-            && !empty($_COOKIE[$this->sessionDataName])
+            isset($_COOKIE[$this->sessionDataCookieName])
+            && !empty($_COOKIE[$this->sessionDataCookieName])
         ) {
             $sessionData = $this->decryptData(
-                cipherText: $_COOKIE[$this->sessionDataName]
+                cipherText: $_COOKIE[$this->sessionDataCookieName]
             );
             $sessionDataArr = unserialize(data: $sessionData);
             if (
                 isset($sessionDataArr['_TS_'])
-                && ($time = $sessionDataArr['_TS_'] + $this->sessionMaxLifetime)
-                && $time > $this->currentTimestamp
+                && ($time = $sessionDataArr['_TS_'] + $this->sessionOptions['cookie_lifetime'])
+                && $time > $this->ENV->timestamp
             ) {
                 return $sessionData;
             }
@@ -89,7 +92,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
     public function setSession($sessionId, $sessionData): bool|int
     {
         $sessionDataArr = unserialize(data: $sessionData);
-        $sessionDataArr['_TS_'] = $this->currentTimestamp;
+        $sessionDataArr['_TS_'] = $this->ENV->timestamp;
         $sessionData = serialize(value: $sessionDataArr);
 
         $cookieData = $this->encryptData(plainText: $sessionData);
@@ -101,25 +104,17 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
             );
         }
 
-        $_COOKIE[$this->sessionDataName] = $cookieData;
+        $_COOKIE[$this->sessionDataCookieName] = $cookieData;
 
         return setcookie(
-            name: $this->sessionDataName,
+            name: $this->sessionDataCookieName,
             value: $cookieData,
             expires_or_options: [
-                'expires' => 0,
-                'path' => $this->sessionOptions['cookie_path'],
-                'domain' => '',
-                'secure' => (
-                    (
-                        strpos(
-                            haystack: $_SERVER['HTTP_HOST'],
-                            needle: 'localhost'
-                        ) === false
-                    ) ? true : false
-                ),
-                'httponly' => true,
-                'samesite' => 'Strict'
+				'expires' => 0,
+				'path' => $this->sessionOptions['cookie_path'],
+				'secure' => $this->sessionOptions['cookie_secure'],
+				'httponly' => $this->sessionOptions['cookie_httponly'],
+				'samesite' => $this->sessionOptions['cookie_samesite']
             ]
         );
     }
@@ -148,7 +143,7 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
     public function touchSession($sessionId, $sessionData): bool
     {
         $sessionDataArr = unserialize(data: $sessionData);
-        $sessionDataArr['_TS_'] = $this->currentTimestamp;
+        $sessionDataArr['_TS_'] = $this->ENV->timestamp;
         $sessionData = serialize(value: $sessionDataArr);
 
         $cookieData = $this->encryptData(plainText: $sessionData);
@@ -160,25 +155,17 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
             );
         }
 
-        $_COOKIE[$this->sessionDataName] = $cookieData;
+        $_COOKIE[$this->sessionDataCookieName] = $cookieData;
 
         return setcookie(
-            name: $this->sessionDataName,
+            name: $this->sessionDataCookieName,
             value: $cookieData,
             expires_or_options: [
-                'expires' => 0,
-                'path' => $this->sessionOptions['cookie_path'],
-                'domain' => '',
-                'secure' => (
-                    (
-                        strpos(
-                            haystack: $_SERVER['HTTP_HOST'],
-                            needle: 'localhost'
-                        ) === false
-                    ) ? true : false
-                ),
-                'httponly' => true,
-                'samesite' => 'Strict'
+				'expires' => 0,
+				'path' => $this->sessionOptions['cookie_path'],
+				'secure' => $this->sessionOptions['cookie_secure'],
+				'httponly' => $this->sessionOptions['cookie_httponly'],
+				'samesite' => $this->sessionOptions['cookie_samesite']
             ]
         );
     }
@@ -204,8 +191,18 @@ class CookieBasedSessionContainer extends SessionContainerHelper implements
      */
     public function deleteSession($sessionId): bool
     {
-        if (isset($_COOKIE[$this->sessionDataName])) {
-            unset($_COOKIE[$this->sessionDataName]);
+        if (isset($_COOKIE[$this->sessionDataCookieName])) {
+			return setcookie(
+				name: $this->sessionDataCookieName,
+				value: '',
+				expires_or_options: [
+					'expires' => 0,
+					'path' => $this->sessionOptions['cookie_path'],
+					'secure' => $this->sessionOptions['cookie_secure'],
+					'httponly' => $this->sessionOptions['cookie_httponly'],
+					'samesite' => $this->sessionOptions['cookie_samesite']
+				]
+			);
         }
         return true;
     }

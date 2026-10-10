@@ -31,220 +31,307 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @since     Class available since Release 1.0.0
  */
 class MongoDbBasedSessionContainer extends SessionContainerHelper implements
-    SessionContainerInterface
+	SessionContainerInterface
 {
-    // "mongodb://<username>:<password>@<cluster-url>:<port>/<database-name>
-    // ?retryWrites=true&w=majority"
-    public $MONGODB_URI = null;
+	// "mongodb://<username>:<password>@<cluster-url>:<port>/<database-name>
+	// ?retryWrites=true&w=majority"
+	public $mongoDbServerUri = null;
 
-    public $MONGODB_HOSTNAME = null;
-    public $MONGODB_PORT = null;
-    public $MONGODB_USERNAME = null;
-    public $MONGODB_PASSWORD = null;
-    public $MONGODB_DATABASE = null;
-    public $MONGODB_COLLECTION = null;
+	public $sessionServerHost = null;
+	public $sessionServerPort = null;
+	public $sessionServerUser = null;
+	public $sessionServerPassword = null;
+	public $sessionServerDb = null;
+	public $sessionServerTable = null;
 
-    private $mongo = null;
-    private $database = null;
-    private $collection = null;
+	private $sessionServerObject = null;
+	private $dbObject = null;
+	private $collectionObject = null;
 
-    /**
-     * Initialize
-     *
-     * @param string $sessionSavePath Session Save Path
-     * @param string $sessionName     Session Name
-     *
-     * @return void
-     */
-    public function init($sessionSavePath, $sessionName): void
-    {
-        $this->connect();
-        $this->currentTimestamp = time();
-    }
 
-    /**
-     * For Custom Session Handler - Validate session ID
-     *
-     * @param string $sessionId Session ID
-     *
-     * @return bool|string
-     */
-    public function getSession($sessionId): bool|string
-    {
-        try {
-            $filter = ['sessionId' => $sessionId];
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		
+	}
 
-            if ($document = $this->collection->findOne($filter)) {
-                $lastAccessed = $this->currentTimestamp - $this->sessionMaxLifetime;
-                if ($document['lastAccessed'] > $lastAccessed) {
-                    return $this->decryptData(cipherText: $document['sessionData']);
-                }
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
+	/**
+	 * Initialize
+	 * 
+	 * @param string $sessionSavePath Session Save Path
+	 * @param string $sessionName     Session Name
+	 * 
+	 * @return void
+	 */
+	public function init(
+		$sessionSavePath,
+		$sessionName
+	): void {
+		$this->connect();
+	}
 
-    /**
-     * For Custom Session Handler - Write session data
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool|int
-     */
-    public function setSession($sessionId, $sessionData): bool|int
-    {
-        try {
-            $document = [
-                "sessionId" => $sessionId,
-                "lastAccessed" => $this->currentTimestamp,
-                "sessionData" => $this->encryptData(plainText: $sessionData)
-            ];
-            if ($this->collection->insertOne($document)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
+	/**
+	 * For Custom Session Handler - Validate session id
+	 * 
+	 * @param string $sessionId Session id
+	 * 
+	 * @return bool|string
+	 */
+	public function getSession(
+		$sessionId
+	): bool|string {
+		try {
+			$filter = ['sessionId' => $sessionId];
 
-    /**
-     * Update Session
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool|int
-     */
-    public function updateSession($sessionId, $sessionData): bool|int
-    {
-        try {
-            $filter = ['sessionId' => $sessionId];
-            $update = [
-                '$set' => [
-                    'lastAccessed' => $this->currentTimestamp,
-                    "sessionData" => $this->encryptData(plainText: $sessionData)
-                ]
-            ];
-            if ($this->collection->updateOne($filter, $update)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
+			if ($document = $this->collectionObject->findOne($filter)) {
+				$lastAccessed = $this->ENV->timestamp - $this->sessionOptions['cookie_lifetime'];
+				if ($document['lastAccessed'] > $lastAccessed) {
+					$sessionData = $this->decryptData(
+						cipherText: $document['sessionData']
+					);
+					return $sessionData;
+				}
+			}
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return false;
+	}
 
-    /**
-     * For Custom Session Handler - Update session timestamp
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool
-     */
-    public function touchSession($sessionId, $sessionData): bool
-    {
-        try {
-            $filter = ['sessionId' => $sessionId];
-            $update = [
-                '$set' => [
-                    'lastAccessed' => $this->currentTimestamp
-                ]
-            ];
+	/**
+	 * For Custom Session Handler - Write session data
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool|int
+	 */
+	public function setSession(
+		$sessionId,
+		$sessionData
+	): bool|int {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-            if ($this->collection->updateOne($filter, $update)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
 
-    /**
-     * For Custom Session Handler - Cleanup old sessions
-     *
-     * @param integer $sessionMaxLifetime Session Max Lifetime
-     *
-     * @return bool
-     */
-    public function gcSession($sessionMaxLifetime): bool
-    {
-        return true;
-    }
+		try {
+			$document = [
+				"sessionId" => $sessionId,
+				"lastAccessed" => $this->ENV->timestamp,
+				"sessionData" => $this->encryptData(
+					plainText: $sessionData
+				)
+			];
+			if ($this->collectionObject->insertOne($document)) {
+				return true;
+			}
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return false;
+	}
 
-    /**
-     * For Custom Session Handler - Destroy a session
-     *
-     * @param string $sessionId Session ID
-     *
-     * @return bool
-     */
-    public function deleteSession($sessionId): bool
-    {
-        try {
-            $filter = ['sessionId' => $sessionId];
+	/**
+	 * Update Session
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool|int
+	 */
+	public function updateSession(
+		$sessionId,
+		$sessionData
+	): bool|int {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-            if ($this->collection->deleteOne($filter)) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return false;
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
 
-    /**
-     * Close File Container
-     *
-     * @return void
-     */
-    public function closeSession(): void
-    {
-        $this->mongo = null;
-    }
+		try {
+			$filter = ['sessionId' => $sessionId];
+			$update = [
+				'$set' => [
+					'lastAccessed' => $this->ENV->timestamp,
+					"sessionData" => $this->encryptData(
+						plainText: $sessionData
+					)
+				]
+			];
+			if (
+				$this->collectionObject->updateOne(
+					$filter,
+					$update
+				)
+			) {
+				return true;
+			}
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return false;
+	}
 
-    /**
-     * Connect
-     *
-     * @return void
-     */
-    private function connect(): void
-    {
-        try {
-            if ($this->MONGODB_URI === null) {
-                $UP = '';
-                if ($this->MONGODB_USERNAME !== null && $this->MONGODB_PASSWORD !== null) {
-                    $UP = "{$this->MONGODB_USERNAME}:{$this->MONGODB_PASSWORD}@";
-                }
-                $this->MONGODB_URI = 'mongodb://' . $UP .
-                    $this->MONGODB_HOSTNAME . ':' . $this->MONGODB_PORT;
-            }
-            $this->mongo = new \MongoDB\Client($this->MONGODB_URI);
+	/**
+	 * For Custom Session Handler - Update session timestamp
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool
+	 */
+	public function touchSession(
+		$sessionId,
+		$sessionData
+	): bool {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-            // Select a database
-            $this->database = $this->mongo->selectDatabase($this->MONGODB_DATABASE);
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
 
-            // Select a collection
-            $this->collection = $this->database->selectCollection($this->MONGODB_COLLECTION);
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-    }
+		try {
+			$filter = ['sessionId' => $sessionId];
+			$update = [
+				'$set' => [
+					'lastAccessed' => $this->ENV->timestamp
+				]
+			];
 
-    /**
-     * Manage Exception
-     *
-     * @param \Exception $e Exception
-     *
-     * @return never
-     */
-    private function manageException(\Exception $e): never
-    {
-        die($e->getMessage());
-    }
+			if (
+				$this->collectionObject->updateOne(
+					$filter,
+					$update
+				)
+			) {
+				return true;
+			}
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return false;
+	}
+
+	/**
+	 * For Custom Session Handler - Cleanup old sessions
+	 * 
+	 * @param integer $sessionMaxLifetime Session Max Lifetime
+	 * 
+	 * @return bool
+	 */
+	public function gcSession(
+		$sessionMaxLifetime
+	): bool {
+		return true;
+	}
+
+	/**
+	 * For Custom Session Handler - Destroy a session
+	 * 
+	 * @param string $sessionId Session id
+	 * 
+	 * @return bool
+	 */
+	public function deleteSession(
+		$sessionId
+	): bool {
+		try {
+			$filter = ['sessionId' => $sessionId];
+
+			if ($this->collectionObject->deleteOne($filter)) {
+				return true;
+			}
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return false;
+	}
+
+	/**
+	 * Close File Containers
+	 * 
+	 * @return void
+	 */
+	public function closeSession(): void
+	{
+		$this->sessionServerObject = null;
+	}
+
+	/**
+	 * Connect
+	 * 
+	 * @return void
+	 */
+	private function connect(): void
+	{
+		try {
+			if ($this->mongoDbServerUri === null) {
+				$UP = '';
+				if (
+					$this->sessionServerUser !== null
+					&& $this->sessionServerPassword !== null
+				) {
+					$UP = "{$this->sessionServerUser}:{$this->sessionServerPassword}@";
+				}
+				$this->mongoDbServerUri = 'mongodb://' . $UP
+					. $this->sessionServerHost . ':' . $this->sessionServerPort;
+			}
+			$this->sessionServerObject = new \MongoDB\Customer(
+				$this->mongoDbServerUri
+			);
+
+			// Select a database
+			$this->dbObject = $this->sessionServerObject->selectDatabase(
+				$this->sessionServerDb
+			);
+
+			// Select a collection
+			$this->collectionObject = $this->dbObject->selectCollection(
+				$this->sessionServerTable
+			);
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+	}
+
+	/**
+	 * Manage Exception
+	 * 
+	 * @param \Exception $e Exception
+	 * 
+	 * @return never
+	 */
+	private function manageException(
+		\Exception $e
+	): never {
+		throw new \Exception(
+			message: $e->getMessage(),
+			code: 500
+		);
+	}
 }

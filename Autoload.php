@@ -29,24 +29,24 @@ namespace CustomSessionHandler;
  */
 class Autoload
 {
-    /**
-     * Autoload Register function
-     *
-     * @param string $className Class name
-     *
-     * @return void
-     */
-    public static function register($className): void
-    {
-        $className = str_replace(
-            search: "\\",
-            replace: DIRECTORY_SEPARATOR,
-            subject: $className
-        );
-        $file = __DIR__ . DIRECTORY_SEPARATOR . $className . '.php';
-        if (!file_exists(filename: $file)) {
-            echo PHP_EOL . "File '{$file}' missing" . PHP_EOL;
-        }
-        include_once $file;
-    }
+	/**
+	 * Autoload Register function
+	 *
+	 * @param string $className Class name
+	 *
+	 * @return void
+	 */
+	public static function register($className): void
+	{
+		$className = str_replace(
+			search: "\\",
+			replace: DIRECTORY_SEPARATOR,
+			subject: $className
+		);
+		$file = __DIR__ . DIRECTORY_SEPARATOR . $className . '.php';
+		if (!file_exists(filename: $file)) {
+			echo PHP_EOL . "File '{$file}' missing" . PHP_EOL;
+		}
+		include_once $file;
+	}
 }

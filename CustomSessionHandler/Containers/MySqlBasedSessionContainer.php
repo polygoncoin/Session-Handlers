@@ -31,270 +31,360 @@ use CustomSessionHandler\Containers\SessionContainerHelper;
  * @since     Class available since Release 1.0.0
  */
 class MySqlBasedSessionContainer extends SessionContainerHelper implements
-    SessionContainerInterface
+	SessionContainerInterface
 {
-    public $MYSQL_HOSTNAME = null;
-    public $MYSQL_PORT = null;
-    public $MYSQL_USERNAME = null;
-    public $MYSQL_PASSWORD = null;
-    public $MYSQL_DATABASE = null;
-    public $MYSQL_TABLE = null;
+	public $sessionServerHost = null;
+	public $sessionServerPort = null;
+	public $sessionServerUser = null;
+	public $sessionServerPassword = null;
+	public $sessionServerDb = null;
+	public $sessionServerTable = null;
 
-    private $pdo = null;
+	private $sessionServerObject = null;
 
-    /**
-     * Initialize
-     *
-     * @param string $sessionSavePath Session Save Path
-     * @param string $sessionName     Session Name
-     *
-     * @return void
-     */
-    public function init($sessionSavePath, $sessionName): void
-    {
-        $this->connect();
-        $this->currentTimestamp = time();
-    }
 
-    /**
-     * For Custom Session Handler - Validate session ID
-     *
-     * @param string $sessionId Session ID
-     *
-     * @return bool|string
-     */
-    public function getSession($sessionId): bool|string
-    {
-        $sql = "
-            SELECT `sessionData`
-            FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-            WHERE `sessionId` = :sessionId AND lastAccessed > :lastAccessed
-        ";
-        $params = [
-            ':sessionId' => $sessionId,
-            ':lastAccessed' => ($this->currentTimestamp - $this->sessionMaxLifetime)
-        ];
-        if (
-            ($row = $this->getSql(sql: $sql, params: $params))
-            && isset($row['sessionData'])
-        ) {
-            return $this->decryptData(cipherText: $row['sessionData']);
-        }
-        return false;
-    }
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		
+	}
 
-    /**
-     * For Custom Session Handler - Write session data
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool|int
-     */
-    public function setSession($sessionId, $sessionData): bool|int
-    {
-        $sql = "
-            INSERT INTO `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-            SET
-                `sessionData` = :sessionData,
-                `lastAccessed` = :lastAccessed,
-                `sessionId` = :sessionId
-        ";
-        $params = [
-            ':sessionId' => $sessionId,
-            ':sessionData' => $this->encryptData(plainText: $sessionData),
-            ':lastAccessed' => $this->currentTimestamp
-        ];
+	/**
+	 * Initialize
+	 * 
+	 * @param string $sessionSavePath Session Save Path
+	 * @param string $sessionName     Session Name
+	 * 
+	 * @return void
+	 */
+	public function init(
+		$sessionSavePath,
+		$sessionName
+	): void {
+		$this->connect();
+	}
 
-        return $this->execSql(sql: $sql, params: $params);
-    }
+	/**
+	 * For Custom Session Handler - Validate session id
+	 * 
+	 * @param string $sessionId Session id
+	 * 
+	 * @return bool|string
+	 */
+	public function getSession(
+		$sessionId
+	): bool|string {
+		$sql = "
+			SELECT *
+			FROM `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
+			WHERE `session_id` = :session_id AND `last_accessed` > :last_accessed
+		";
+		$paramArray = [
+			':session_id' => $sessionId,
+			':last_accessed' => ($this->ENV->timestamp - $this->sessionOptions['cookie_lifetime'])
+		];
+		if (
+			(
+				$record = $this->getSql(
+					sql: $sql,
+					paramArray: $paramArray
+				)
+			)
+			&& isset($record['session_data'])
+		) {
+			$sessionData = $this->decryptData(
+				cipherText: $record['session_data']
+			);
+			return $sessionData;
+		}
+		return false;
+	}
 
-    /**
-     * For Custom Session Handler - Update session data
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool|int
-     */
-    public function updateSession($sessionId, $sessionData): bool|int
-    {
-        $sql = "
-            UPDATE `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-            SET
-                `sessionData` = :sessionData,
-                `lastAccessed` = :lastAccessed
-            WHERE
-                `sessionId` = :sessionId
-        ";
-        $params = [
-            ':sessionId' => $sessionId,
-            ':sessionData' => $this->encryptData(plainText: $sessionData),
-            ':lastAccessed' => $this->currentTimestamp
-        ];
+	/**
+	 * For Custom Session Handler - Write session data
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool|int
+	 */
+	public function setSession(
+		$sessionId,
+		$sessionData
+	): bool|int {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-        return $this->execSql(sql: $sql, params: $params);
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
 
-    /**
-     * For Custom Session Handler - Update session timestamp
-     *
-     * @param string $sessionId   Session ID
-     * @param string $sessionData Session Data
-     *
-     * @return bool
-     */
-    public function touchSession($sessionId, $sessionData): bool
-    {
-        $sql = "
-            UPDATE `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-            SET `lastAccessed` = :lastAccessed
-            WHERE `sessionId` = :sessionId
-        ";
-        $params = [
-            ':sessionId' => $sessionId,
-            ':lastAccessed' => $this->currentTimestamp
-        ];
-        return $this->execSql(sql: $sql, params: $params);
-    }
+		$sql = "
+			INSERT INTO `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
+			SET
+				`session_id` = :session_id,
+				`session_data` = :session_data,
+				`last_accessed` = :last_accessed
+		";
+		$paramArray = [
+			':session_id' => $sessionId,
+			':session_data' => $this->encryptData(
+				plainText: $sessionData
+			),
+			':last_accessed' => $this->ENV->timestamp
+		];
 
-    /**
-     * For Custom Session Handler - Cleanup old sessions
-     *
-     * @param integer $sessionMaxLifetime Session Max Lifetime
-     *
-     * @return bool
-     */
-    public function gcSession($sessionMaxLifetime): bool
-    {
-        $lastAccessed = $this->currentTimestamp - $sessionMaxLifetime;
-        $sql = "
-            DELETE FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-            WHERE `lastAccessed` < :lastAccessed
-        ";
-        $params = [
-            ':lastAccessed' => $lastAccessed
-        ];
-        return $this->execSql(sql: $sql, params: $params);
-    }
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
 
-    /**
-     * For Custom Session Handler - Destroy a session
-     *
-     * @param string $sessionId Session ID
-     *
-     * @return bool
-     */
-    public function deleteSession($sessionId): bool
-    {
-        $sql = "
-            DELETE FROM `{$this->MYSQL_DATABASE}`.`{$this->MYSQL_TABLE}`
-            WHERE `sessionId` = :sessionId
-        ";
-        $params = [
-            ':sessionId' => $sessionId
-        ];
-        return $this->execSql(sql: $sql, params: $params);
-    }
+	/**
+	 * For Custom Session Handler - Update session data
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool|int
+	 */
+	public function updateSession(
+		$sessionId,
+		$sessionData
+	): bool|int {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-    /**
-     * Close File Container
-     *
-     * @return void
-     */
-    public function closeSession(): void
-    {
-        $this->pdo = null;
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
 
-    /**
-     * Connect
-     *
-     * @return void
-     */
-    private function connect(): void
-    {
-        try {
-            $this->pdo = new \PDO(
-                dsn: "mysql:host={$this->MYSQL_HOSTNAME}",
-                username: $this->MYSQL_USERNAME,
-                password: $this->MYSQL_PASSWORD,
-                options: [
-                    \PDO::ATTR_EMULATE_PREPARES => false,
-                ]
-            );
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-    }
+		$sql = "
+			UPDATE `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
+			SET
+				`session_data` = :session_data,
+				`last_accessed` = :last_accessed
+			WHERE
+				`session_id` = :session_id
+		";
+		$paramArray = [
+			':session_id' => $sessionId,
+			':session_data' => $this->encryptData(
+				plainText: $sessionData
+			),
+			':last_accessed' => $this->ENV->timestamp
+		];
 
-    /**
-     * Get Session
-     *
-     * @param string $sql    SQL
-     * @param array  $params Params
-     *
-     * @return mixed
-     */
-    private function getSql($sql, $params = []): mixed
-    {
-        $row = [];
-        try {
-            $stmt = $this->pdo->prepare(
-                query: $sql,
-                options: [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]
-            );
-            $stmt->execute(params: $params);
-            switch ($stmt->rowCount()) {
-                case 0:
-                    $row = [];
-                    break;
-                case 1:
-                    $row = $stmt->fetch();
-                    break;
-                default:
-                    $row = false;
-                    break;
-            }
-            $stmt->closeCursor();
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return $row;
-    }
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
 
-    /**
-     * Execute SQL
-     *
-     * @param string $sql    SQL
-     * @param array  $params Params
-     *
-     * @return bool
-     */
-    private function execSql($sql, $params = []): bool
-    {
-        try {
-            $stmt = $this->pdo->prepare(
-                query: $sql,
-                options: [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]
-            );
-            $stmt->execute(params: $params);
-            $stmt->closeCursor();
-        } catch (\Exception $e) {
-            $this->manageException(e: $e);
-        }
-        return true;
-    }
+	/**
+	 * For Custom Session Handler - Update session timestamp
+	 * 
+	 * @param string $sessionId   Session id
+	 * @param string $sessionData Session Data
+	 * 
+	 * @return bool
+	 */
+	public function touchSession(
+		$sessionId,
+		$sessionData
+	): bool {
+		$sessionDataArray = unserialize(
+			data: $sessionData
+		);
 
-    /**
-     * Manage Exception
-     *
-     * @param \Exception $e Exception
-     *
-     * @return never
-     */
-    private function manageException(\Exception $e): never
-    {
-        die($e->getMessage());
-    }
+		
+		$sessionData = serialize(
+			value: $sessionDataArray
+		);
+
+		$sql = "
+			UPDATE `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
+			SET `last_accessed` = :last_accessed
+			WHERE `session_id` = :session_id
+		";
+		$paramArray = [
+			':session_id' => $sessionId,
+			':last_accessed' => $this->ENV->timestamp
+		];
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
+
+	/**
+	 * For Custom Session Handler - Cleanup old sessions
+	 * 
+	 * @param integer $sessionMaxLifetime Session Max Lifetime
+	 * 
+	 * @return bool
+	 */
+	public function gcSession(
+		$sessionMaxLifetime
+	): bool {
+		$lastAccessed = $this->ENV->timestamp - $sessionMaxLifetime;
+		$sql = "
+			DELETE FROM `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
+			WHERE `last_accessed` < :last_accessed
+		";
+		$paramArray = [
+			':last_accessed' => $lastAccessed
+		];
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
+
+	/**
+	 * For Custom Session Handler - Destroy a session
+	 * 
+	 * @param string $sessionId Session id
+	 * 
+	 * @return bool
+	 */
+	public function deleteSession(
+		$sessionId
+	): bool {
+		$sql = "
+			DELETE FROM `{$this->sessionServerDb}`.`{$this->sessionServerTable}`
+			WHERE `session_id` = :session_id
+		";
+		$paramArray = [
+			':session_id' => $sessionId
+		];
+		return $this->execSql(
+			sql: $sql,
+			paramArray: $paramArray
+		);
+	}
+
+	/**
+	 * Close File Containers
+	 * 
+	 * @return void
+	 */
+	public function closeSession(): void
+	{
+		$this->sessionServerObject = null;
+	}
+
+	/**
+	 * Connect
+	 * 
+	 * @return void
+	 */
+	private function connect(): void
+	{
+		try {
+			$this->sessionServerObject = new \PDO(
+				dsn: "mysql:host={$this->sessionServerHost}",
+				username: $this->sessionServerUser,
+				password: $this->sessionServerPassword,
+				options: [
+					\PDO::ATTR_EMULATE_PREPARES => false,
+				]
+			);
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+	}
+
+	/**
+	 * Get Session
+	 * 
+	 * @param string $sql        Sql query
+	 * @param array  $paramArray Sql query params
+	 * 
+	 * @return mixed
+	 */
+	private function getSql(
+		$sql,
+		$paramArray = []
+	): mixed {
+		$record = [];
+		try {
+			$stmt = $this->sessionServerObject->prepare(
+				query: $sql,
+				options: [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]
+			);
+			$stmt->execute(
+				$paramArray
+			);
+			switch ($stmt->rowCount()) {
+				case 0:
+					$record = [];
+					break;
+				case 1:
+					$record = $stmt->fetch();
+					break;
+				default:
+					$record = false;
+					break;
+			}
+			$stmt->closeCursor();
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return $record;
+	}
+
+	/**
+	 * Execute Sql
+	 * 
+	 * @param string $sql        Sql query
+	 * @param array  $paramArray Sql query params
+	 * 
+	 * @return bool
+	 */
+	private function execSql(
+		$sql,
+		$paramArray = []
+	): bool {
+		try {
+			$stmt = $this->sessionServerObject->prepare(
+				query: $sql,
+				options: [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]
+			);
+			$stmt->execute(
+				$paramArray
+			);
+			$stmt->closeCursor();
+		} catch (\Exception $e) {
+			$this->manageException(
+				e: $e
+			);
+		}
+		return true;
+	}
+
+	/**
+	 * Manage Exception
+	 * 
+	 * @param \Exception $e Exception
+	 * 
+	 * @return never
+	 */
+	private function manageException(
+		\Exception $e
+	): never {
+		throw new \Exception(
+			message: $e->getMessage(),
+			code: 500
+		);
+	}
 }

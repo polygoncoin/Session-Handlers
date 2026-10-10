@@ -10,24 +10,18 @@ use CustomSessionHandler\Session;
 // Turn on output buffering
 ob_start();
 
-// Session Runtime Configuration
-$options = [];
+// Session Object
+$sessionObject = new Session('.env');
 
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File', options: $options);
-// Session::initSessionHandler(sessionMode: 'MySql', options: $options);
-// Session::initSessionHandler(sessionMode: 'PostgreSql', options: $options);
-// Session::initSessionHandler(sessionMode: 'MongoDb', options: $options);
-// Session::initSessionHandler(sessionMode: 'Redis', options: $options);
-// Session::initSessionHandler(sessionMode: 'Memcached', options: $options);
-// Session::initSessionHandler(sessionMode: 'Cookie', options: $options);
+$sessionObject->initSessionHandler();
 
 // Start session in readonly mode
 // Use when user is already logged in and we need to authorize the client cookie.
-Session::sessionStartReadonly();
+$sessionObject->startReadonly();
 
 if (isset($_SESSION)) {
-    print_r(value: $_SESSION);
+	print_r(value: $_SESSION);
 }
 
 // Auth Check
@@ -37,5 +31,5 @@ if (isset($_SESSION)) {
 
 // Start session in normal (read/write) mode.
 // Use once client is authorized and want to make changes in $_SESSION
-Session::sessionStartReadWrite();
+$sessionObject->startReadWrite();
 $_SESSION['id'] = rand();

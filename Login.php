@@ -7,19 +7,22 @@ use CustomSessionHandler\Session;
 // Turn on output buffering
 ob_start();
 
+// Session Object
+$sessionObject = new Session('.env');
+
 // Initialize Session Handler
-Session::initSessionHandler(sessionMode: 'File');
+$sessionObject->initSessionHandler(sessionMode: 'File');
 
 if (isset($POST['submit'])) {
-    $username = $POST['username'];
-    $password = $POST['password'];
-    if (verifyCredentials($username, $password)) { // phpcs:ignore
-        $userDetails = getFromDB($username);
+	$username = $POST['username'];
+	$password = $POST['password'];
+	if (verifyCredentials($username, $password)) { // phpcs:ignore
+		$userDetails = getFromDB($username);
 
-        // Start session in normal (read/write) mode.
-        Session::sessionStartReadWrite();
-        $_SESSION = $userDetails;
+		// Start session in normal (read/write) mode.
+		$sessionObject->startReadWrite();
+		$_SESSION = $userDetails;
 
-        header(header: 'Location: dashboard.php');
-    }
+		header(header: 'Location: dashboard.php');
+	}
 }
